@@ -1,0 +1,1744 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Solo Estate 0.2.0\n"
+"Last-Translator: Solo Studio <https://solostudio.ge>\n"
+"Language-Team: Georgian\n"
+"PO-Revision-Date: 2026-09-30 00:00+0400\n"
+"Language: ka_GE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Domain: solo-estate\n"
+
+#: includes/admin/class-admin.php:41
+msgid "Solo Estate"
+msgstr "Solo Estate"
+
+#: includes/admin/class-admin.php:42 includes/admin/class-nodes-page.php:142
+#: includes/admin/class-nodes-page.php:631
+#: includes/admin/class-statuses-page.php:38 includes/class-nodes.php:113
+msgid "Projects"
+msgstr "პროექტები"
+
+#: includes/admin/class-admin.php:43 includes/admin/class-statuses-page.php:31
+msgid "Statuses"
+msgstr "სტატუსები"
+
+#: includes/admin/class-admin.php:44 includes/admin/class-specs-page.php:33
+msgid "Specification fields"
+msgstr "სპეციფიკაციის ველები"
+
+#: includes/admin/class-admin.php:44
+msgid "Specification"
+msgstr "სპეციფიკაცია"
+
+#: includes/admin/class-admin.php:45 includes/admin/class-leads-page.php:52
+#: includes/admin/class-settings-page.php:42
+msgid "Leads"
+msgstr "ლიდები"
+
+#: includes/admin/class-admin.php:46 includes/admin/class-transfer-page.php:33
+msgid "Import / Export"
+msgstr "იმპორტი / ექსპორტი"
+
+#: includes/admin/class-admin.php:47
+msgid "Settings"
+msgstr "პარამეტრები"
+
+#: includes/admin/class-admin.php:71 includes/admin/class-ui.php:105
+msgid "Choose image"
+msgstr "სურათის არჩევა"
+
+#: includes/admin/class-admin.php:72
+msgid "Use this image"
+msgstr "ამ სურათის გამოყენება"
+
+#: includes/admin/class-admin.php:73
+msgid "Choose images"
+msgstr "სურათების არჩევა"
+
+#: includes/admin/class-admin.php:74
+msgid "Add to gallery"
+msgstr "გალერეაში დამატება"
+
+#: includes/admin/class-admin.php:75 includes/admin/class-nodes-page.php:690
+#: includes/admin/class-ui.php:106 includes/admin/class-ui.php:129
+msgid "Remove"
+msgstr "მოშორება"
+
+#: includes/admin/class-admin.php:76
+msgid "Delete permanently? Everything inside will be deleted too."
+msgstr "წაიშალოს სამუდამოდ? შიგნით არსებული ყველაფერიც წაიშლება."
+
+#: includes/admin/class-admin.php:77
+msgid "Remove all points of this polygon?"
+msgstr "წაიშალოს ამ პოლიგონის ყველა წერტილი?"
+
+#: includes/admin/class-admin.php:93
+msgid "Saved."
+msgstr "შენახულია."
+
+#: includes/admin/class-admin.php:94
+msgid "Deleted."
+msgstr "წაშლილია."
+
+#: includes/admin/class-admin.php:95
+msgid "Duplicated. You are now editing the copy."
+msgstr "დუბლირებულია. ახლა ასლს არედაქტირებთ."
+
+#: includes/admin/class-admin.php:96
+msgid "Updated."
+msgstr "განახლებულია."
+
+#: includes/admin/class-admin.php:97
+msgid "Something went wrong. Nothing was changed."
+msgstr "დაფიქსირდა შეცდომა. არაფერი შეცვლილა."
+
+#: includes/admin/class-admin.php:98
+msgid "Style imported."
+msgstr "სტილი შემოტანილია."
+
+#: includes/admin/class-admin.php:99
+msgid "This is not a Solo Estate style file. Nothing was changed."
+msgstr "ეს Solo Estate-ის სტილის ფაილი არ არის. არაფერი შეცვლილა."
+
+#: includes/admin/class-admin.php:104
+#, php-format
+msgid "Layout applied to %d apartment."
+msgid_plural "Layout applied to %d apartments."
+msgstr[0] "განლაგება გადავიდა %d ბინაზე."
+
+#: includes/admin/class-admin.php:128 includes/admin/class-nodes-page.php:131
+msgid "You are not allowed to do this."
+msgstr "ამის გაკეთების უფლება არ გაქვთ."
+
+#: includes/admin/class-leads-page.php:58
+msgid "Export CSV"
+msgstr "CSV ექსპორტი"
+
+#: includes/admin/class-leads-page.php:64
+#: includes/admin/class-localization.php:85
+#: includes/admin/class-localization.php:87
+msgid "Search"
+msgstr "ძებნა"
+
+#: includes/admin/class-leads-page.php:69
+#: includes/admin/class-nodes-page.php:845
+msgid "Bulk actions"
+msgstr "ჯგუფური მოქმედებები"
+
+#: includes/admin/class-leads-page.php:72
+#, php-format
+msgid "Mark as: %s"
+msgstr "მონიშვნა: %s"
+
+#: includes/admin/class-leads-page.php:75
+#: includes/admin/class-nodes-page.php:173
+#: includes/admin/class-nodes-page.php:495
+#: includes/admin/class-nodes-page.php:864
+#: includes/admin/class-nodes-page.php:898
+#: includes/admin/class-specs-page.php:66
+#: includes/admin/class-statuses-page.php:80
+msgid "Delete"
+msgstr "წაშლა"
+
+#: includes/admin/class-leads-page.php:78
+#: includes/admin/class-nodes-page.php:867
+msgid "Apply"
+msgstr "გამოყენება"
+
+#: includes/admin/class-leads-page.php:81
+#, php-format
+msgid "%s item"
+msgid_plural "%s items"
+msgstr[0] "%s ჩანაწერი"
+
+#: includes/admin/class-leads-page.php:98
+msgid "Date"
+msgstr "თარიღი"
+
+#: includes/admin/class-leads-page.php:98
+#: includes/admin/class-nodes-page.php:872 includes/class-leads.php:106
+msgid "Name"
+msgstr "სახელი"
+
+#: includes/admin/class-leads-page.php:98 includes/class-leads.php:107
+msgid "Phone"
+msgstr "ტელეფონი"
+
+#: includes/admin/class-leads-page.php:98 includes/class-nodes.php:118
+msgid "Apartment"
+msgstr "ბინა"
+
+#: includes/admin/class-leads-page.php:98
+msgid "Language"
+msgstr "ენა"
+
+#: includes/admin/class-leads-page.php:98
+#: includes/admin/class-nodes-page.php:332
+#: includes/admin/class-nodes-page.php:564
+#: includes/admin/class-nodes-page.php:876
+msgid "Status"
+msgstr "სტატუსი"
+
+#: includes/admin/class-leads-page.php:104
+msgid "No leads yet."
+msgstr "ლიდები ჯერ არ არის."
+
+#: includes/admin/class-leads-page.php:128
+msgid "Open page"
+msgstr "გვერდის გახსნა"
+
+#: includes/admin/class-localization.php:77
+msgid "All texts of the plugin: the site (buttons, tooltips, filter, form) and the admin (field names, buttons, descriptions). Write your own wording in any language; an empty field keeps the standard text shown in grey. The admin shows each user the language of their profile."
+msgstr "პლაგინის ყველა ტექსტი: საიტის (ღილაკები, ტულტიპები, ფილტრი, ფორმა) და ადმინის (ველების სახელები, ღილაკები, აღწერები). ჩაწერეთ საკუთარი ტექსტი ნებისმიერ ენაზე; ცარიელი ველი ნიშნავს სტანდარტულ ტექსტს, რომელიც ნაცრისფრად ჩანს. ადმინში თითოეული მომხმარებელი ხედავს თავისი პროფილის ენას."
+
+#: includes/admin/class-localization.php:79
+#, php-format
+msgid "Some texts were not saved: they must keep the placeholders of the original (such as %s or %d), which are filled in automatically."
+msgstr "ზოგი ტექსტი არ შეინახა: მასში უნდა დარჩეს ორიგინალის ჩანაცვლების ნიშნები (მაგ. %s ან %d), რომლებიც ავტომატურად ივსება."
+
+#: includes/admin/class-localization.php:85
+msgid "Search in any language, e.g. Building number"
+msgstr "ძებნა ნებისმიერ ენაზე, მაგ. კორპუსის ნომერი"
+
+#: includes/admin/class-localization.php:86
+msgid "Only changed"
+msgstr "მხოლოდ შეცვლილი"
+
+#: includes/admin/class-localization.php:89
+msgid "Show all"
+msgstr "ყველას ჩვენება"
+
+#: includes/admin/class-localization.php:91
+#, php-format
+msgid "%d text"
+msgid_plural "%d texts"
+msgstr[0] "%d ტექსტი"
+
+#: includes/admin/class-localization.php:95
+msgid "Nothing found."
+msgstr "ვერაფერი მოიძებნა."
+
+#: includes/admin/class-localization.php:104
+msgid "Original"
+msgstr "ორიგინალი"
+
+#: includes/admin/class-localization.php:111
+msgid "Site"
+msgstr "საიტი"
+
+#: includes/admin/class-localization.php:111
+msgid "Admin"
+msgstr "ადმინი"
+
+#: includes/admin/class-localization.php:129
+#: includes/admin/class-nodes-page.php:488
+msgid "Save changes"
+msgstr "ცვლილებების შენახვა"
+
+#: includes/admin/class-localization.php:131
+msgid "Save before moving to another page."
+msgstr "სხვა გვერდზე გადასვლამდე შეინახეთ."
+
+#: includes/admin/class-localization.php:144
+msgid "Pages"
+msgstr "გვერდები"
+
+#: includes/admin/class-nodes-page.php:94
+#, php-format
+msgid "%d item is inside an apartment, where nothing can be."
+msgid_plural "%d items are inside an apartment, where nothing can be."
+msgstr[0] "%d ელემენტი ბინის შიგნითაა, სადაც არაფერი უნდა იყოს."
+
+#: includes/admin/class-nodes-page.php:95
+msgid "They came from the old database by mistake (usually duplicates). They are not shown on the site or counted, so they can be deleted."
+msgstr "ისინი ძველი ბაზიდან შეცდომით შემოვიდა (როგორც წესი, დუბლიკატებია). საიტზე არ ჩანს და არ ითვლება, ამიტომ შეგიძლიათ წაშალოთ."
+
+#: includes/admin/class-nodes-page.php:108
+msgid "Delete them"
+msgstr "წაშლა"
+
+#: includes/admin/class-nodes-page.php:126
+msgid "Not found"
+msgstr "ვერ მოიძებნა"
+
+#: includes/admin/class-nodes-page.php:127
+#: includes/admin/class-nodes-page.php:132
+msgid "← All projects"
+msgstr "← ყველა პროექტი"
+
+#: includes/admin/class-nodes-page.php:144
+msgid "Add project"
+msgstr "პროექტის დამატება"
+
+#: includes/admin/class-nodes-page.php:148
+#, php-format
+msgid "Put %s on a page to show all projects (Projects → project → building → floor → apartment). Use the per-project shortcode below to show a single project."
+msgstr "ჩასვით %s გვერდზე, რომ გამოჩნდეს ყველა პროექტი (პროექტები → პროექტი → კორპუსი → სართული → ბინა). ერთი პროექტის საჩვენებლად გამოიყენეთ ქვემოთ მოცემული შორტკოდი."
+
+#: includes/admin/class-nodes-page.php:150
+msgid "No projects yet. Create one, or import apartments from a CSV/Excel file under Solo Estate → Import / Export."
+msgstr "პროექტები ჯერ არ არის. შექმენით ახალი ან შემოიტანეთ ბინები CSV/Excel ფაილიდან: Solo Estate → იმპორტი / ექსპორტი."
+
+#: includes/admin/class-nodes-page.php:155
+#: includes/admin/class-transfer-page.php:86 includes/class-nodes.php:113
+msgid "Project"
+msgstr "პროექტი"
+
+#: includes/admin/class-nodes-page.php:156
+msgid "Items inside"
+msgstr "შიგნით"
+
+#: includes/admin/class-nodes-page.php:157
+msgid "Available"
+msgstr "თავისუფალი"
+
+#: includes/admin/class-nodes-page.php:158
+#: includes/admin/class-nodes-page.php:552
+#: includes/admin/class-nodes-page.php:879
+msgid "Sold"
+msgstr "გაყიდული"
+
+#: includes/admin/class-nodes-page.php:159
+msgid "Shortcode"
+msgstr "შორტკოდი"
+
+#: includes/admin/class-nodes-page.php:171
+#: includes/admin/class-nodes-page.php:893
+msgid "Open"
+msgstr "გახსნა"
+
+#: includes/admin/class-nodes-page.php:179
+#: includes/admin/class-nodes-page.php:230
+msgid "Click to copy"
+msgstr "დააჭირეთ დასაკოპირებლად"
+
+#: includes/admin/class-nodes-page.php:225
+#: includes/admin/class-nodes-page.php:791
+#, php-format
+msgid "Add %s"
+msgstr "დამატება: %s"
+
+#: includes/admin/class-nodes-page.php:240
+#, php-format
+msgid "Available: %1$d of %2$d."
+msgstr "თავისუფალია: %1$d / %2$d."
+
+#: includes/admin/class-nodes-page.php:241
+msgid "Sold:"
+msgstr "გაყიდულია:"
+
+#: includes/admin/class-nodes-page.php:259
+msgid "Project name"
+msgstr "პროექტის სახელი"
+
+#: includes/admin/class-nodes-page.php:264
+msgid "Phase number"
+msgstr "ფაზის ნომერი"
+
+#: includes/admin/class-nodes-page.php:265
+msgid "Building number"
+msgstr "კორპუსის ნომერი"
+
+#: includes/admin/class-nodes-page.php:266
+#: includes/admin/class-nodes-page.php:271
+msgid "Floor number"
+msgstr "სართულის ნომერი"
+
+#: includes/admin/class-nodes-page.php:267
+msgid "Parking level"
+msgstr "პარკინგის დონე"
+
+#: includes/admin/class-nodes-page.php:268
+msgid "Apartment number"
+msgstr "ბინის ნომერი"
+
+#: includes/admin/class-nodes-page.php:269
+msgid "Space number"
+msgstr "ფართის ნომერი"
+
+#: includes/admin/class-nodes-page.php:270
+msgid "Villa number"
+msgstr "ვილის ნომერი"
+
+#: includes/admin/class-nodes-page.php:272
+msgid "Parking space number"
+msgstr "პარკინგის ადგილის ნომერი"
+
+#: includes/admin/class-nodes-page.php:278
+msgid "Optional, e.g. -1. Give the parking a name below instead if you like."
+msgstr "არასავალდებულო, მაგ. -1. სურვილისამებრ ქვემოთ დაარქვით სახელი."
+
+#: includes/admin/class-nodes-page.php:280
+msgid "Optional: a sports field, boulevard or commercial building needs no number, only a type below."
+msgstr "არასავალდებულო: სპორტულ მოედანს, ბულვარს ან კომერციულ შენობას ნომერი არ სჭირდება, საკმარისია ქვემოთ ტიპი."
+
+#: includes/admin/class-nodes-page.php:286
+msgid "Type (before the number)"
+msgstr "ტიპი (ნომრის წინ)"
+
+#: includes/admin/class-nodes-page.php:287
+msgid "e.g. Block, Commercial building"
+msgstr "მაგ. კორპუსი, კომერციული შენობა"
+
+#: includes/admin/class-nodes-page.php:288
+msgid "The name is this word plus the number: \"Block\" + \"A\" = \"Block A\". Without a number the word alone is the name, e.g. \"Sports field\". Empty = \"Building\"."
+msgstr "სახელი = ეს სიტყვა + ნომერი: „კორპუსი“ + „4“ = „კორპუსი 4“. ნომრის გარეშე სახელად მხოლოდ ეს სიტყვა ჩანს, მაგ. „სპორტული მოედანი“. ცარიელი = „კორპუსი“."
+
+#: includes/admin/class-nodes-page.php:294
+msgid "e.g. Phase I"
+msgstr "მაგ. ფაზა I"
+
+#: includes/admin/class-nodes-page.php:295
+msgid "Optional, e.g. Ground floor"
+msgstr "არასავალდებულო, მაგ. პირველი სართული"
+
+#: includes/admin/class-nodes-page.php:296
+msgid "e.g. Underground parking"
+msgstr "მაგ. მიწისქვეშა პარკინგი"
+
+#: includes/admin/class-nodes-page.php:297
+msgid "Optional, e.g. Penthouse"
+msgstr "არასავალდებულო, მაგ. პენტჰაუსი"
+
+#: includes/admin/class-nodes-page.php:298
+msgid "Optional, e.g. Shop 2"
+msgstr "არასავალდებულო, მაგ. მაღაზია 2"
+
+#: includes/admin/class-nodes-page.php:299
+msgid "Optional, e.g. Villa Rose"
+msgstr "არასავალდებულო, მაგ. ვილა როზა"
+
+#: includes/admin/class-nodes-page.php:301
+msgid "Custom name"
+msgstr "საკუთარი სახელი"
+
+#: includes/admin/class-nodes-page.php:302
+msgid "Optional"
+msgstr "არასავალდებულო"
+
+#: includes/admin/class-nodes-page.php:305
+msgid "Optional. When filled in, it replaces the whole name (type and number), e.g. \"Rose Residence\". Leave empty to show the type and number."
+msgstr "არასავალდებულო. თუ შეავსებთ, მთლიან სახელს (ტიპს და ნომერს) ჩაანაცვლებს, მაგ. „როუზ რეზიდენსი“. ცარიელი = ტიპი და ნომერი."
+
+#: includes/admin/class-nodes-page.php:306
+msgid "Leave empty to show the type and number, e.g. \"Apartment 5\"."
+msgstr "დატოვეთ ცარიელი და გამოჩნდება ტიპი და ნომერი, მაგ. „ბინა 5“."
+
+#: includes/admin/class-nodes-page.php:312
+msgid "Entrance"
+msgstr "სადარბაზო"
+
+#: includes/admin/class-nodes-page.php:314
+msgid "Optional, e.g. 2 or B. Shown in the apartment details."
+msgstr "არასავალდებულო, მაგ. 2 ან B. ჩანს ბინის აღწერილობაში."
+
+#: includes/admin/class-nodes-page.php:319
+msgid "Completion"
+msgstr "დასრულების ვადა"
+
+#: includes/admin/class-nodes-page.php:320
+msgid "e.g. Q4 2027"
+msgstr "მაგ. 2027 წლის IV კვარტალი"
+
+#: includes/admin/class-nodes-page.php:324
+msgid "External link"
+msgstr "გარე ბმული"
+
+#: includes/admin/class-nodes-page.php:326
+msgid "Optional. When set, clicking the building opens this page instead of its floors."
+msgstr "არასავალდებულო. თუ მითითებულია, კორპუსზე დაჭერით ეს გვერდი გაიხსნება სართულების ნაცვლად."
+
+#: includes/admin/class-nodes-page.php:335
+msgid "Manage statuses"
+msgstr "სტატუსების მართვა"
+
+#: includes/admin/class-nodes-page.php:338
+msgid "Used for the tabs on the projects page (e.g. Ongoing / Completed)."
+msgstr "გამოიყენება პროექტების გვერდის ჩანართებისთვის (მაგ. მიმდინარე / დასრულებული)."
+
+#: includes/admin/class-nodes-page.php:345
+msgid "Can visitors open it?"
+msgstr "შეუძლიათ ვიზიტორებს გახსნა?"
+
+#: includes/admin/class-nodes-page.php:348
+msgid "Automatic"
+msgstr "ავტომატური"
+
+#: includes/admin/class-nodes-page.php:349
+msgid "Always open"
+msgstr "ყოველთვის ღიაა"
+
+#: includes/admin/class-nodes-page.php:350 includes/class-leads.php:267
+msgid "Closed"
+msgstr "დახურული"
+
+#: includes/admin/class-nodes-page.php:358
+msgid "Automatic: follows the status (sold, reserved and rented units do not open)."
+msgstr "ავტომატური: სტატუსს მიჰყვება (გაყიდული, დაჯავშნილი და გაქირავებული არ იხსნება)."
+
+#: includes/admin/class-nodes-page.php:359
+msgid "Automatic: follows the status; sold out phases and buildings close when this is enabled in Settings. \"Always open\" and \"Closed\" ignore how much is sold."
+msgstr "ავტომატური: სტატუსს მიჰყვება; სრულად გაყიდული ფაზა და კორპუსი იკეტება, თუ ეს პარამეტრებშია ჩართული. „ყოველთვის ღიაა“ და „დაკეტილია“ არ ითვალისწინებს, რამდენია გაყიდული."
+
+#: includes/admin/class-nodes-page.php:366
+msgid "Detailed page"
+msgstr "დეტალური გვერდი"
+
+#: includes/admin/class-nodes-page.php:371
+msgid "Clicking it opens the detailed page"
+msgstr "დაჭერისას იხსნება დეტალური გვერდი"
+
+#: includes/admin/class-nodes-page.php:373
+msgid "Turn off for a boulevard, sports field, park and the like: clicking then opens a window with its photos and description, and no status is shown for it on the site."
+msgstr "გამორთეთ ბულვარისთვის, სპორტული მოედნისთვის, პარკისთვის და მსგავსისთვის: დაჭერისას გაიხსნება ფანჯარა მისი ფოტოებით და აღწერით, სტატუსი კი საიტზე არ გამოჩნდება."
+
+#: includes/admin/class-nodes-page.php:382
+msgid "Rooms"
+msgstr "ოთახები"
+
+#: includes/admin/class-nodes-page.php:384
+msgid "Used by the apartment filter. 0 = studio."
+msgstr "გამოიყენება ბინების ფილტრში. 0 = სტუდიო."
+
+#: includes/admin/class-nodes-page.php:387
+#: includes/admin/class-nodes-page.php:539
+msgid "Total area"
+msgstr "საერთო ფართი"
+
+#: includes/admin/class-nodes-page.php:391
+msgid "Living area"
+msgstr "საცხოვრებელი ფართი"
+
+#: includes/admin/class-nodes-page.php:394
+msgid "Summer area"
+msgstr "საზაფხულო ფართი"
+
+#: includes/admin/class-nodes-page.php:396
+msgid "Balconies, terraces, loggias."
+msgstr "აივნები, ტერასები, ლოჯიები."
+
+#: includes/admin/class-nodes-page.php:400
+msgid "Price per m²"
+msgstr "ფასი 1 მ²"
+
+#: includes/admin/class-nodes-page.php:405
+#: includes/admin/class-nodes-page.php:545
+msgid "Total price"
+msgstr "სრული ფასი"
+
+#: includes/admin/class-nodes-page.php:408
+msgid "Filled in automatically: total area × price per m². Type a different total if needed."
+msgstr "ივსება ავტომატურად: საერთო ფართი × ფასი მ²-ზე. საჭიროების შემთხვევაში ჩაწერეთ სხვა თანხა."
+
+#: includes/admin/class-nodes-page.php:416
+msgid "Masterplan (optional)"
+msgstr "მასტერპლანი (არასავალდებულო)"
+
+#: includes/admin/class-nodes-page.php:417
+msgid "Phase render (with buildings)"
+msgstr "ფაზის რენდერი (კორპუსებით)"
+
+#: includes/admin/class-nodes-page.php:418
+msgid "Building render (with floors)"
+msgstr "კორპუსის რენდერი (სართულებით)"
+
+#: includes/admin/class-nodes-page.php:419
+msgid "Floor plan (with apartments)"
+msgstr "სართულის გეგმა (ბინებით)"
+
+#: includes/admin/class-nodes-page.php:420
+msgid "Parking plan (with parking spaces)"
+msgstr "პარკინგის ნახაზი (ადგილებით)"
+
+#: includes/admin/class-nodes-page.php:421
+#: includes/admin/class-nodes-page.php:422
+#: includes/admin/class-nodes-page.php:423
+msgid "2D plan"
+msgstr "2D გეგმა"
+
+#: includes/admin/class-nodes-page.php:424
+msgid "Floor plan"
+msgstr "სართულის ნახაზი"
+
+#: includes/admin/class-nodes-page.php:430
+msgid "Buildings, villas and parkings are drawn on it. Without a masterplan visitors see a list instead."
+msgstr "მასზე იხაზება კორპუსები, ვილები და პარკინგები. მასტერპლანის გარეშე ვიზიტორი ნახავს სიას."
+
+#: includes/admin/class-nodes-page.php:432
+msgid "Polygons of the items inside are drawn on this image."
+msgstr "შიგნით არსებული ელემენტების პოლიგონები ამ სურათზე იხაზება."
+
+#: includes/admin/class-nodes-page.php:437
+msgid "Card image"
+msgstr "ბარათის სურათი"
+
+#: includes/admin/class-nodes-page.php:439
+msgid "Shown on the projects page. The masterplan is used when empty."
+msgstr "ჩანს პროექტების გვერდზე. ცარიელის შემთხვევაში გამოიყენება მასტერპლანი."
+
+#: includes/admin/class-nodes-page.php:443
+msgid "3D plan"
+msgstr "3D გეგმა"
+
+#: includes/admin/class-nodes-page.php:448
+#: includes/admin/class-nodes-page.php:453
+msgid "Photos"
+msgstr "ფოტოები"
+
+#: includes/admin/class-nodes-page.php:450
+msgid "Renders, interior photos, views. Drag to change the order."
+msgstr "რენდერები, ინტერიერის ფოტოები, ხედები. თანმიმდევრობის შესაცვლელად გადაათრიეთ."
+
+#: includes/admin/class-nodes-page.php:455
+msgid "Shown in the info window when the detailed page is turned off. Drag to change the order."
+msgstr "ჩანს საინფორმაციო ფანჯარაში, როცა დეტალური გვერდი გამორთულია. რიგის შესაცვლელად გადაათრიეთ."
+
+#: includes/admin/class-nodes-page.php:459
+msgid "Virtual tour link"
+msgstr "ვირტუალური ტურის ბმული"
+
+#: includes/admin/class-nodes-page.php:461
+msgid "Matterport, Kuula, 3DVista or any other 360° tour. It opens embedded on the page."
+msgstr "Matterport, Kuula, 3DVista ან სხვა 360° ტური. გაიხსნება პირდაპირ გვერდზე."
+
+#: includes/admin/class-nodes-page.php:466
+msgid "Description"
+msgstr "აღწერა"
+
+#: includes/admin/class-nodes-page.php:471
+#: includes/admin/class-statuses-page.php:51
+msgid "Order"
+msgstr "რიგი"
+
+#: includes/admin/class-nodes-page.php:473
+msgid "Lower numbers come first."
+msgstr "ნაკლები რიცხვი პირველად ჩანს."
+
+#: includes/admin/class-nodes-page.php:488
+msgid "Create"
+msgstr "შექმნა"
+
+#: includes/admin/class-nodes-page.php:492
+msgid "Duplicate (with everything inside)"
+msgstr "დუბლირება (შიგნით არსებული ყველაფრით)"
+
+#: includes/admin/class-nodes-page.php:517
+msgid "No status"
+msgstr "სტატუსის გარეშე"
+
+#: includes/admin/class-nodes-page.php:534
+#: includes/admin/class-nodes-page.php:874
+msgid "Type"
+msgstr "ტიპი"
+
+#: includes/admin/class-nodes-page.php:567
+msgid "Save status"
+msgstr "სტატუსის შენახვა"
+
+#: includes/admin/class-nodes-page.php:596
+msgid "Apply this layout to other floors"
+msgstr "ამ განლაგების გადატანა სხვა სართულებზე"
+
+#: includes/admin/class-nodes-page.php:597
+msgid "Copies the outline of each apartment to the apartment in the same position on the selected floors (1st to 1st, 2nd to 2nd… by apartment number order). Use it for floors with the same plan."
+msgstr "თითოეული ბინის მოხაზულობა გადადის არჩეულ სართულებზე იმავე პოზიციის ბინაზე (პირველი პირველზე, მეორე მეორეზე… ბინის ნომრის რიგით). გამოიყენეთ ერთნაირი გეგმის სართულებისთვის."
+
+#: includes/admin/class-nodes-page.php:602
+msgid "Select all"
+msgstr "ყველას მონიშვნა"
+
+#: includes/admin/class-nodes-page.php:610
+#, php-format
+msgid "%d apartment"
+msgid_plural "%d apartments"
+msgstr[0] "%d ბინა"
+
+#: includes/admin/class-nodes-page.php:615
+msgid "Also use this floor plan image"
+msgstr "სართულის გეგმის სურათიც გადავიდეს"
+
+#: includes/admin/class-nodes-page.php:616
+msgid "Also copy area and specification of each apartment"
+msgstr "ბინების ფართი და სპეციფიკაციაც გადავიდეს"
+
+#: includes/admin/class-nodes-page.php:617
+msgid "Overwrite outlines that are already drawn"
+msgstr "უკვე დახაზული მოხაზულობების გადაწერა"
+
+#: includes/admin/class-nodes-page.php:619
+#, php-format
+msgid "This floor has %d apartments. Floors marked in orange have a different number, only the matching positions are copied."
+msgstr "ამ სართულზე %d ბინაა. ნარინჯისფრად მონიშნულ სართულებზე ბინების რაოდენობა განსხვავდება, გადავა მხოლოდ შესაბამისი პოზიციები."
+
+#: includes/admin/class-nodes-page.php:620
+msgid "Apply layout"
+msgstr "განლაგების გადატანა"
+
+#: includes/admin/class-nodes-page.php:639
+#, php-format
+msgid "New %s"
+msgstr "ახალი: %s"
+
+#: includes/admin/class-nodes-page.php:666
+msgid "Rooms and sections"
+msgstr "ოთახები და სექციები"
+
+#: includes/admin/class-nodes-page.php:667
+msgid "Area of each room (bedroom, kitchen, balcony…). Empty fields are not shown on the site."
+msgstr "თითოეული ოთახის ფართი (საძინებელი, სამზარეულო, აივანი…). ცარიელი ველები საიტზე არ ჩანს."
+
+#: includes/admin/class-nodes-page.php:687
+msgid "Name, e.g. Bedroom 3"
+msgstr "სახელი, მაგ. საძინებელი 3"
+
+#: includes/admin/class-nodes-page.php:688
+msgid "Value"
+msgstr "მნიშვნელობა"
+
+#: includes/admin/class-nodes-page.php:692
+msgid "Add a new section"
+msgstr "ახალი სექციის დამატება"
+
+#: includes/admin/class-nodes-page.php:693
+msgid "A new section (e.g. \"Bedroom 3\") is saved to the shared list, so it can be filled on any unit later. Translate its name under Specification."
+msgstr "ახალი სექცია (მაგ. „საძინებელი 3“) ინახება საერთო სიაში და შემდეგ ნებისმიერ ფართს შეიძლება მიეთითოს. სახელის თარგმანი — „სპეციფიკაციაში“."
+
+#: includes/admin/class-nodes-page.php:704
+msgid "Position on the image"
+msgstr "მდებარეობა სურათზე"
+
+#: includes/admin/class-nodes-page.php:713
+#, php-format
+msgid "Add an image to <a href=\"%2$s\">%1$s</a> first, then draw this item on it."
+msgstr "ჯერ დაამატეთ სურათი <a href=\"%2$s\">%1$s</a>-ს, შემდეგ დახაზეთ ეს ელემენტი მასზე."
+
+#: includes/admin/class-nodes-page.php:739
+msgid "Click on the image to add a point. The outline always closes by itself."
+msgstr "წერტილის დასამატებლად დააჭირეთ სურათს. მოხაზულობა თავისით იკვრება."
+
+#: includes/admin/class-nodes-page.php:740
+msgid "Drag a point to move it. Click a point to select it and press Delete to remove it."
+msgstr "წერტილის გადასაადგილებლად გადაათრიეთ. წასაშლელად დააჭირეთ წერტილს და შემდეგ Delete ღილაკს."
+
+#: includes/admin/class-nodes-page.php:741
+msgid "Point at an edge: a new point appears — press and drag to add it there."
+msgstr "მიიტანეთ მაუსი ხაზთან: გამოჩნდება ახალი წერტილი — დააჭირეთ და გადაათრიეთ."
+
+#: includes/admin/class-nodes-page.php:742
+msgid "Drag inside the outline to move the whole outline. Other items on this image are shown in grey."
+msgstr "მთლიანი მოხაზულობის გადასაადგილებლად გადაათრიეთ მის შიგნით. ამ სურათის სხვა ელემენტები ნაცრისფრად ჩანს."
+
+#: includes/admin/class-nodes-page.php:743
+msgid "Mouse wheel zooms in and out; drag outside the outline to move the zoomed image."
+msgstr "მაუსის ბორბლით ზუმი; გადიდებული სურათის გადასაადგილებლად გადაათრიეთ მოხაზულობის გარეთ."
+
+#: includes/admin/class-nodes-page.php:757
+msgid "Undo last point"
+msgstr "ბოლო წერტილის გაუქმება"
+
+#: includes/admin/class-nodes-page.php:758
+msgid "Delete point"
+msgstr "წერტილის წაშლა"
+
+#: includes/admin/class-nodes-page.php:759
+msgid "Clean up points"
+msgstr "წერტილების გასწორება"
+
+#: includes/admin/class-nodes-page.php:759
+msgid "Removes points that sit on top of each other (common in imported outlines)"
+msgstr "შლის ერთმანეთზე დადებულ წერტილებს (ხშირია იმპორტირებულ მოხაზულობებში)"
+
+#: includes/admin/class-nodes-page.php:760
+msgid "Clear"
+msgstr "გასუფთავება"
+
+#: includes/admin/class-nodes-page.php:761
+msgid "Show other items"
+msgstr "სხვა ელემენტების ჩვენება"
+
+#: includes/admin/class-nodes-page.php:762
+msgid "Zoom out"
+msgstr "დაპატარავება"
+
+#: includes/admin/class-nodes-page.php:762
+msgid "Zoom in"
+msgstr "გადიდება"
+
+#: includes/admin/class-nodes-page.php:765
+msgid "Coordinates"
+msgstr "კოორდინატები"
+
+#: includes/admin/class-nodes-page.php:766
+msgid "Draw on the image or paste coordinates copied from another item"
+msgstr "დახაზეთ სურათზე ან ჩასვით სხვა ელემენტიდან დაკოპირებული კოორდინატები"
+
+#: includes/admin/class-nodes-page.php:767
+msgid "Copy"
+msgstr "კოპირება"
+
+#: includes/admin/class-nodes-page.php:767
+msgid "Filled in automatically while you draw. Paste coordinates here to reuse an outline — the drawing updates instantly."
+msgstr "ივსება ავტომატურად ხაზვისას. მოხაზულობის გამოსაყენებლად ჩასვით კოორდინატები აქ — ნახაზი მაშინვე განახლდება."
+
+#: includes/admin/class-nodes-page.php:784
+msgid "Inside"
+msgstr "შიგნით"
+
+#: includes/admin/class-nodes-page.php:796
+msgid "Phases are optional: add buildings directly when the project does not use them."
+msgstr "ფაზა არასავალდებულოა: თუ პროექტს არ აქვს, კორპუსები პირდაპირ დაამატეთ."
+
+#: includes/admin/class-nodes-page.php:800
+msgid "Nothing here yet."
+msgstr "აქ ჯერ არაფერია."
+
+#: includes/admin/class-nodes-page.php:809
+msgid "Map"
+msgstr "რუკა"
+
+#: includes/admin/class-nodes-page.php:852
+#, php-format
+msgid "Set status: %s"
+msgstr "სტატუსის დაყენება: %s"
+
+#: includes/admin/class-nodes-page.php:859
+msgid "Visitors: automatic"
+msgstr "ვიზიტორებისთვის: ავტომატური"
+
+#: includes/admin/class-nodes-page.php:859
+msgid "Visitors: always open"
+msgstr "ვიზიტორებისთვის: ყოველთვის ღია"
+
+#: includes/admin/class-nodes-page.php:859
+msgid "Visitors: closed"
+msgstr "ვიზიტორებისთვის: დაკეტილი"
+
+#: includes/admin/class-nodes-page.php:877
+msgid "Area / items"
+msgstr "ფართი / რაოდენობა"
+
+#: includes/admin/class-nodes-page.php:878
+msgid "Price / available"
+msgstr "ფასი / თავისუფალი"
+
+#: includes/admin/class-nodes-page.php:880
+msgid "On map"
+msgstr "რუკაზე"
+
+#: includes/admin/class-nodes-page.php:890
+msgid "always open"
+msgstr "ყოველთვის ღია"
+
+#: includes/admin/class-nodes-page.php:890
+msgid "closed"
+msgstr "დაკეტილი"
+
+#: includes/admin/class-nodes-page.php:893
+#: includes/frontend/class-admin-bar.php:60
+msgid "Edit"
+msgstr "რედაქტირება"
+
+#: includes/admin/class-nodes-page.php:895
+msgid "Duplicate"
+msgstr "დუბლირება"
+
+#: includes/admin/class-nodes-page.php:922
+msgid "Copy coordinates"
+msgstr "კოორდინატების კოპირება"
+
+#: includes/admin/class-nodes-page.php:924
+msgid "Not drawn on the image yet"
+msgstr "სურათზე ჯერ არ არის დახაზული"
+
+#: includes/admin/class-settings-page.php:40
+#: includes/admin/class-settings-page.php:85
+msgid "Languages"
+msgstr "ენები"
+
+#: includes/admin/class-settings-page.php:41
+msgid "Prices"
+msgstr "ფასები"
+
+#: includes/admin/class-settings-page.php:43
+msgid "Appearance"
+msgstr "იერსახე"
+
+#: includes/admin/class-settings-page.php:44
+msgid "Style"
+msgstr "სტილი"
+
+#: includes/admin/class-settings-page.php:45
+msgid "Localization"
+msgstr "ლოკალიზაცია"
+
+#: includes/admin/class-settings-page.php:46
+msgid "Access"
+msgstr "წვდომა"
+
+#: includes/admin/class-settings-page.php:47
+msgid "Advanced"
+msgstr "დამატებითი"
+
+#: includes/admin/class-settings-page.php:50
+msgid "Solo Estate settings"
+msgstr "Solo Estate — პარამეტრები"
+
+#: includes/admin/class-settings-page.php:69
+msgid "none"
+msgstr "არ არის"
+
+#: includes/admin/class-settings-page.php:72
+msgid "Multilingual plugin"
+msgstr "ენების plugin-ი"
+
+#: includes/admin/class-settings-page.php:75
+msgid "No multilingual plugin detected. The languages below are used for content fields."
+msgstr "ენების plugin-ი ვერ მოიძებნა. კონტენტისთვის გამოიყენება ქვემოთ მითითებული ენები."
+
+#: includes/admin/class-settings-page.php:76
+msgid "Content languages are taken automatically from this plugin. Add or remove languages there."
+msgstr "კონტენტის ენები ავტომატურად აიღება ამ plugin-იდან. ენების დამატება და წაშლა იქ ხდება."
+
+#: includes/admin/class-settings-page.php:80
+msgid "default"
+msgstr "ნაგულისხმევი"
+
+#: includes/admin/class-settings-page.php:82
+msgid "Content languages"
+msgstr "კონტენტის ენები"
+
+#: includes/admin/class-settings-page.php:87
+msgid "One per line: code|Name|locale, e.g. ka|ქართული|ka_GE. The first line is the default language."
+msgstr "თითო ხაზზე ერთი: კოდი|სახელი|ლოკალი, მაგ. ka|ქართული|ka_GE. პირველი ხაზი ნაგულისხმევი ენაა."
+
+#: includes/admin/class-settings-page.php:96
+msgid "Show prices"
+msgstr "ფასების ჩვენება"
+
+#: includes/admin/class-settings-page.php:97
+msgid "Area unit"
+msgstr "ფართის ერთეული"
+
+#: includes/admin/class-settings-page.php:98
+msgid "Base currency"
+msgstr "ძირითადი ვალუტა"
+
+#: includes/admin/class-settings-page.php:98
+msgid "Code and symbol, e.g. GEL ₾. Prices are entered and shown in this currency."
+msgstr "კოდი და სიმბოლო, მაგ. GEL ₾. ფასები შეიყვანება და ჩანს ამ ვალუტაში."
+
+#: includes/admin/class-settings-page.php:99
+msgid "Second currency"
+msgstr "მეორე ვალუტა"
+
+#: includes/admin/class-settings-page.php:99
+msgid "Show a currency switcher"
+msgstr "ვალუტის გადამრთველის ჩვენება"
+
+#: includes/admin/class-settings-page.php:100
+msgid "Second currency code / symbol"
+msgstr "მეორე ვალუტის კოდი / სიმბოლო"
+
+#: includes/admin/class-settings-page.php:100
+msgid "e.g. USD $. Prices in this currency are calculated with the exchange rate."
+msgstr "მაგ. USD $. ამ ვალუტაში ფასი კურსით ითვლება."
+
+#: includes/admin/class-settings-page.php:106
+#, php-format
+msgid "Current rate: 1 %1$s = %2$s %3$s (National Bank of Georgia, %4$s)."
+msgstr "მიმდინარე კურსი: 1 %1$s = %2$s %3$s (საქართველოს ეროვნული ბანკი, %4$s)."
+
+#: includes/admin/class-settings-page.php:114
+msgid "Exchange rate"
+msgstr "კურსი"
+
+#: includes/admin/class-settings-page.php:119
+msgid "National Bank of Georgia (updated automatically)"
+msgstr "საქართველოს ეროვნული ბანკი (ავტომატურად ახლდება)"
+
+#: includes/admin/class-settings-page.php:120
+msgid "Fixed rate entered below"
+msgstr "ქვემოთ მითითებული ფიქსირებული კურსი"
+
+#: includes/admin/class-settings-page.php:123
+msgid "The fixed rate below is used until it works again."
+msgstr "სანამ აღდგება, გამოიყენება ქვემოთ მითითებული კურსი."
+
+#: includes/admin/class-settings-page.php:124
+msgid "Update the rate now"
+msgstr "კურსის განახლება ახლავე"
+
+#: includes/admin/class-settings-page.php:125
+msgid "The rate is checked every 6 hours in the background."
+msgstr "კურსი ფონურად მოწმდება ყოველ 6 საათში."
+
+#: includes/admin/class-settings-page.php:128
+msgid "Fixed / fallback rate"
+msgstr "ფიქსირებული / სარეზერვო კურსი"
+
+#: includes/admin/class-settings-page.php:133
+msgid "Currency shown first"
+msgstr "პირველად საჩვენებელი ვალუტა"
+
+#: includes/admin/class-settings-page.php:146
+msgid "Lead form"
+msgstr "ლიდის ფორმა"
+
+#: includes/admin/class-settings-page.php:146
+msgid "Enabled"
+msgstr "ჩართულია"
+
+#: includes/admin/class-settings-page.php:148
+msgid "Show form on"
+msgstr "ფორმის ჩვენება"
+
+#: includes/admin/class-settings-page.php:154
+msgid "Apartment pages"
+msgstr "ბინის გვერდებზე"
+
+#: includes/admin/class-settings-page.php:155
+msgid "Every level"
+msgstr "ყველა დონეზე"
+
+#: includes/admin/class-settings-page.php:156
+msgid "Nowhere (use the [solo_estate_lead_form] shortcode)"
+msgstr "არსად (გამოიყენეთ შორტკოდი [solo_estate_lead_form])"
+
+#: includes/admin/class-settings-page.php:159
+msgid "Email recipients"
+msgstr "მეილის მიმღებები"
+
+#: includes/admin/class-settings-page.php:159
+msgid "Comma separated. Leave empty to disable emails."
+msgstr "მძიმით გამოყოფილი. მეილების გასათიშად დატოვეთ ცარიელი."
+
+#: includes/admin/class-settings-page.php:160
+msgid "Email subject"
+msgstr "მეილის სათაური"
+
+#: includes/admin/class-settings-page.php:160
+msgid "Placeholders: {site} {project} {building} {floor} {flat} {name} {phone}"
+msgstr "ჩასანაცვლებლები: {site} {project} {building} {floor} {flat} {name} {phone}"
+
+#: includes/admin/class-settings-page.php:161
+msgid "Webhook URL"
+msgstr "Webhook მისამართი"
+
+#: includes/admin/class-settings-page.php:161
+msgid "Optional. Every lead is POSTed here as JSON — use it for Zoho CRM (via Zoho Flow), Make, Zapier or your own CRM."
+msgstr "არასავალდებულო. ყოველი ლიდი აქ იგზავნება JSON-ად (POST) — გამოიყენეთ Zoho CRM-ისთვის (Zoho Flow-ით), Make-ისთვის, Zapier-ისთვის ან საკუთარი CRM-ისთვის."
+
+#: includes/admin/class-settings-page.php:162
+msgid "Webhook secret"
+msgstr "Webhook-ის საიდუმლო გასაღები"
+
+#: includes/admin/class-settings-page.php:162
+msgid "Generate"
+msgstr "გენერირება"
+
+#: includes/admin/class-settings-page.php:162
+msgid "Optional. When set, each webhook request carries an X-Solo-Estate-Signature header: sha256 HMAC of the body with this secret, so your CRM can verify the request really came from this site. Only HTTPS webhook URLs are accepted."
+msgstr "არასავალდებულო. თუ მითითებულია, ყოველ მოთხოვნას ახლავს X-Solo-Estate-Signature სათაური (sha256 HMAC ამ გასაღებით), რომ CRM-მა გადაამოწმოს, მოთხოვნა ნამდვილად ამ საიტიდან მოდის. მიიღება მხოლოდ HTTPS მისამართი."
+
+#: includes/admin/class-settings-page.php:164
+msgid "Keep leads for"
+msgstr "ლიდების შენახვის ვადა"
+
+#: includes/admin/class-settings-page.php:165
+msgid "days"
+msgstr "დღე"
+
+#: includes/admin/class-settings-page.php:166
+msgid "0 = keep forever. Older leads are deleted automatically once a day. Visitor IP addresses are always removed after 30 days."
+msgstr "0 = სამუდამოდ. უფრო ძველი ლიდები დღეში ერთხელ ავტომატურად იშლება. ვიზიტორის IP მისამართი ყოველთვის იშლება 30 დღის შემდეგ."
+
+#: includes/admin/class-settings-page.php:169
+msgid "Visitor IP source"
+msgstr "ვიზიტორის IP-ის წყარო"
+
+#: includes/admin/class-settings-page.php:175
+msgid "Direct connection (REMOTE_ADDR) — default"
+msgstr "პირდაპირი კავშირი (REMOTE_ADDR) — ნაგულისხმევი"
+
+#: includes/admin/class-settings-page.php:176
+msgid "Cloudflare (CF-Connecting-IP)"
+msgstr "Cloudflare (CF-Connecting-IP)"
+
+#: includes/admin/class-settings-page.php:177
+msgid "Reverse proxy (X-Forwarded-For)"
+msgstr "Reverse proxy (X-Forwarded-For)"
+
+#: includes/admin/class-settings-page.php:178
+msgid "Used for spam rate limiting. Change it only if the site is behind Cloudflare or a proxy — otherwise visitors could fake their IP."
+msgstr "გამოიყენება სპამის შეზღუდვისთვის. შეცვალეთ მხოლოდ მაშინ, თუ საიტი Cloudflare-ის ან proxy-ის უკანაა — სხვა შემთხვევაში ვიზიტორებს IP-ის გაყალბება შეეძლებათ."
+
+#: includes/admin/class-settings-page.php:180
+msgid "Analytics events"
+msgstr "Analytics მოვლენები"
+
+#: includes/admin/class-settings-page.php:180
+msgid "Send \"generate_lead\" to Google Analytics (gtag) and \"Lead\" to Meta Pixel when they are present on the site"
+msgstr "„generate_lead“ იგზავნება Google Analytics-ში (gtag) და „Lead“ — Meta Pixel-ში, თუ ისინი საიტზეა"
+
+#: includes/admin/class-settings-page.php:185
+msgid "Accent colour"
+msgstr "ძირითადი ფერი"
+
+#: includes/admin/class-settings-page.php:186
+msgid "Highlight colour"
+msgstr "გამოსარჩევი ფერი"
+
+#: includes/admin/class-settings-page.php:188
+msgid "Tooltip"
+msgstr "ტულტიპი"
+
+#: includes/admin/class-settings-page.php:193
+msgid "Dark (accent colour)"
+msgstr "მუქი (ძირითადი ფერი)"
+
+#: includes/admin/class-settings-page.php:194
+msgid "Light (white)"
+msgstr "ღია (თეთრი)"
+
+#: includes/admin/class-settings-page.php:195
+msgid "Show the apartment plan in the tooltip"
+msgstr "ბინის გეგმის ჩვენება ტულტიპში"
+
+#: includes/admin/class-settings-page.php:197
+msgid "Polygon opacity"
+msgstr "პოლიგონის გამჭვირვალობა"
+
+#: includes/admin/class-settings-page.php:197
+msgid "Normal / on hover, from 0 to 1."
+msgstr "ჩვეულებრივ / მაუსის მიტანისას, 0-დან 1-მდე."
+
+#: includes/admin/class-settings-page.php:198
+msgid "Sold out"
+msgstr "გაყიდულია"
+
+#: includes/admin/class-settings-page.php:198
+msgid "Automatically show projects, phases, buildings and floors whose units are all sold as \"Sold out\""
+msgstr "პროექტი, ფაზა, კორპუსი და სართული, რომლის ყველა ფართი გაყიდულია, ავტომატურად გამოჩნდეს როგორც „გაყიდულია“"
+
+#: includes/admin/class-settings-page.php:198
+msgid "Sold out phases and buildings cannot be opened (no link)"
+msgstr "სრულად გაყიდული ფაზა და კორპუსი არ იხსნება (ბმულის გარეშე)"
+
+#: includes/admin/class-settings-page.php:198
+msgid "The label text is editable under Localization (search: Sold out). A status set by hand (e.g. Sold) and \"Can visitors open it?\" on each item always win."
+msgstr "წარწერის ტექსტი იცვლება ლოკალიზაციაში (ძებნა: Sold out). ხელით მითითებულ სტატუსს (მაგ. გაყიდულია) და ელემენტის „შეუძლიათ ვიზიტორებს გახსნა?“ ველს ყოველთვის უპირატესობა აქვს."
+
+#: includes/admin/class-settings-page.php:199
+msgid "Sold out colour"
+msgstr "„გაყიდულია“-ს ფერი"
+
+#: includes/admin/class-settings-page.php:201 includes/class-nodes.php:119
+msgid "Commercial spaces"
+msgstr "კომერციული ფართები"
+
+#: includes/admin/class-settings-page.php:203
+msgid "Colour and hover colour of commercial spaces on floor plans, so they stand out from apartments. Sold, reserved and rented spaces use their status colour."
+msgstr "კომერციული ფართის ფერი და ჰოვერის ფერი სართულის ნახაზზე, რომ ბინებისგან გამოირჩეოდეს. გაყიდული, დაჯავშნილი და გაქირავებული ფართი სტატუსის ფერით ჩანს."
+
+#: includes/admin/class-settings-page.php:205
+msgid "Apartment filter"
+msgstr "ბინების ფილტრი"
+
+#: includes/admin/class-settings-page.php:205
+msgid "Show the apartment search (rooms, area, price, building) on the projects and project pages"
+msgstr "ბინის ძიების ჩვენება (ოთახები, ფართი, ფასი, კორპუსი) პროექტების და პროექტის გვერდებზე"
+
+#: includes/admin/class-settings-page.php:206
+msgid "Lists under images"
+msgstr "სიები სურათების ქვეშ"
+
+#: includes/admin/class-settings-page.php:206
+msgid "Show a list of floors and apartments next to or below each image (helps on phones and for SEO)"
+msgstr "სართულების და ბინების სია სურათის გვერდით ან ქვემოთ (ეხმარება მობილურზე და SEO-ს)"
+
+#: includes/admin/class-settings-page.php:206
+msgid "Also show cards of the buildings below the masterplan"
+msgstr "მასტერპლანის ქვემოთ კორპუსების ბარათებიც გამოჩნდეს"
+
+#: includes/admin/class-settings-page.php:206
+msgid "Without a masterplan the buildings are always listed as cards."
+msgstr "მასტერპლანის გარეშე კორპუსები ყოველთვის ბარათებად ჩანს."
+
+#: includes/admin/class-settings-page.php:211
+msgid "How the apartment selector looks on the site. Empty fonts and a size of 0 follow your theme. Accent and highlight colours are on the Appearance tab."
+msgstr "როგორ გამოიყურება ბინების შერჩევა საიტზე. ცარიელი შრიფტი და ზომა 0 თემას მიჰყვება. ძირითადი და გამოსაყოფი ფერები „იერსახის“ ჩანართშია."
+
+#: includes/admin/class-settings-page.php:212
+msgid "None — use the theme font"
+msgstr "არა — თემის შრიფტი"
+
+#: includes/admin/class-settings-page.php:217
+msgid "Google Font"
+msgstr "Google-ის შრიფტი"
+
+#: includes/admin/class-settings-page.php:217
+msgid "Loads the font from Google Fonts and uses it for the selector. Noto Sans Georgian is a clean modern Georgian font; Inter and Manrope use it for Georgian letters."
+msgstr "შრიფტი ჩაიტვირთება Google Fonts-იდან და გამოიყენება ბინების შერჩევაში. Noto Sans Georgian სუფთა, თანამედროვე ქართული შრიფტია; Inter და Manrope ქართული ასოებისთვის მას იყენებს."
+
+#: includes/admin/class-settings-page.php:218
+msgid "Font"
+msgstr "შრიფტი"
+
+#: includes/admin/class-settings-page.php:218
+msgid "Theme font"
+msgstr "თემის შრიფტი"
+
+#: includes/admin/class-settings-page.php:218
+msgid "Advanced: your own font list, e.g. Manrope, \"Noto Sans Georgian\", sans-serif — Latin letters in Manrope, Georgian in Noto Sans Georgian. It wins over the Google Font above."
+msgstr "დამატებით: საკუთარი შრიფტების სია, მაგ. Manrope, \"Noto Sans Georgian\", sans-serif — ლათინური ასოები Manrope-ით, ქართული Noto Sans Georgian-ით. მას უპირატესობა აქვს ზემოთ არჩეულ Google-ის შრიფტზე."
+
+#: includes/admin/class-settings-page.php:219
+msgid "Text size"
+msgstr "ტექსტის ზომა"
+
+#: includes/admin/class-settings-page.php:219
+msgid "0 = the theme size. 15–17 px suits most sites; use it when the theme makes everything too large or too small."
+msgstr "0 = თემის ზომა. საიტების უმეტესობას 15–17 px უხდება; გამოიყენეთ, თუ თემა ყველაფერს ზედმეტად დიდს ან პატარას აჩენს."
+
+#: includes/admin/class-settings-page.php:220
+msgid "Corner rounding"
+msgstr "კუთხეების მომრგვალება"
+
+#: includes/admin/class-settings-page.php:220
+msgid "0 = square corners."
+msgstr "0 = სწორი კუთხეები."
+
+#: includes/admin/class-settings-page.php:222
+msgid "Text"
+msgstr "ტექსტი"
+
+#: includes/admin/class-settings-page.php:223
+msgid "Secondary text"
+msgstr "მეორეხარისხოვანი ტექსტი"
+
+#: includes/admin/class-settings-page.php:224
+msgid "Lines and borders"
+msgstr "ხაზები და ჩარჩოები"
+
+#: includes/admin/class-settings-page.php:225
+msgid "Light backgrounds"
+msgstr "ღია ფონები"
+
+#: includes/admin/class-settings-page.php:226
+msgid "Cards and panels"
+msgstr "ბარათები და პანელები"
+
+#: includes/admin/class-settings-page.php:232
+msgid "Buttons"
+msgstr "ღილაკები"
+
+#: includes/admin/class-settings-page.php:234
+msgid "Background and text. Leave the background empty to use the accent colour."
+msgstr "ფონი და ტექსტი. ცარიელი ფონის შემთხვევაში გამოიყენება ძირითადი ფერი."
+
+#: includes/admin/class-settings-page.php:237
+msgid "Text on the accent colour"
+msgstr "ტექსტი აქცენტის ფერზე"
+
+#: includes/admin/class-settings-page.php:239
+msgid "Tooltips, active tabs and chips, the price box and other places with the accent colour as background."
+msgstr "ტულტიპები, აქტიური ტაბები და ღილაკები, ფასის ბლოკი და სხვა ადგილები, სადაც ფონი აქცენტის ფერია."
+
+#: includes/admin/class-settings-page.php:241
+msgid "Shadows"
+msgstr "ჩრდილები"
+
+#: includes/admin/class-settings-page.php:241
+msgid "Soft shadow under cards and panels"
+msgstr "რბილი ჩრდილი ბარათებისა და პანელების ქვეშ"
+
+#: includes/admin/class-settings-page.php:247
+msgid "Solo Estate roles"
+msgstr "Solo Estate-ის როლები"
+
+#: includes/admin/class-settings-page.php:248
+#: includes/admin/class-settings-page.php:257
+msgid "Manager"
+msgstr "მენეჯერი"
+
+#: includes/admin/class-settings-page.php:248
+msgid "everything, including deleting, statuses, specification list, import and settings."
+msgstr "ყველაფერი, მათ შორის წაშლა, სტატუსები, სპეციფიკაციის სია, იმპორტი და პარამეტრები."
+
+#: includes/admin/class-settings-page.php:249
+#: includes/admin/class-settings-page.php:256
+msgid "Marketing"
+msgstr "მარკეტინგი"
+
+#: includes/admin/class-settings-page.php:249
+msgid "adds and changes projects, buildings, floors and units: photos, prices, rooms and new sections, statuses. Cannot delete anything."
+msgstr "ამატებს და ცვლის პროექტებს, კორპუსებს, სართულებს და ფართებს: ფოტოებს, ფასებს, ოთახებს და ახალ სექციებს, სტატუსებს. წაშლა არ შეუძლია."
+
+#: includes/admin/class-settings-page.php:250
+#: includes/admin/class-settings-page.php:255
+msgid "Sales"
+msgstr "გაყიდვები"
+
+#: includes/admin/class-settings-page.php:250
+msgid "sees everything and changes statuses only (e.g. For sale → Reserved → Sold); reads leads."
+msgstr "ყველაფერს ხედავს და მხოლოდ სტატუსს ცვლის (მაგ. იყიდება → დაჯავშნილია → გაყიდულია); კითხულობს ლიდებს."
+
+#: includes/admin/class-settings-page.php:251
+msgid "Give a user the role \"Solo Estate Manager\", \"Solo Estate Marketing\" or \"Solo Estate Sales\" under Users, or give an existing WordPress role a level below. Administrators are always managers."
+msgstr "მომხმარებლებში მიანიჭეთ როლი „Solo Estate მენეჯერი“, „Solo Estate მარკეტინგი“ ან „Solo Estate გაყიდვები“, ან ქვემოთ მიუთითეთ დონე არსებულ WordPress როლს. ადმინისტრატორი ყოველთვის მენეჯერია."
+
+#: includes/admin/class-settings-page.php:254
+msgid "No access"
+msgstr "წვდომის გარეშე"
+
+#: includes/admin/class-settings-page.php:274
+msgid "Uninstall"
+msgstr "წაშლა"
+
+#: includes/admin/class-settings-page.php:274
+msgid "Delete all Solo Estate data (projects, apartments, leads, settings) when the plugin is deleted"
+msgstr "Solo Estate-ის ყველა მონაცემის (პროექტები, ბინები, ლიდები, პარამეტრები) წაშლა plugin-ის წაშლისას"
+
+#: includes/admin/class-settings-page.php:275
+msgid "Shortcodes"
+msgstr "შორტკოდები"
+
+#: includes/admin/class-settings-page.php:275
+msgid "all projects: Projects → project → building → floor → apartment"
+msgstr "ყველა პროექტი: პროექტები → პროექტი → კორპუსი → სართული → ბინა"
+
+#: includes/admin/class-settings-page.php:275
+msgid "one project only"
+msgstr "მხოლოდ ერთი პროექტი"
+
+#: includes/admin/class-settings-page.php:275
+msgid "lead form only"
+msgstr "მხოლოდ ლიდის ფორმა"
+
+#: includes/admin/class-settings-page.php:275
+msgid "Works in any theme and page builder (Avada: use a Text Block or Code Block element). A Gutenberg block \"Solo Estate project\" is also available."
+msgstr "მუშაობს ნებისმიერ თემაზე და გვერდის ბილდერში (Avada: გამოიყენეთ Text Block ან Code Block). ასევე ხელმისაწვდომია Gutenberg ბლოკი „Solo Estate project“."
+
+#: includes/admin/class-settings-page.php:318
+msgid "Import / export style"
+msgstr "სტილის იმპორტი / ექსპორტი"
+
+#: includes/admin/class-settings-page.php:319
+msgid "Colours, fonts, sizes, rounding, tooltip and polygon settings in one JSON file. Use it to copy a look to another site or keep a backup. Other settings (prices, leads, texts) are not included."
+msgstr "ფერები, შრიფტები, ზომები, მომრგვალება, ტულტიპისა და პოლიგონების პარამეტრები ერთ JSON ფაილში. გამოიყენეთ იერსახის სხვა საიტზე გადასატანად ან სარეზერვოდ. სხვა პარამეტრები (ფასები, ლიდები, ტექსტები) არ შედის."
+
+#: includes/admin/class-settings-page.php:324
+msgid "Download style (.json)"
+msgstr "სტილის ჩამოტვირთვა (.json)"
+
+#: includes/admin/class-settings-page.php:330
+msgid "Upload a style file"
+msgstr "სტილის ფაილის ატვირთვა"
+
+#: includes/admin/class-settings-page.php:331
+msgid "or paste the JSON code"
+msgstr "ან ჩასვით JSON კოდი"
+
+#: includes/admin/class-settings-page.php:332
+msgid "Import style"
+msgstr "სტილის იმპორტი"
+
+#: includes/admin/class-settings-page.php:338
+msgid "Reset style to defaults"
+msgstr "სტილის საწყისზე დაბრუნება"
+
+#: includes/admin/class-specs-page.php:34
+msgid "Rooms and areas listed on the apartment page. Values are entered on each apartment. Drag rows to reorder. \"Highlight\" makes the row stand out (e.g. living area)."
+msgstr "ოთახები და ფართები, რომლებიც ბინის გვერდზე ჩანს. მნიშვნელობები თითოეულ ბინაზე შეიყვანება. რიგის შესაცვლელად გადაათრიეთ ხაზები. „გამორჩევა“ ხაზს გამოყოფს (მაგ. საცხოვრებელი ფართი)."
+
+#: includes/admin/class-specs-page.php:43
+msgid "Unit"
+msgstr "ერთეული"
+
+#: includes/admin/class-specs-page.php:43
+msgid "Highlight"
+msgstr "გამორჩევა"
+
+#: includes/admin/class-specs-page.php:56
+msgid "New field…"
+msgstr "ახალი ველი…"
+
+#: includes/admin/class-specs-page.php:72
+msgid "Save fields"
+msgstr "ველების შენახვა"
+
+#: includes/admin/class-statuses-page.php:32
+msgid "Colours are used for polygons and labels on the site. \"Clickable\" lets visitors open the item (turn it off for Sold, Reserved and Rented). \"Counts as available\" is used for the free-unit counters, \"Counts as sold\" for the sold percentages of projects, phases and buildings."
+msgstr "ფერები გამოიყენება საიტზე პოლიგონებისა და წარწერებისთვის. „დაკლიკებადი“ — ვიზიტორს შეუძლია გახსნა (გამორთეთ გაყიდულის, დაჯავშნილისა და გაქირავებულისთვის). „ითვლება თავისუფლად“ — თავისუფალი ფართების მრიცხველისთვის, „ითვლება გაყიდულად“ — პროექტის, ფაზისა და კორპუსის გაყიდვის პროცენტისთვის."
+
+#: includes/admin/class-statuses-page.php:33
+msgid "Projects: when every apartment of a project is sold, the projects page shows it under the status marked \"Sold-out projects move here\" (e.g. Completed), whatever status is set on it."
+msgstr "პროექტები: როცა პროექტის ყველა ბინა გაიყიდება, პროექტების გვერდზე ის ავტომატურად გამოჩნდება სტატუსში, რომელზეც მონიშნულია „სრულად გაყიდული პროექტები აქ გადადის“ (მაგ. დასრულებული), მიუხედავად მასზე დაყენებული სტატუსისა."
+
+#: includes/admin/class-statuses-page.php:35
+msgid "Apartments, commercial spaces, villas and parking spaces"
+msgstr "ბინები, კომერციული ფართები, ვილები და პარკინგის ადგილები"
+
+#: includes/admin/class-statuses-page.php:36
+msgid "Floors and parkings"
+msgstr "სართულები და პარკინგები"
+
+#: includes/admin/class-statuses-page.php:37
+msgid "Phases and buildings"
+msgstr "ფაზები და კორპუსები"
+
+#: includes/admin/class-statuses-page.php:51
+msgid "Colour"
+msgstr "ფერი"
+
+#: includes/admin/class-statuses-page.php:51
+msgid "Clickable"
+msgstr "დაკლიკებადი"
+
+#: includes/admin/class-statuses-page.php:51
+msgid "Counts as available"
+msgstr "ითვლება თავისუფლად"
+
+#: includes/admin/class-statuses-page.php:51
+msgid "Counts as sold"
+msgstr "ითვლება გაყიდულად"
+
+#: includes/admin/class-statuses-page.php:51
+msgid "Sold-out projects move here"
+msgstr "სრულად გაყიდული პროექტები აქ გადადის"
+
+#: includes/admin/class-statuses-page.php:64
+msgid "New status…"
+msgstr "ახალი სტატუსი…"
+
+#: includes/admin/class-statuses-page.php:88
+msgid "Save statuses"
+msgstr "სტატუსების შენახვა"
+
+#: includes/admin/class-transfer-page.php:38
+msgid "Please choose a .csv file up to 10 MB."
+msgstr "აირჩიეთ .csv ფაილი, მაქსიმუმ 10 MB."
+
+#: includes/admin/class-transfer-page.php:40
+msgid "Select at least one project to export."
+msgstr "ექსპორტისთვის მონიშნეთ ერთი პროექტი მაინც."
+
+#: includes/admin/class-transfer-page.php:46
+msgid "Export apartments"
+msgstr "ბინების ექსპორტი"
+
+#: includes/admin/class-transfer-page.php:47
+msgid "Downloads every apartment of the selected projects in one file, with the project name, status, rooms, area, prices and specification. Edit it in Excel or Google Sheets and import it back to update everything at once."
+msgstr "არჩეული პროექტების ყველა ბინა ერთ ფაილად იტვირთება: პროექტის სახელი, სტატუსი, ოთახები, ფართი, ფასები და სპეციფიკაცია. შეცვალეთ Excel-ში ან Google Sheets-ში და შემოიტანეთ უკან, რომ ყველაფერი ერთდროულად განახლდეს."
+
+#: includes/admin/class-transfer-page.php:51
+msgid "All projects"
+msgstr "ყველა პროექტი"
+
+#: includes/admin/class-transfer-page.php:61
+msgid "Download CSV"
+msgstr "CSV-ის ჩამოტვირთვა"
+
+#: includes/admin/class-transfer-page.php:66
+msgid "Import apartments"
+msgstr "ბინების იმპორტი"
+
+#: includes/admin/class-transfer-page.php:68
+msgid "Use the exported file as a template. Units are matched by id, or by project + phase + building + floor + unit number (phase only when the project uses phases). The entrance column is a detail of the apartment."
+msgstr "შაბლონად გამოიყენეთ ექსპორტირებული ფაილი. ფართი იძებნება id-ით, ან პროექტი + ფაზა + კორპუსი + სართული + ნომრით (ფაზა — მხოლოდ თუ პროექტს აქვს). სადარბაზოს სვეტი ბინის მონაცემია."
+
+#: includes/admin/class-transfer-page.php:69
+msgid "The \"type\" column is flat, commercial, villa or spot (parking space). Villas leave building and floor empty. Parking spaces can only be updated, by id."
+msgstr "სვეტი „type“: flat (ბინა), commercial (კომერციული), villa (ვილა) ან spot (პარკინგის ადგილი). ვილას კორპუსი და სართული ცარიელი რჩება. პარკინგის ადგილი მხოლოდ id-ით ახლდება."
+
+#: includes/admin/class-transfer-page.php:70
+msgid "The \"project\" column says which project each row belongs to. A project that does not exist on the site yet is created during the import."
+msgstr "სვეტი „project“ მიუთითებს, რომელ პროექტს ეკუთვნის ხაზი. პროექტი, რომელიც საიტზე ჯერ არ არსებობს, იმპორტისას შეიქმნება."
+
+#: includes/admin/class-transfer-page.php:71
+msgid "Empty cells leave the value unchanged. Type a single \"-\" to clear a value."
+msgstr "ცარიელი უჯრა მნიშვნელობას არ ცვლის. მნიშვნელობის წასაშლელად ჩაწერეთ „-“."
+
+#: includes/admin/class-transfer-page.php:72
+msgid "Status can be written in any site language (e.g. Sold, გაყიდულია)."
+msgstr "სტატუსი შეიძლება ეწეროს საიტის ნებისმიერ ენაზე (მაგ. Sold, გაყიდულია)."
+
+#: includes/admin/class-transfer-page.php:77
+msgid "From the file (\"project\" column)"
+msgstr "ფაილიდან (სვეტი „project“)"
+
+#: includes/admin/class-transfer-page.php:79
+msgid "Create projects, buildings, floors and apartments that do not exist yet"
+msgstr "შეიქმნას პროექტები, კორპუსები, სართულები და ბინები, რომლებიც ჯერ არ არსებობს"
+
+#: includes/admin/class-transfer-page.php:80
+msgid "Preview only — show what would change, without saving"
+msgstr "მხოლოდ წინასწარი ნახვა — აჩვენოს ცვლილებები შენახვის გარეშე"
+
+#: includes/admin/class-transfer-page.php:81
+msgid "Upload"
+msgstr "ატვირთვა"
+
+#: includes/admin/class-transfer-page.php:108
+msgid "Import finished."
+msgstr "იმპორტი დასრულდა."
+
+#: includes/admin/class-transfer-page.php:108
+msgid "Preview — nothing was saved yet."
+msgstr "წინასწარი ნახვა — ჯერ არაფერი შენახულა."
+
+#: includes/admin/class-transfer-page.php:110
+#, php-format
+msgid "Rows read: %d"
+msgstr "წაკითხული ხაზები: %d"
+
+#: includes/admin/class-transfer-page.php:112
+#, php-format
+msgid "Apartments updated: %d"
+msgstr "განახლებული ბინები: %d"
+
+#: includes/admin/class-transfer-page.php:114
+#, php-format
+msgid "Unchanged: %d"
+msgstr "უცვლელი: %d"
+
+#: includes/admin/class-transfer-page.php:116
+#, php-format
+msgid "New: %1$d projects, %2$d buildings, %3$d floors, %4$d apartments"
+msgstr "ახალი: %1$d პროექტი, %2$d კორპუსი, %3$d სართული, %4$d ბინა"
+
+#: includes/admin/class-transfer-page.php:119
+#, php-format
+msgid "New phases: %d"
+msgstr "ახალი ფაზები: %d"
+
+#: includes/admin/class-transfer-page.php:124
+#, php-format
+msgid "%d problem:"
+msgid_plural "%d problems:"
+msgstr[0] "%d პრობლემა:"
+
+#: includes/admin/class-transfer-page.php:127
+#, php-format
+msgid "Line %1$d: %2$s"
+msgstr "ხაზი %1$d: %2$s"
+
+#: includes/admin/class-transfer-page.php:132
+msgid "If this looks right, upload the same file again with \"Preview only\" unticked."
+msgstr "თუ ყველაფერი სწორია, ატვირთეთ იგივე ფაილი „მხოლოდ წინასწარი ნახვის“ მონიშვნის გარეშე."
+
+#: includes/admin/class-ui.php:133
+msgid "Add images"
+msgstr "სურათების დამატება"
+
+#: includes/class-csv.php:162
+msgid "The file could not be read."
+msgstr "ფაილის წაკითხვა ვერ მოხერხდა."
+
+#: includes/class-csv.php:175
+msgid "The first row must contain the column names: building, floor, unit (or id). Export a file first to get the right format."
+msgstr "პირველ ხაზზე უნდა იყოს სვეტების სახელები: building, floor, unit (ან id). სწორი ფორმატისთვის ჯერ გააკეთეთ ექსპორტი."
+
+#: includes/class-csv.php:180
+msgid "The file has no \"project\" column. Choose the project to import into, or add the column."
+msgstr "ფაილში არ არის სვეტი „project“. აირჩიეთ პროექტი, რომელშიც შემოვა მონაცემები, ან დაამატეთ სვეტი."
+
+#: includes/class-csv.php:196
+msgid "Too many rows; the rest were skipped."
+msgstr "ხაზები ზედმეტად ბევრია; დანარჩენი გამოტოვებულია."
+
+#: includes/class-csv.php:215
+msgid "The project name is empty."
+msgstr "პროექტის სახელი ცარიელია."
+
+#: includes/class-csv.php:225
+#, php-format
+msgid "Project \"%s\" not found."
+msgstr "პროექტი „%s“ ვერ მოიძებნა."
+
+#: includes/class-csv.php:259 includes/class-csv.php:280
+msgid "Building, floor and unit numbers are required when there is no id."
+msgstr "id-ის გარეშე აუცილებელია კორპუსის, სართულისა და ბინის ნომრები."
+
+#: includes/class-csv.php:263
+msgid "Parking spaces can only be updated by id. Add new ones in wp-admin."
+msgstr "პარკინგის ადგილი მხოლოდ id-ით ახლდება. ახალი დაამატეთ ადმინიდან."
+
+#: includes/class-csv.php:291 includes/class-csv.php:311
+#, php-format
+msgid "%1$s %2$s not found."
+msgstr "%1$s %2$s ვერ მოიძებნა."
+
+#: includes/class-csv.php:319
+msgid "Could not create the apartment."
+msgstr "ბინის შექმნა ვერ მოხერხდა."
+
+#: includes/class-csv.php:351
+#, php-format
+msgid "Unknown status \"%s\" — status left unchanged."
+msgstr "უცნობი სტატუსი „%s“ — სტატუსი არ შეცვლილა."
+
+#: includes/class-csv.php:362
+#, php-format
+msgid "Column rooms: \"%s\" must be a whole number 0–20."
+msgstr "სვეტი rooms: „%s“ უნდა იყოს მთელი რიცხვი 0–20."
+
+#: includes/class-csv.php:385
+#, php-format
+msgid "Column %1$s: \"%2$s\" is not a number."
+msgstr "სვეტი %1$s: „%2$s“ არ არის რიცხვი."
+
+#: includes/class-install.php:309
+msgid "Solo Estate Manager"
+msgstr "Solo Estate მენეჯერი"
+
+#: includes/class-install.php:310
+msgid "Solo Estate Marketing"
+msgstr "Solo Estate მარკეტინგი"
+
+#: includes/class-install.php:311
+msgid "Solo Estate Sales"
+msgstr "Solo Estate გაყიდვები"
+
+#: includes/class-leads.php:110
+msgid "Email"
+msgstr "ელფოსტა"
+
+#: includes/class-leads.php:113
+msgid "Message"
+msgstr "შეტყობინება"
+
+#: includes/class-leads.php:122
+msgid "Page"
+msgstr "გვერდი"
+
+#: includes/class-leads.php:123
+msgid "All leads"
+msgstr "ყველა ლიდი"
+
+#: includes/class-leads.php:265
+msgid "New"
+msgstr "ახალი"
+
+#: includes/class-leads.php:266
+msgid "Contacted"
+msgstr "დაკავშირებული"
+
+#: includes/class-nodes.php:114
+msgid "Phase"
+msgstr "ფაზა"
+
+#: includes/class-nodes.php:114
+msgid "Phases"
+msgstr "ფაზები"
+
+#: includes/class-nodes.php:115
+msgid "Building"
+msgstr "კორპუსი"
+
+#: includes/class-nodes.php:115
+msgid "Buildings"
+msgstr "კორპუსები"
+
+#: includes/class-nodes.php:116
+msgid "Floor"
+msgstr "სართული"
+
+#: includes/class-nodes.php:116
+msgid "Floors"
+msgstr "სართულები"
+
+#: includes/class-nodes.php:117
+msgid "Parking"
+msgstr "პარკინგი"
+
+#: includes/class-nodes.php:117
+msgid "Parkings"
+msgstr "პარკინგები"
+
+#: includes/class-nodes.php:118
+msgid "Apartments"
+msgstr "ბინები"
+
+#: includes/class-nodes.php:119
+msgid "Commercial space"
+msgstr "კომერციული ფართი"
+
+#: includes/class-nodes.php:120
+msgid "Villa"
+msgstr "ვილა"
+
+#: includes/class-nodes.php:120
+msgid "Villas"
+msgstr "ვილები"
+
+#: includes/class-nodes.php:121
+msgid "Villa floor"
+msgstr "ვილის სართული"
+
+#: includes/class-nodes.php:121
+msgid "Villa floors"
+msgstr "ვილის სართულები"
+
+#: includes/class-nodes.php:122
+msgid "Parking space"
+msgstr "პარკინგის ადგილი"
+
+#: includes/class-nodes.php:122
+msgid "Parking spaces"
+msgstr "პარკინგის ადგილები"
+
+#: includes/class-rates.php:108
+msgid "The National Bank of Georgia could not be reached, or it has no rate for this currency."
+msgstr "საქართველოს ეროვნულ ბანკთან დაკავშირება ვერ მოხერხდა, ან ამ ვალუტის კურსი არ აქვს."
+
+#: includes/frontend/class-admin-bar.php:45
+msgid "Edit project"
+msgstr "პროექტის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:46
+msgid "Edit phase"
+msgstr "ფაზის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:47
+msgid "Edit building"
+msgstr "კორპუსის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:48
+msgid "Edit floor"
+msgstr "სართულის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:49
+msgid "Edit parking"
+msgstr "პარკინგის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:50
+msgid "Edit apartment"
+msgstr "ბინის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:51
+msgid "Edit commercial space"
+msgstr "კომერციული ფართის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:52
+msgid "Edit villa"
+msgstr "ვილის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:53
+msgid "Edit villa floor"
+msgstr "ვილის სართულის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:54
+msgid "Edit parking space"
+msgstr "პარკინგის ადგილის ჩასწორება"
+
+#: includes/frontend/class-admin-bar.php:76
+msgid "Edit page"
+msgstr "გვერდის ჩასწორება"
+
+#: includes/frontend/class-renderer.php:46
+msgid "Solo Estate: project not found. Check the id in the shortcode."
+msgstr "Solo Estate: პროექტი ვერ მოიძებნა. შეამოწმეთ id შორტკოდში."

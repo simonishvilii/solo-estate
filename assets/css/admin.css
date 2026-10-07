@@ -1,0 +1,520 @@
+/* Solo Estate admin */
+
+.solo-estate-wrap .solo-estate-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 4px 20px 12px;
+	margin: 16px 0;
+}
+.solo-estate-wrap .solo-estate-card > h2 {
+	font-size: 14px;
+	margin: 14px 0 8px;
+}
+.solo-estate-columns {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 260px;
+	gap: 20px;
+	align-items: start;
+}
+.solo-estate-card--sticky {
+	position: sticky;
+	top: 46px;
+	padding-top: 16px !important;
+}
+.solo-estate-side-actions {
+	line-height: 2;
+}
+.solo-estate-delete,
+.solo-estate-delete:hover {
+	color: #b32d2e;
+}
+@media (max-width: 960px) {
+	.solo-estate-columns {
+		grid-template-columns: 1fr;
+	}
+}
+
+.solo-estate-breadcrumbs {
+	margin: 12px 0 4px;
+	color: #646970;
+}
+.solo-estate-breadcrumbs span {
+	margin: 0 4px;
+}
+.solo-estate-heading-code {
+	vertical-align: middle;
+}
+.solo-estate-copy {
+	cursor: copy;
+	user-select: all;
+}
+.solo-estate-copy.is-copied {
+	background: #d1f0d6;
+}
+.solo-estate-empty {
+	background: #fff;
+	border: 1px dashed #c3c4c7;
+	padding: 24px;
+	text-align: center;
+	margin-top: 16px;
+}
+.solo-estate-thumb {
+	float: left;
+	margin-right: 10px;
+	border-radius: 3px;
+	object-fit: cover;
+}
+.solo-estate-ok {
+	color: #00a32a;
+}
+.solo-estate-warn {
+	color: #dba617;
+}
+
+/* Translatable fields */
+.solo-estate-i18n {
+	max-width: 760px;
+}
+.solo-estate-i18n__tabs {
+	display: flex;
+	gap: 2px;
+	margin-bottom: -1px;
+}
+.solo-estate-i18n__tab {
+	border: 1px solid #c3c4c7;
+	border-bottom: 0;
+	background: #f6f7f7;
+	padding: 3px 10px;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	border-radius: 3px 3px 0 0;
+	color: #646970;
+}
+.solo-estate-i18n__tab.is-filled::after {
+	content: "•";
+	color: #00a32a;
+	margin-left: 4px;
+}
+.solo-estate-i18n__tab.is-active {
+	background: #fff;
+	color: #1d2327;
+	position: relative;
+	z-index: 1;
+}
+/* Hidden panes stay rendered off-screen so TinyMCE initialises with a real size. */
+.solo-estate-i18n__pane:not(.is-active) {
+	position: absolute;
+	left: -99999px;
+	width: 700px;
+	visibility: hidden;
+}
+.solo-estate-i18n__pane .regular-text {
+	width: 100%;
+	max-width: 25em;
+}
+
+/* Media field */
+.solo-estate-image-field__preview img {
+	display: block;
+	max-width: 280px;
+	max-height: 200px;
+	margin-bottom: 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+}
+
+/* Status pills */
+.solo-estate-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.solo-estate-pill__dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Specification grid on apartment form */
+.solo-estate-spec-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 8px 16px;
+}
+.solo-estate-spec-grid__item {
+	display: grid;
+	grid-template-columns: 1fr 80px auto;
+	align-items: center;
+	gap: 6px;
+}
+.solo-estate-spec-grid__item em {
+	color: #646970;
+	font-style: normal;
+}
+
+/* Editable tables */
+.solo-estate-status-table input[type="text"],
+.solo-estate-specs-table input[type="text"]:not(.small-text) {
+	width: 100%;
+}
+.solo-estate-new-row {
+	background: #f0f6fc !important;
+}
+.solo-estate-handle-col {
+	width: 24px;
+}
+.solo-estate-handle {
+	cursor: move;
+	color: #8c8f94;
+}
+.solo-estate-lead--new td {
+	font-weight: 600;
+}
+
+/* Settings tabs */
+.solo-estate-tab-panel {
+	display: none;
+}
+.solo-estate-tab-panel.is-active {
+	display: block;
+}
+
+/* Polygon editor */
+.solo-estate-poly__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin: 8px 0;
+}
+.solo-estate-poly__zoom {
+	margin-left: auto;
+}
+.solo-estate-poly__viewport {
+	overflow: auto;
+	max-height: 75vh;
+	border: 1px solid #dcdcde;
+	background: #f0f0f1;
+}
+.solo-estate-poly__canvas {
+	position: relative;
+	width: 100%;
+	line-height: 0;
+	user-select: none;
+}
+.solo-estate-poly__canvas img {
+	width: 100%;
+	height: auto;
+	display: block;
+	pointer-events: none;
+}
+.solo-estate-poly__svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	cursor: crosshair;
+	touch-action: none;
+}
+.solo-estate-poly__siblings polygon {
+	fill: rgba(40, 40, 40, 0.35);
+	stroke: #fff;
+}
+.solo-estate-poly__shape {
+	fill: rgba(34, 113, 177, 0.35);
+	stroke: #2271b1;
+	stroke-linejoin: round;
+}
+.solo-estate-poly__shape.is-movable {
+	cursor: move;
+}
+.solo-estate-poly__svg.is-panning,
+.solo-estate-poly__svg.is-panning .solo-estate-poly__shape {
+	cursor: grabbing;
+}
+.solo-estate-poly__zoom-level {
+	display: inline-block;
+	min-width: 48px;
+	margin-right: 6px;
+	color: #50575e;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+.solo-estate-poly__svg.is-moving,
+.solo-estate-poly__svg.is-moving .solo-estate-poly__shape {
+	cursor: grabbing;
+}
+.solo-estate-poly__svg:focus {
+	outline: none;
+}
+.solo-estate-poly__edge {
+	stroke: transparent;
+	fill: none;
+	stroke-linecap: round;
+}
+.solo-estate-poly__svg.is-on-edge,
+.solo-estate-poly__svg.is-on-edge .solo-estate-poly__shape {
+	cursor: copy;
+}
+.solo-estate-poly__ghost {
+	fill: #fff;
+	stroke: #2271b1;
+	stroke-dasharray: 2 2;
+	opacity: 0.9;
+	pointer-events: none;
+}
+.solo-estate-poly__handle {
+	fill: #fff;
+	stroke: #2271b1;
+	cursor: grab;
+}
+.solo-estate-poly__handle.is-first {
+	fill: #2271b1;
+}
+.solo-estate-poly__handle.is-selected {
+	fill: #d63638;
+	stroke: #fff;
+}
+.solo-estate-poly__help {
+	margin: 0 0 8px 18px;
+	list-style: disc;
+}
+.solo-estate-poly__help li {
+	margin: 0;
+}
+.solo-estate-poly__raw {
+	margin-top: 10px;
+}
+.solo-estate-poly__raw-label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+.solo-estate-poly__raw textarea {
+	margin-bottom: 6px;
+}
+
+/* Overview map */
+.solo-estate-overview > summary {
+	cursor: pointer;
+	font-weight: 600;
+	padding: 12px 0;
+}
+.solo-estate-overview__stage {
+	position: relative;
+	line-height: 0;
+	max-width: 1100px;
+}
+.solo-estate-overview__stage img {
+	width: 100%;
+	height: auto;
+}
+.solo-estate-overview__stage svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+.solo-estate-overview__stage polygon {
+	fill-opacity: 0.5;
+	stroke: #fff;
+	stroke-width: 2;
+	vector-effect: non-scaling-stroke;
+	transition: fill-opacity 0.15s;
+}
+.solo-estate-overview__stage a:hover polygon {
+	fill-opacity: 0.8;
+}
+.solo-estate-children {
+	margin-top: 32px;
+}
+
+/* Apply layout */
+.solo-estate-apply-layout__floors {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 6px 16px;
+	margin-bottom: 12px;
+}
+.solo-estate-apply-layout__floors .solo-estate-mismatch {
+	color: #b26200;
+}
+.solo-estate-copy-coords {
+	font-size: 12px;
+}
+
+/* Gallery picker */
+.solo-estate-gallery-field__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+.solo-estate-gallery-field__list li {
+	position: relative;
+	width: 84px;
+	height: 84px;
+	margin: 0;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #f6f7f7;
+	cursor: move;
+	overflow: hidden;
+}
+.solo-estate-gallery-field__list img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.solo-estate-gallery-field__remove {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	font-size: 16px;
+	line-height: 22px;
+	cursor: pointer;
+}
+
+/* New sections typed on a unit */
+.solo-estate-new-specs {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+.solo-estate-new-specs__table td {
+	padding: 0 8px 8px 0;
+}
+
+/* Sold percentage */
+.solo-estate-sold {
+	display: inline-block;
+	min-width: 110px;
+}
+.solo-estate-sold__bar {
+	display: block;
+	height: 4px;
+	margin-top: 4px;
+	border-radius: 4px;
+	background: #f0f0f1;
+	overflow: hidden;
+}
+.solo-estate-sold__bar span {
+	display: block;
+	height: 100%;
+	background: #c0504d;
+}
+.solo-estate-summary {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0 16px;
+}
+.solo-estate-access {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #f0f6fc;
+	color: #2271b1;
+	font-size: 11px;
+	font-weight: 400;
+}
+.solo-estate-access--2 {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+.solo-estate-status-form {
+	padding: 12px 0 4px;
+}
+
+/* Style import / export */
+.solo-estate-style-transfer {
+	max-width: 780px;
+	margin-top: 24px;
+}
+.solo-estate-style-reset {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f1;
+}
+
+/* Settings → Localization */
+.solo-estate-loc-search {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin: 16px 0;
+}
+.solo-estate-loc-table td {
+	vertical-align: top;
+}
+.solo-estate-loc-table__original {
+	width: 28%;
+	color: #50575e;
+}
+.solo-estate-loc-table input::placeholder,
+.solo-estate-loc-table textarea::placeholder {
+	color: #a0a5aa;
+}
+.solo-estate-loc-tag {
+	display: inline-block;
+	margin: 0 4px 2px 0;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	line-height: 16px;
+	vertical-align: 1px;
+}
+.solo-estate-loc-tag--site {
+	background: #e7f5ee;
+	color: #0a6b3d;
+}
+.solo-estate-loc-tag--admin {
+	background: #eef1f6;
+	color: #3c4a61;
+}
+.solo-estate-loc-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 16px 0;
+}
+.solo-estate-loc-pages {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-left: auto;
+}
+.solo-estate-loc-pages .page-numbers {
+	display: inline-block;
+	min-width: 30px;
+	padding: 4px 8px;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	background: #fff;
+	text-align: center;
+	text-decoration: none;
+}
+.solo-estate-loc-pages .page-numbers.current {
+	border-color: #2271b1;
+	background: #2271b1;
+	color: #fff;
+}
+.solo-estate-loc-pages .page-numbers.dots {
+	border-color: transparent;
+	background: none;
+}

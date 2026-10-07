@@ -1,0 +1,746 @@
+<?php
+/**
+ * The tree of a project: project → [phase] → building → floor → apartment, plus villas,
+ * parkings and commercial spaces. The entrance is a field of the apartment, not a level:
+ * a floor plan covers the whole floor.
+ *
+ * Every node stores `path` ("/1/5/13/") so counts below any node are one query.
+ *
+ * @package SoloEstate
+ */
+
+namespace SoloEstate;
+
+defined( 'ABSPATH' ) || exit;
+
+class Nodes {
+
+	const LEVELS = array( 'project', 'phase', 'building', 'floor', 'parking', 'flat', 'commercial', 'villa', 'villa_floor', 'spot' );
+
+	/**
+	 * What can be added inside what. Phases are optional: buildings can sit directly in a
+	 * project.
+	 */
+	const CHILDREN = array(
+		'project'  => array( 'phase', 'building', 'villa', 'parking' ),
+		'phase'    => array( 'building', 'villa', 'parking' ),
+		'building' => array( 'floor', 'parking' ),
+		'floor'    => array( 'flat', 'commercial' ),
+		'parking'  => array( 'spot' ),
+		'villa'    => array( 'villa_floor' ),
+	);
+
+	/** Units that are sold and counted in availability / sold percentages. */
+	const UNITS = array( 'flat', 'commercial', 'villa' );
+
+	/** Units with their own page, prices, gallery and specification. */
+	const PROPERTIES = array( 'flat', 'commercial', 'villa' );
+
+	/** Visitor access to a node page: automatic, always open, always closed. */
+	const ACCESS_AUTO   = 0;
+	const ACCESS_OPEN   = 1;
+	const ACCESS_CLOSED = 2;
+
+	/**
+	 * Levels that can show an info window (photos + description) instead of their own page:
+	 * a boulevard, a sports field or a park drawn on the masterplan like a building.
+	 */
+	const INFO_LEVELS = array( 'phase', 'building', 'parking' );
+
+	/** Translatable fields per level. */
+	const I18N_FIELDS = array(
+		'project'     => array( 'title', 'description' ),
+		'phase'       => array( 'title', 'completion', 'description' ),
+		'building'    => array( 'title', 'label', 'completion', 'link', 'description' ),
+		'floor'       => array( 'title' ),
+		'parking'     => array( 'title', 'description' ),
+		'flat'        => array( 'title', 'description' ),
+		'commercial'  => array( 'title', 'description' ),
+		'villa'       => array( 'title', 'description' ),
+		'villa_floor' => array( 'title' ),
+		'spot'        => array( 'title' ),
+	);
+
+	/** Columns that Nodes::save() writes. */
+	const COLUMNS = array( 'parent_id', 'level', 'number', 'entrance', 'status_id', 'access', 'info_modal', 'image_id', 'image2_id', 'gallery', 'tour_url', 'coords', 'area', 'area_living', 'area_summer', 'rooms', 'price_sqm', 'price_total', 'sort_order', 'i18n', 'legacy_id' );
+
+	/** @var array<int,object> */
+	private static $cache = array();
+
+	/** @var array<int,array> */
+	private static $stats = array();
+
+	/**
+	 * Levels that can be added inside a level.
+	 *
+	 * @param string $level Level.
+	 * @return string[]
+	 */
+	public static function child_levels( $level ) {
+		return isset( self::CHILDREN[ $level ] ) ? self::CHILDREN[ $level ] : array();
+	}
+
+	/**
+	 * Whether a level can hold another.
+	 *
+	 * @param string $parent Parent level ('' for the root).
+	 * @param string $child  Child level.
+	 * @return bool
+	 */
+	public static function allows( $parent, $child ) {
+		return '' === $parent ? 'project' === $child : in_array( $child, self::child_levels( $parent ), true );
+	}
+
+	/**
+	 * Whether a level is a sellable unit (apartment, commercial space, villa).
+	 *
+	 * @param string $level Level.
+	 * @return bool
+	 */
+	public static function is_unit( $level ) {
+		return in_array( $level, self::UNITS, true );
+	}
+
+	/**
+	 * Human label for a level (admin).
+	 *
+	 * @param string $level  Level.
+	 * @param bool   $plural Plural form.
+	 * @return string
+	 */
+	public static function level_label( $level, $plural = false ) {
+		$labels = array(
+			'project'     => array( __( 'Project', 'solo-estate' ), __( 'Projects', 'solo-estate' ) ),
+			'phase'       => array( __( 'Phase', 'solo-estate' ), __( 'Phases', 'solo-estate' ) ),
+			'building'    => array( __( 'Building', 'solo-estate' ), __( 'Buildings', 'solo-estate' ) ),
+			'floor'       => array( __( 'Floor', 'solo-estate' ), __( 'Floors', 'solo-estate' ) ),
+			'parking'     => array( __( 'Parking', 'solo-estate' ), __( 'Parkings', 'solo-estate' ) ),
+			'flat'        => array( __( 'Apartment', 'solo-estate' ), __( 'Apartments', 'solo-estate' ) ),
+			'commercial'  => array( __( 'Commercial space', 'solo-estate' ), __( 'Commercial spaces', 'solo-estate' ) ),
+			'villa'       => array( __( 'Villa', 'solo-estate' ), __( 'Villas', 'solo-estate' ) ),
+			'villa_floor' => array( __( 'Villa floor', 'solo-estate' ), __( 'Villa floors', 'solo-estate' ) ),
+			'spot'        => array( __( 'Parking space', 'solo-estate' ), __( 'Parking spaces', 'solo-estate' ) ),
+		);
+		return isset( $labels[ $level ] ) ? $labels[ $level ][ $plural ? 1 : 0 ] : $level;
+	}
+
+	/**
+	 * Loads a node.
+	 *
+	 * @param int $id Node id.
+	 * @return object|null
+	 */
+	public static function get( $id ) {
+		global $wpdb;
+
+		$id = (int) $id;
+		if ( $id <= 0 ) {
+			return null;
+		}
+		if ( ! isset( self::$cache[ $id ] ) ) {
+			$table = Install::table( 'nodes' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE id = %d", $id ) );
+			if ( ! $row ) {
+				return null;
+			}
+			self::$cache[ $id ] = self::hydrate( $row );
+		}
+		return self::$cache[ $id ];
+	}
+
+	/**
+	 * Children of a node.
+	 *
+	 * @param int         $parent_id Parent id (0 for projects).
+	 * @param string|null $level     Only this level.
+	 * @return object[]
+	 */
+	public static function children( $parent_id, $level = null ) {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE parent_id = %d ORDER BY sort_order ASC, id ASC", (int) $parent_id ) );
+
+		$out = array();
+		foreach ( (array) $rows as $row ) {
+			$node                    = self::hydrate( $row );
+			self::$cache[ $node->id ] = $node;
+			if ( null === $level || $node->level === $level ) {
+				$out[] = $node;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Children in natural number order (1, 2, 10 — not 1, 10, 2), then by id.
+	 *
+	 * @param int         $parent_id Parent id.
+	 * @param string|null $level     Only this level.
+	 * @return object[]
+	 */
+	public static function sorted_children( $parent_id, $level = null ) {
+		$children = self::children( $parent_id, $level );
+		usort(
+			$children,
+			static function ( $a, $b ) {
+				$cmp = strnatcmp( (string) $a->number, (string) $b->number );
+				return $cmp ? $cmp : $a->id - $b->id;
+			}
+		);
+		return $children;
+	}
+
+	/**
+	 * All projects.
+	 *
+	 * @return object[]
+	 */
+	public static function projects() {
+		return self::children( 0 );
+	}
+
+	/**
+	 * Chain from the project down to (and including) the node.
+	 *
+	 * @param object $node Node.
+	 * @return object[]
+	 */
+	public static function ancestors( $node ) {
+		$chain = array( $node );
+		$guard = 0;
+		while ( $node && $node->parent_id && $guard++ < 12 ) {
+			$node = self::get( $node->parent_id );
+			if ( $node ) {
+				array_unshift( $chain, $node );
+			}
+		}
+		return $chain;
+	}
+
+	/**
+	 * Nearest ancestor of a level.
+	 *
+	 * @param object $node  Node.
+	 * @param string $level Level.
+	 * @return object|null
+	 */
+	public static function ancestor( $node, $level ) {
+		foreach ( array_reverse( self::ancestors( $node ) ) as $item ) {
+			if ( $item->level === $level ) {
+				return $item;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Translated field.
+	 *
+	 * @param object      $node  Node.
+	 * @param string      $field Field.
+	 * @param string|null $lang  Language.
+	 * @return string
+	 */
+	public static function field( $node, $field, $lang = null ) {
+		return isset( $node->i18n[ $field ] ) ? I18n::pick( $node->i18n[ $field ], $lang ) : '';
+	}
+
+	/**
+	 * Display name, e.g. "Block A", "Floor 5", "Apartment 106", "Villa 3".
+	 *
+	 * @param object      $node Node.
+	 * @param string|null $lang Language.
+	 * @return string
+	 */
+	public static function display_title( $node, $lang = null ) {
+		$title = self::field( $node, 'title', $lang );
+		switch ( $node->level ) {
+			case 'project':
+				return '' !== $title ? $title : sprintf( '#%d', $node->id );
+			case 'building':
+				// A custom name is the whole name; otherwise type label + number ("Block A").
+				if ( '' !== $title ) {
+					return $title;
+				}
+				$label = self::field( $node, 'label', $lang );
+				$label = '' !== $label ? $label : Texts::get( 'building', $lang );
+				return trim( $label . ' ' . $node->number );
+		}
+		if ( '' !== $title ) {
+			return $title;
+		}
+		$keys = array(
+			'villa_floor' => 'floor',
+			'spot'        => 'spot',
+		);
+		$key = isset( $keys[ $node->level ] ) ? $keys[ $node->level ] : $node->level;
+		return trim( Texts::get( $key, $lang ) . ' ' . $node->number );
+	}
+
+	/**
+	 * Admin-facing short name.
+	 *
+	 * @param object $node Node.
+	 * @return string
+	 */
+	public static function admin_title( $node ) {
+		$lang = I18n::default_code();
+		if ( 'project' === $node->level ) {
+			return self::display_title( $node, $lang );
+		}
+		$name = self::field( $node, 'title', $lang );
+		if ( 'building' === $node->level ) {
+			return '' !== $name ? $name : trim( self::field( $node, 'label', $lang ) . ' ' . $node->number );
+		}
+		if ( '' === $node->number && '' !== $name ) {
+			return $name;
+		}
+		return trim( self::level_label( $node->level ) . ' ' . ( '' !== $node->number ? $node->number : $name ) );
+	}
+
+	/**
+	 * Total price in base currency: the price entered, or total area × price per m².
+	 *
+	 * @param object $node Unit.
+	 * @return float|null
+	 */
+	public static function total_price( $node ) {
+		if ( null !== $node->price_total && (float) $node->price_total > 0 ) {
+			return (float) $node->price_total;
+		}
+		if ( null !== $node->area && null !== $node->price_sqm && (float) $node->price_sqm > 0 ) {
+			return round( (float) $node->area * (float) $node->price_sqm, 2 );
+		}
+		return null;
+	}
+
+	/**
+	 * Unit counts below a node: total, available, sold, open (visitors can open them).
+	 * Parkings count their parking spaces; everything else counts apartments,
+	 * commercial spaces and villas.
+	 *
+	 * @param object $node Node.
+	 * @return array{total:int,available:int,sold:int,open:int,percent:int}
+	 */
+	public static function stats( $node ) {
+		global $wpdb;
+
+		if ( isset( self::$stats[ $node->id ] ) ) {
+			return self::$stats[ $node->id ];
+		}
+		$out = array(
+			'total'     => 0,
+			'available' => 0,
+			'sold'      => 0,
+			'open'      => 0,
+			'percent'   => 0,
+			'by_status' => array(),
+		);
+		if ( '' === (string) $node->path || in_array( $node->level, array( 'villa_floor', 'spot' ), true ) || self::is_unit( $node->level ) ) {
+			return $out;
+		}
+		$levels = 'parking' === $node->level ? array( 'spot' ) : self::UNITS;
+		$table  = Install::table( 'nodes' );
+		$in     = "'" . implode( "','", $levels ) . "'";
+		$units  = "'" . implode( "','", self::UNITS ) . "'";
+		// A unit inside another unit (left over from an old import) is not shown anywhere, so it
+		// is not counted either; see misplaced().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT n.status_id, COUNT(*) AS c FROM $table n JOIN $table p ON p.id = n.parent_id WHERE n.path LIKE %s AND n.level IN ($in) AND p.level NOT IN ($units) GROUP BY n.status_id", $wpdb->esc_like( $node->path ) . '%' ) );
+		foreach ( $rows as $row ) {
+			$count         = (int) $row->c;
+			$status        = Statuses::get( (int) $row->status_id );
+			$out['total'] += $count;
+			$out['by_status'][ (int) $row->status_id ] = $count;
+			if ( $status && $status->available ) {
+				$out['available'] += $count;
+			}
+			if ( $status && $status->sold ) {
+				$out['sold'] += $count;
+			}
+			if ( Statuses::is_clickable( $status ) ) {
+				$out['open'] += $count;
+			}
+		}
+		// Rounded down: 100% only when every unit is sold (1 of 300 unsold is 99%, not 100%).
+		$out['percent']             = $out['total'] ? (int) floor( 100 * $out['sold'] / $out['total'] ) : 0;
+		self::$stats[ $node->id ] = $out;
+		return $out;
+	}
+
+	/**
+	 * Units placed inside another unit (an apartment under an apartment). Nothing can be added
+	 * there, but old imports brought such records in; they are hidden, not counted and listed
+	 * in the admin for deletion.
+	 *
+	 * @return object[]
+	 */
+	public static function misplaced() {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		$units = "'" . implode( "','", self::UNITS ) . "'";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$ids = (array) $wpdb->get_col( "SELECT n.id FROM $table n JOIN $table p ON p.id = n.parent_id WHERE n.level IN ($units) AND p.level IN ($units) ORDER BY n.id" );
+		return array_values( array_filter( array_map( array( __CLASS__, 'get' ), array_map( 'intval', $ids ) ) ) );
+	}
+
+	/**
+	 * Number of available units below a node.
+	 *
+	 * @param object $node Node.
+	 * @return int
+	 */
+	public static function available_count( $node ) {
+		return self::stats( $node )['available'];
+	}
+
+	/**
+	 * Number of units below a node that visitors can still open (any clickable status or none).
+	 *
+	 * @param object $node Node.
+	 * @return int
+	 */
+	public static function open_count( $node ) {
+		return self::stats( $node )['open'];
+	}
+
+	/**
+	 * Number of units below a node.
+	 *
+	 * @param object $node Node.
+	 * @return int
+	 */
+	public static function flat_count( $node ) {
+		return self::stats( $node )['total'];
+	}
+
+	/**
+	 * Direct child counts keyed by parent id, for list screens.
+	 *
+	 * @param int[] $ids Parent ids.
+	 * @return array<int,int>
+	 */
+	public static function child_counts( array $ids ) {
+		global $wpdb;
+
+		$ids = array_filter( array_map( 'intval', $ids ) );
+		if ( ! $ids ) {
+			return array();
+		}
+		$table = Install::table( 'nodes' );
+		$in    = implode( ',', $ids );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( "SELECT parent_id, COUNT(*) AS c FROM $table WHERE parent_id IN ($in) GROUP BY parent_id" );
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ (int) $row->parent_id ] = (int) $row->c;
+		}
+		return $out;
+	}
+
+	/**
+	 * Inserts or updates a node. Values must already be sanitized.
+	 *
+	 * @param array $data Column values; `i18n` as array, `gallery` as int[].
+	 * @param int   $id   Existing id or 0.
+	 * @return int Node id, 0 on failure.
+	 */
+	public static function save( array $data, $id = 0 ) {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		$row   = array_intersect_key( $data, array_flip( self::COLUMNS ) );
+
+		if ( isset( $row['i18n'] ) && is_array( $row['i18n'] ) ) {
+			$row['i18n'] = I18n::encode( $row['i18n'] );
+		}
+		if ( isset( $row['gallery'] ) && is_array( $row['gallery'] ) ) {
+			$row['gallery'] = implode( ',', array_filter( array_map( 'absint', $row['gallery'] ) ) );
+		}
+
+		// Keep project_id pointing at the root project for fast per-project queries.
+		$parent = null;
+		if ( isset( $row['parent_id'] ) ) {
+			$parent = self::get( $row['parent_id'] );
+			if ( $parent ) {
+				$row['project_id'] = 'project' === $parent->level ? $parent->id : $parent->project_id;
+			} else {
+				// A project is its own project. (Saving one used to reset this to 0, which broke
+				// everything that looks the project up by it, e.g. its apartment filter.)
+				$old               = $id ? self::get( $id ) : null;
+				$level             = isset( $row['level'] ) ? $row['level'] : ( $old ? $old->level : '' );
+				$row['project_id'] = ( 'project' === $level && $id ) ? (int) $id : 0;
+			}
+		}
+
+		$row['updated_at'] = current_time( 'mysql' );
+		self::$stats       = array();
+
+		if ( $id ) {
+			$old = self::get( $id );
+			$wpdb->update( $table, $row, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			unset( self::$cache[ (int) $id ] );
+			if ( $old && isset( $row['parent_id'] ) && (int) $row['parent_id'] !== $old->parent_id ) {
+				self::move_path( $old, $parent );
+			}
+			return (int) $id;
+		}
+
+		$row['created_at'] = $row['updated_at'];
+		if ( ! $wpdb->insert( $table, $row ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			return 0;
+		}
+		$id     = (int) $wpdb->insert_id;
+		$update = array( 'path' => ( $parent ? $parent->path : '/' ) . $id . '/' );
+		// A new project is its own project_id.
+		if ( isset( $row['level'] ) && 'project' === $row['level'] ) {
+			$update['project_id'] = $id;
+		}
+		$wpdb->update( $table, $update, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return $id;
+	}
+
+	/**
+	 * Rewrites the path (and project) of a moved node and everything inside it.
+	 *
+	 * @param object      $old    Node before the move.
+	 * @param object|null $parent New parent.
+	 */
+	private static function move_path( $old, $parent ) {
+		global $wpdb;
+
+		$table   = Install::table( 'nodes' );
+		$new     = ( $parent ? $parent->path : '/' ) . $old->id . '/';
+		$project = $parent ? ( 'project' === $parent->level ? $parent->id : $parent->project_id ) : $old->id;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare( "UPDATE $table SET path = CONCAT(%s, SUBSTRING(path, %d)), project_id = %d WHERE path LIKE %s", $new, strlen( $old->path ) + 1, $project, $wpdb->esc_like( $old->path ) . '%' ) );
+		// phpcs:enable
+		self::flush();
+	}
+
+	/**
+	 * Recomputes every path from parent_id (upgrade and repair).
+	 */
+	public static function rebuild_paths() {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows    = (array) $wpdb->get_results( "SELECT id, parent_id, path FROM $table" );
+		$parents = array();
+		$current = array();
+		foreach ( $rows as $row ) {
+			$parents[ (int) $row->id ] = (int) $row->parent_id;
+			$current[ (int) $row->id ] = (string) $row->path;
+		}
+		$paths   = array();
+		$resolve = static function ( $id ) use ( &$resolve, &$paths, $parents ) {
+			if ( isset( $paths[ $id ] ) ) {
+				return $paths[ $id ];
+			}
+			$chain = array();
+			$node  = $id;
+			$guard = 0;
+			while ( $node && $guard++ < 20 ) {
+				array_unshift( $chain, $node );
+				$node = isset( $parents[ $node ] ) ? $parents[ $node ] : 0;
+			}
+			$paths[ $id ] = '/' . implode( '/', $chain ) . '/';
+			return $paths[ $id ];
+		};
+		foreach ( array_keys( $parents ) as $id ) {
+			$path = $resolve( $id );
+			if ( $current[ $id ] !== $path ) {
+				$wpdb->update( $table, array( 'path' => $path ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		}
+		self::flush();
+	}
+
+	/**
+	 * Deletes a node with all descendants and their spec values.
+	 *
+	 * @param int $id Node id.
+	 * @return int Number of deleted nodes.
+	 */
+	public static function delete( $id ) {
+		global $wpdb;
+
+		$ids   = self::descendant_ids( (int) $id );
+		$ids[] = (int) $id;
+		$in    = implode( ',', array_map( 'intval', $ids ) );
+
+		$nodes  = Install::table( 'nodes' );
+		$values = Install::table( 'spec_values' );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM $values WHERE node_id IN ($in)" );
+		$count = (int) $wpdb->query( "DELETE FROM $nodes WHERE id IN ($in)" );
+		// phpcs:enable
+		self::flush();
+		return $count;
+	}
+
+	/**
+	 * All descendant ids (breadth-first).
+	 *
+	 * @param int $id Node id.
+	 * @return int[]
+	 */
+	public static function descendant_ids( $id ) {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		$out   = array();
+		$level = array( (int) $id );
+		$guard = 0;
+		while ( $level && $guard++ < 12 ) {
+			$in = implode( ',', $level );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$level = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM $table WHERE parent_id IN ($in)" ) );
+			$out   = array_merge( $out, $level );
+		}
+		return $out;
+	}
+
+	/**
+	 * Deep-copies a node (with children and spec values) under the same parent.
+	 *
+	 * @param int      $id        Source node.
+	 * @param int|null $parent_id Target parent; same parent when null.
+	 * @return int New id.
+	 */
+	public static function duplicate( $id, $parent_id = null ) {
+		$node = self::get( $id );
+		if ( ! $node ) {
+			return 0;
+		}
+		$data = array( 'parent_id' => null === $parent_id ? $node->parent_id : (int) $parent_id );
+		foreach ( self::COLUMNS as $column ) {
+			if ( 'parent_id' !== $column && 'legacy_id' !== $column ) {
+				$data[ $column ] = $node->$column;
+			}
+		}
+		$new_id = self::save( $data );
+		if ( ! $new_id ) {
+			return 0;
+		}
+		$values = Specs::values( $node->id );
+		if ( $values ) {
+			Specs::save_values( $new_id, $values );
+		}
+		foreach ( self::children( $node->id ) as $child ) {
+			self::duplicate( $child->id, $new_id );
+		}
+		return $new_id;
+	}
+
+	/**
+	 * Sets the status of many nodes at once.
+	 *
+	 * @param int[] $ids       Node ids.
+	 * @param int   $status_id Status id.
+	 */
+	public static function bulk_status( array $ids, $status_id ) {
+		global $wpdb;
+
+		$ids = array_filter( array_map( 'intval', $ids ) );
+		if ( ! $ids ) {
+			return;
+		}
+		$table = Install::table( 'nodes' );
+		$in    = implode( ',', $ids );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status_id = %d, updated_at = %s WHERE id IN ($in)", (int) $status_id, current_time( 'mysql' ) ) );
+		self::flush();
+	}
+
+	/**
+	 * Gallery attachment ids.
+	 *
+	 * @param object $node Node.
+	 * @return int[]
+	 */
+	public static function gallery( $node ) {
+		return array_values( array_filter( array_map( 'absint', explode( ',', (string) $node->gallery ) ) ) );
+	}
+
+	/**
+	 * Polygon points parsed from "x1,y1,x2,y2,…".
+	 *
+	 * @param string|null $coords Stored coords.
+	 * @return array<int,array{0:float,1:float}>
+	 */
+	public static function points( $coords ) {
+		$nums = array_values( array_filter( array_map( 'trim', explode( ',', (string) $coords ) ), 'is_numeric' ) );
+		$out  = array();
+		for ( $i = 0; $i + 1 < count( $nums ); $i += 2 ) {
+			$out[] = array( (float) $nums[ $i ], (float) $nums[ $i + 1 ] );
+		}
+		return count( $out ) >= 3 ? $out : array();
+	}
+
+	/**
+	 * Normalizes user-entered coords to "x,y,x,y" with at most 1 decimal.
+	 *
+	 * @param string $coords Raw value.
+	 * @return string
+	 */
+	public static function sanitize_coords( $coords ) {
+		preg_match_all( '/-?\d+(?:\.\d+)?/', (string) $coords, $m );
+		$nums = array_map(
+			static function ( $n ) {
+				return (string) round( (float) $n, 1 );
+			},
+			$m[0]
+		);
+		if ( count( $nums ) % 2 ) {
+			array_pop( $nums );
+		}
+		return count( $nums ) >= 6 ? implode( ',', $nums ) : '';
+	}
+
+	/**
+	 * Converts a DB row into a typed object.
+	 *
+	 * @param object $row Row.
+	 * @return object
+	 */
+	private static function hydrate( $row ) {
+		$decimal          = static function ( $value ) {
+			return null === $value ? null : (float) $value;
+		};
+		$row->id          = (int) $row->id;
+		$row->parent_id   = (int) $row->parent_id;
+		$row->project_id  = (int) $row->project_id;
+		$row->status_id   = (int) $row->status_id;
+		$row->access      = isset( $row->access ) ? (int) $row->access : 0;
+		$row->info_modal  = isset( $row->info_modal ) ? (int) $row->info_modal : 0;
+		$row->image_id    = (int) $row->image_id;
+		$row->image2_id   = (int) $row->image2_id;
+		$row->sort_order  = (int) $row->sort_order;
+		$row->path        = isset( $row->path ) ? (string) $row->path : '';
+		$row->entrance    = isset( $row->entrance ) ? (string) $row->entrance : '';
+		$row->gallery     = isset( $row->gallery ) ? (string) $row->gallery : '';
+		$row->tour_url    = isset( $row->tour_url ) ? (string) $row->tour_url : '';
+		$row->area        = $decimal( $row->area );
+		$row->area_living = isset( $row->area_living ) ? $decimal( $row->area_living ) : null;
+		$row->area_summer = isset( $row->area_summer ) ? $decimal( $row->area_summer ) : null;
+		$row->rooms       = ! isset( $row->rooms ) || null === $row->rooms ? null : (int) $row->rooms;
+		$row->price_sqm   = $decimal( $row->price_sqm );
+		$row->price_total = $decimal( $row->price_total );
+		$row->i18n        = I18n::decode( $row->i18n );
+		return $row;
+	}
+
+	/**
+	 * Clears the in-request caches.
+	 */
+	public static function flush() {
+		self::$cache = array();
+		self::$stats = array();
+	}
+}
