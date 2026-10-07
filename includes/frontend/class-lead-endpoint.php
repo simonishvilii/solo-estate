@@ -24,7 +24,6 @@ class Lead_Endpoint {
 	const RATE_LIMIT  = 5;   // Requests…
 	const RATE_WINDOW = 600; // …per 10 minutes per IP.
 	const MIN_SECONDS = 2;   // Faster submissions are treated as bots.
-	const GLOBAL_LIMIT = 60; // Site-wide cap per hour, against floods from many IPs.
 
 	/**
 	 * Hooks.
@@ -56,8 +55,7 @@ class Lead_Endpoint {
 		$ip     = self::ip();
 		$key    = 'solo_estate_rl_' . md5( $ip );
 		$hit    = (int) get_transient( $key );
-		$global = (int) get_transient( 'solo_estate_rl_global' );
-		if ( $hit >= self::RATE_LIMIT || $global >= self::GLOBAL_LIMIT ) {
+		if ( $hit >= self::RATE_LIMIT ) {
 			wp_send_json_error( array( 'message' => Texts::get( 'lead_error', $lang ) ), 429 );
 		}
 
@@ -93,7 +91,6 @@ class Lead_Endpoint {
 		}
 
 		set_transient( $key, $hit + 1, self::RATE_WINDOW );
-		set_transient( 'solo_estate_rl_global', $global + 1, HOUR_IN_SECONDS );
 
 		$id = Leads::create(
 			array(

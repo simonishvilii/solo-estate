@@ -46,6 +46,9 @@ class Settings_Page {
 			'access'     => __( 'Access', 'solo-estate' ),
 			'advanced'   => __( 'Advanced', 'solo-estate' ),
 		);
+		if ( ! Admin::can_assign_roles() ) {
+			unset( $tabs['access'] );
+		}
 
 		echo '<div class="wrap solo-estate-wrap"><h1>' . esc_html__( 'Solo Estate settings', 'solo-estate' ) . '</h1>';
 		echo '<nav class="nav-tab-wrapper solo-estate-tabs" data-solo-estate-tabs>';
@@ -241,7 +244,31 @@ class Settings_Page {
 		self::row( __( 'Shadows', 'solo-estate' ), self::checkbox( 'card_shadow', $s['card_shadow'], __( 'Soft shadow under cards and panels', 'solo-estate' ) ) );
 		self::close();
 
-		// Access.
+		if ( Admin::can_assign_roles() ) {
+			self::render_access();
+		}
+
+		// Advanced.
+		self::open( 'advanced' );
+		self::row( __( 'Uninstall', 'solo-estate' ), self::checkbox( 'delete_on_uninstall', $s['delete_on_uninstall'], __( 'Delete all Solo Estate data (projects, apartments, leads, settings) when the plugin is deleted', 'solo-estate' ) ) );
+		self::row( __( 'Shortcodes', 'solo-estate' ), '<code>[solo_estate]</code> — ' . esc_html__( 'all projects: Projects → project → building → floor → apartment', 'solo-estate' ) . '<br><code>[solo_estate id="1"]</code> — ' . esc_html__( 'one project only', 'solo-estate' ) . '<br><code>[solo_estate_lead_form]</code> — ' . esc_html__( 'lead form only', 'solo-estate' ) . '<p class="description">' . esc_html__( 'Works in any theme and page builder (Avada: use a Text Block or Code Block element). A Gutenberg block "Solo Estate project" is also available.', 'solo-estate' ) . '</p>' );
+		self::close();
+
+		// The Localization tab saves with its own button.
+		printf( '<div class="solo-estate-settings-submit"%s>', Localization::TAB === self::$active ? ' hidden' : '' );
+		submit_button();
+		echo '</div></form>';
+		self::render_style_transfer();
+		Localization::render_panel( Localization::TAB === self::$active );
+		echo '</div>';
+	}
+
+	/**
+	 * Access tab: which WordPress roles work in Solo Estate, and at what level. Administrators
+	 * only: a Solo Estate manager could otherwise hand the plugin (and its data and leads) to
+	 * every editor or subscriber.
+	 */
+	private static function render_access() {
 		self::open( 'access' );
 		self::row(
 			__( 'Solo Estate roles', 'solo-estate' ),
@@ -268,20 +295,6 @@ class Settings_Page {
 			self::row( translate_user_role( wp_roles()->role_names[ $slug ] ), $select . '</select>' );
 		}
 		self::close();
-
-		// Advanced.
-		self::open( 'advanced' );
-		self::row( __( 'Uninstall', 'solo-estate' ), self::checkbox( 'delete_on_uninstall', $s['delete_on_uninstall'], __( 'Delete all Solo Estate data (projects, apartments, leads, settings) when the plugin is deleted', 'solo-estate' ) ) );
-		self::row( __( 'Shortcodes', 'solo-estate' ), '<code>[solo_estate]</code> — ' . esc_html__( 'all projects: Projects → project → building → floor → apartment', 'solo-estate' ) . '<br><code>[solo_estate id="1"]</code> — ' . esc_html__( 'one project only', 'solo-estate' ) . '<br><code>[solo_estate_lead_form]</code> — ' . esc_html__( 'lead form only', 'solo-estate' ) . '<p class="description">' . esc_html__( 'Works in any theme and page builder (Avada: use a Text Block or Code Block element). A Gutenberg block "Solo Estate project" is also available.', 'solo-estate' ) . '</p>' );
-		self::close();
-
-		// The Localization tab saves with its own button.
-		printf( '<div class="solo-estate-settings-submit"%s>', Localization::TAB === self::$active ? ' hidden' : '' );
-		submit_button();
-		echo '</div></form>';
-		self::render_style_transfer();
-		Localization::render_panel( Localization::TAB === self::$active );
-		echo '</div>';
 	}
 
 	private static function open( $key ) {
@@ -410,7 +423,7 @@ class Settings_Page {
 		Admin::check( 'solo_estate_save_settings' );
 		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- verified above, sanitized in save().
 		Settings::save( isset( $_POST['s'] ) && is_array( $_POST['s'] ) ? $_POST['s'] : array() );
-		if ( isset( $_POST['roles'] ) && is_array( $_POST['roles'] ) ) {
+		if ( isset( $_POST['roles'] ) && is_array( $_POST['roles'] ) && Admin::can_assign_roles() ) {
 			$map = array();
 			foreach ( wp_unslash( $_POST['roles'] ) as $slug => $level ) {
 				$level                        = sanitize_key( $level );

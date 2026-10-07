@@ -4,7 +4,7 @@
  * Plugin URI:        https://solostudio.ge
  * Author URI:        https://solostudio.ge
  * Description:       Interactive project → building → floor → apartment selector with polygon maps, prices, specifications and lead capture. Everything is managed from wp-admin.
- * Version:           3.2.0
+ * Version:           3.3.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Solo Studio
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SOLO_ESTATE_VERSION', '3.2.0' );
+define( 'SOLO_ESTATE_VERSION', '3.3.0' );
 define( 'SOLO_ESTATE_DB_VERSION', '8' );
 define( 'SOLO_ESTATE_FILE', __FILE__ );
 define( 'SOLO_ESTATE_DIR', plugin_dir_path( __FILE__ ) );
