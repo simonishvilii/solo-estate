@@ -46,8 +46,8 @@ class Settings_Page {
 			'access'     => __( 'Access', 'solo-estate' ),
 			'advanced'   => __( 'Advanced', 'solo-estate' ),
 		);
-		if ( ! Admin::can_assign_roles() ) {
-			unset( $tabs['access'] );
+		if ( ! Admin::is_administrator() ) {
+			unset( $tabs['access'], $tabs['advanced'] );
 		}
 
 		echo '<div class="wrap solo-estate-wrap"><h1>' . esc_html__( 'Solo Estate settings', 'solo-estate' ) . '</h1>';
@@ -244,15 +244,14 @@ class Settings_Page {
 		self::row( __( 'Shadows', 'solo-estate' ), self::checkbox( 'card_shadow', $s['card_shadow'], __( 'Soft shadow under cards and panels', 'solo-estate' ) ) );
 		self::close();
 
-		if ( Admin::can_assign_roles() ) {
+		if ( Admin::is_administrator() ) {
 			self::render_access();
 		}
 
 		// Advanced.
-		self::open( 'advanced' );
-		self::row( __( 'Uninstall', 'solo-estate' ), self::checkbox( 'delete_on_uninstall', $s['delete_on_uninstall'], __( 'Delete all Solo Estate data (projects, apartments, leads, settings) when the plugin is deleted', 'solo-estate' ) ) );
-		self::row( __( 'Shortcodes', 'solo-estate' ), '<code>[solo_estate]</code> — ' . esc_html__( 'all projects: Projects → project → building → floor → apartment', 'solo-estate' ) . '<br><code>[solo_estate id="1"]</code> — ' . esc_html__( 'one project only', 'solo-estate' ) . '<br><code>[solo_estate_lead_form]</code> — ' . esc_html__( 'lead form only', 'solo-estate' ) . '<p class="description">' . esc_html__( 'Works in any theme and page builder (Avada: use a Text Block or Code Block element). A Gutenberg block "Solo Estate project" is also available.', 'solo-estate' ) . '</p>' );
-		self::close();
+		if ( Admin::is_administrator() ) {
+			self::render_advanced();
+		}
 
 		// The Localization tab saves with its own button.
 		printf( '<div class="solo-estate-settings-submit"%s>', Localization::TAB === self::$active ? ' hidden' : '' );
@@ -261,6 +260,16 @@ class Settings_Page {
 		self::render_style_transfer();
 		Localization::render_panel( Localization::TAB === self::$active );
 		echo '</div>';
+	}
+
+	/**
+	 * Advanced tab (administrators only): deleting all data on uninstall, shortcodes.
+	 */
+	private static function render_advanced() {
+		self::open( 'advanced' );
+		self::row( __( 'Uninstall', 'solo-estate' ), self::checkbox( 'delete_on_uninstall', Settings::get( 'delete_on_uninstall' ), __( 'Delete all Solo Estate data (projects, apartments, leads, settings) when the plugin is deleted', 'solo-estate' ) ) );
+		self::row( __( 'Shortcodes', 'solo-estate' ), '<code>[solo_estate]</code> — ' . esc_html__( 'all projects: Projects → project → building → floor → apartment', 'solo-estate' ) . '<br><code>[solo_estate id="1"]</code> — ' . esc_html__( 'one project only', 'solo-estate' ) . '<br><code>[solo_estate_lead_form]</code> — ' . esc_html__( 'lead form only', 'solo-estate' ) . '<p class="description">' . esc_html__( 'Works in any theme and page builder (Avada: use a Text Block or Code Block element). A Gutenberg block "Solo Estate project" is also available.', 'solo-estate' ) . '</p>' );
+		self::close();
 	}
 
 	/**
@@ -422,8 +431,13 @@ class Settings_Page {
 	public static function handle_save() {
 		Admin::check( 'solo_estate_save_settings' );
 		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- verified above, sanitized in save().
-		Settings::save( isset( $_POST['s'] ) && is_array( $_POST['s'] ) ? $_POST['s'] : array() );
-		if ( isset( $_POST['roles'] ) && is_array( $_POST['roles'] ) && Admin::can_assign_roles() ) {
+		$input = isset( $_POST['s'] ) && is_array( $_POST['s'] ) ? $_POST['s'] : array();
+		// Only administrators see the Advanced tab; others keep its setting as it is.
+		if ( ! Admin::is_administrator() ) {
+			$input['delete_on_uninstall'] = Settings::get( 'delete_on_uninstall' );
+		}
+		Settings::save( $input );
+		if ( isset( $_POST['roles'] ) && is_array( $_POST['roles'] ) && Admin::is_administrator() ) {
 			$map = array();
 			foreach ( wp_unslash( $_POST['roles'] ) as $slug => $level ) {
 				$level                        = sanitize_key( $level );

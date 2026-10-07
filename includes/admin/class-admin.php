@@ -138,12 +138,12 @@ class Admin {
 	}
 
 	/**
-	 * Who may give WordPress roles a Solo Estate level (Settings → Access): administrators only,
-	 * i.e. those who can change user roles anyway — not Solo Estate managers.
+	 * Site administrators (who can change user roles anyway), not Solo Estate managers: only
+	 * they see Settings → Access (role levels) and Advanced (delete data on uninstall).
 	 *
 	 * @return bool
 	 */
-	public static function can_assign_roles() {
+	public static function is_administrator() {
 		return current_user_can( 'manage_options' ) && current_user_can( 'promote_users' );
 	}
 
