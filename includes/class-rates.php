@@ -24,6 +24,9 @@ class Rates {
 	const TTL   = 6 * HOUR_IN_SECONDS;
 	const RETRY = HOUR_IN_SECONDS;
 
+	/** A bank rate older than this is not used (the fixed rate is, or no second currency). */
+	const MAX_AGE = 7 * DAY_IN_SECONDS;
+
 	/**
 	 * Hooks.
 	 */
@@ -64,13 +67,57 @@ class Rates {
 	 * @return float
 	 */
 	public static function rate() {
+		return self::current()['rate'];
+	}
+
+	/**
+	 * The rate in use and where it comes from: the bank (when its rate is recent), else the
+	 * fixed rate from the settings, else none (0: the second currency is not shown).
+	 *
+	 * @return array{rate:float,source:string,date:string,stale:bool}
+	 */
+	public static function current() {
+		$stale = false;
+		$date  = '';
 		if ( self::uses_bank() ) {
 			$data = self::stored();
 			if ( self::matches( $data ) && ! empty( $data['rate'] ) && (float) $data['rate'] > 0 ) {
-				return (float) $data['rate'];
+				$date = isset( $data['date'] ) ? (string) $data['date'] : '';
+				if ( time() - self::fetched( $data ) <= self::MAX_AGE ) {
+					return array( 'rate' => (float) $data['rate'], 'source' => 'bank', 'date' => $date, 'stale' => false );
+				}
+				$stale = true;
 			}
 		}
-		return max( 0.0, (float) Settings::get( 'alt_rate' ) );
+		$fixed = (float) str_replace( ',', '.', (string) Settings::get( 'alt_rate' ) );
+		if ( $fixed > 0 ) {
+			return array( 'rate' => $fixed, 'source' => 'fixed', 'date' => $date, 'stale' => $stale );
+		}
+		return array( 'rate' => 0.0, 'source' => 'none', 'date' => $date, 'stale' => $stale );
+	}
+
+	/**
+	 * Whether prices are shown in the second currency too: enabled and a valid rate exists
+	 * (never "0 $" next to a real price).
+	 *
+	 * @return bool
+	 */
+	public static function alt_active() {
+		return Settings::get( 'alt_enabled' ) && self::rate() > 0;
+	}
+
+	/**
+	 * When the stored bank rate was fetched (older data: its bank date).
+	 *
+	 * @param array $data Stored data.
+	 * @return int Timestamp.
+	 */
+	private static function fetched( array $data ) {
+		if ( ! empty( $data['fetched'] ) ) {
+			return (int) $data['fetched'];
+		}
+		$time = isset( $data['date'] ) ? strtotime( (string) $data['date'] ) : false;
+		return $time ? (int) $time : 0;
 	}
 
 	/**
@@ -92,6 +139,7 @@ class Rates {
 		$base = self::code( Settings::get( 'base_currency' ) );
 		$alt  = self::code( Settings::get( 'alt_currency' ) );
 		$data = self::stored();
+		$was  = isset( $data['rate'] ) ? (float) $data['rate'] : 0.0;
 
 		$data['checked'] = time();
 		$data['pair']    = self::pair();
@@ -100,14 +148,19 @@ class Rates {
 		$base_gel = self::gel_per_unit( $base, $date_base );
 		$alt_gel  = self::gel_per_unit( $alt, $date_alt );
 		if ( $base_gel && $alt_gel ) {
-			$data['rate'] = round( $base_gel / $alt_gel, 6 );
-			$data['date'] = $date_alt ? $date_alt : $date_base;
+			$data['rate']    = round( $base_gel / $alt_gel, 6 );
+			$data['date']    = $date_alt ? $date_alt : $date_base;
+			$data['fetched'] = time();
 			$data['base'] = $base;
 			$data['alt']  = $alt;
 		} else {
 			$data['error'] = __( 'The National Bank of Georgia could not be reached, or it has no rate for this currency.', 'solo-estate' );
 		}
 		update_option( self::OPTION, $data, false );
+		// Second-currency prices are printed in the pages: cached ones must show the new rate.
+		if ( ! empty( $data['rate'] ) && abs( (float) $data['rate'] - $was ) > 0.000001 ) {
+			Nodes::changed( 'rate' );
+		}
 		return '' === $data['error'];
 	}
 

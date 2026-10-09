@@ -59,6 +59,7 @@ class Leads_Page {
 			);
 		}
 		echo '<hr class="wp-header-end">';
+		self::render_delivery();
 
 		echo '<form method="get" class="search-form"><input type="hidden" name="page" value="solo-estate-leads">';
 		printf( '<p class="search-box"><input type="search" name="s" value="%1$s"> <input type="submit" class="button" value="%2$s"></p></form>', esc_attr( $search ), esc_attr__( 'Search', 'solo-estate' ) );
@@ -95,13 +96,13 @@ class Leads_Page {
 
 		echo '<table class="wp-list-table widefat fixed striped solo-estate-table"><thead><tr>';
 		echo '<td class="manage-column check-column"><input type="checkbox" data-solo-estate-check-all></td>';
-		foreach ( array( __( 'Date', 'solo-estate' ), __( 'Name', 'solo-estate' ), __( 'Phone', 'solo-estate' ), __( 'Apartment', 'solo-estate' ), __( 'Language', 'solo-estate' ), __( 'Status', 'solo-estate' ) ) as $col ) {
+		foreach ( array( __( 'Date', 'solo-estate' ), __( 'Name', 'solo-estate' ), __( 'Phone', 'solo-estate' ), __( 'Apartment', 'solo-estate' ), __( 'Source', 'solo-estate' ), __( 'Language', 'solo-estate' ), __( 'Status', 'solo-estate' ) ) as $col ) {
 			echo '<th>' . esc_html( $col ) . '</th>';
 		}
 		echo '</tr></thead><tbody>';
 
 		if ( ! $result['rows'] ) {
-			echo '<tr><td colspan="7">' . esc_html__( 'No leads yet.', 'solo-estate' ) . '</td></tr>';
+			echo '<tr><td colspan="8">' . esc_html__( 'No leads yet.', 'solo-estate' ) . '</td></tr>';
 		}
 		foreach ( $result['rows'] as $lead ) {
 			$node = Nodes::get( $lead->node_id );
@@ -126,6 +127,22 @@ class Leads_Page {
 			}
 			if ( $lead->page_url ) {
 				printf( '<br><a href="%1$s" target="_blank" rel="noopener"><small>%2$s</small></a>', esc_url( $lead->page_url ), esc_html__( 'Open page', 'solo-estate' ) );
+			}
+			echo '</td>';
+			// Source: the summary, with the details (keyword, click id, pages) on hover and for screen readers.
+			$source = \SoloEstate\Attribution::of( $lead );
+			echo '<td>';
+			if ( $source ) {
+				$details = array();
+				foreach ( \SoloEstate\Attribution::lines( $source ) as $label => $value ) {
+					$details[] = $label . ': ' . $value;
+				}
+				printf( '<span title="%1$s">%2$s</span>', esc_attr( implode( "\n", $details ) ), esc_html( \SoloEstate\Attribution::summary( $source ) ) );
+				if ( ! empty( $source['landing_page'] ) ) {
+					printf( '<br><a href="%1$s" target="_blank" rel="noopener noreferrer"><small>%2$s</small></a>', esc_url( $source['landing_page'] ), esc_html__( 'First page', 'solo-estate' ) );
+				}
+			} else {
+				echo '—';
 			}
 			echo '</td>';
 			echo '<td>' . esc_html( strtoupper( $lead->lang ) ) . '</td>';
@@ -171,14 +188,24 @@ class Leads_Page {
 
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-		fputcsv( $out, array( 'id', 'date', 'name', 'phone', 'email', 'message', 'project', 'building', 'floor', 'apartment', 'language', 'status', 'page' ), ',', '"', '' );
+		fputcsv( $out, array( 'id', 'date', 'name', 'phone', 'email', 'message', 'project', 'building', 'floor', 'apartment', 'language', 'status', 'page', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'click_id', 'referrer', 'landing_page', 'first_seen' ), ',', '"', '' );
 		foreach ( Leads::all() as $lead ) {
 			$context = Leads::context( Nodes::get( $lead->node_id ) );
+			$source  = \SoloEstate\Attribution::of( $lead );
+			$click   = '';
+			foreach ( array_keys( \SoloEstate\Attribution::CLICK_IDS ) as $key ) {
+				if ( '' === $click && ! empty( $source[ $key ] ) ) {
+					$click = $key . '=' . $source[ $key ];
+				}
+			}
+			$get = static function ( $key ) use ( $source ) {
+				return isset( $source[ $key ] ) ? $source[ $key ] : '';
+			};
 			fputcsv(
 				$out,
 				array_map(
 					array( __CLASS__, 'csv_safe' ),
-					array( $lead->id, $lead->created_at, $lead->name, $lead->phone, $lead->email, $lead->message, $context['project'], $context['building'], $context['floor'], $context['flat'], $lead->lang, $lead->status, $lead->page_url )
+					array( $lead->id, $lead->created_at, $lead->name, $lead->phone, $lead->email, $lead->message, $context['project'], $context['building'], $context['floor'], $context['flat'], $lead->lang, $lead->status, $lead->page_url, \SoloEstate\Attribution::summary( $source ), $get( 'utm_source' ), $get( 'utm_medium' ), $get( 'utm_campaign' ), $get( 'utm_term' ), $get( 'utm_content' ), $click, $get( 'referrer' ), $get( 'landing_page' ), $get( 'first_seen' ) )
 				)
 			);
 		}
@@ -195,5 +222,47 @@ class Leads_Page {
 	public static function csv_safe( $value ) {
 		$value = (string) $value;
 		return ( '' !== $value && in_array( $value[0], array( '=', '+', '-', '@' ), true ) && ! is_numeric( $value ) ) ? "'" . $value : $value;
+	}
+
+	/**
+	 * Notification problems of the last days, the delivery log and the spam counter: a lead
+	 * whose e-mail or CRM delivery failed must not go unnoticed.
+	 */
+	private static function render_delivery() {
+		$log    = Leads::delivery_log();
+		$recent = array_filter(
+			$log,
+			static function ( $entry ) {
+				return empty( $entry['ok'] ) && $entry['time'] > time() - 7 * DAY_IN_SECONDS;
+			}
+		);
+		if ( $recent ) {
+			$last = reset( $recent );
+			/* translators: 1: e-mail or webhook, 2: date, 3: error */
+			echo '<div class="notice notice-error inline"><p>' . esc_html( sprintf( __( 'A lead notification (%1$s) failed on %2$s: %3$s. The leads are saved here; check the e-mail / webhook settings.', 'solo-estate' ), 'email' === $last['channel'] ? __( 'e-mail', 'solo-estate' ) : 'webhook', wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last['time'] ), $last['detail'] ) ) . '</p></div>';
+		}
+		$rejected = get_option( Leads::REJECTED_OPTION, array() );
+		if ( $log || ! empty( $rejected['total'] ) ) {
+			echo '<details class="solo-estate-card solo-estate-delivery"><summary>' . esc_html__( 'Notification log', 'solo-estate' ) . '</summary>';
+			if ( ! empty( $rejected['total'] ) ) {
+				/* translators: 1: number, 2: date */
+				echo '<p class="description">' . esc_html( sprintf( __( 'Spam protection rejected %1$d submissions since %2$s.', 'solo-estate' ), (int) $rejected['total'], wp_date( get_option( 'date_format' ), (int) $rejected['since'] ) ) ) . '</p>';
+			}
+			if ( $log ) {
+				echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Time', 'solo-estate' ) . '</th><th>' . esc_html__( 'Lead', 'solo-estate' ) . '</th><th>' . esc_html__( 'Channel', 'solo-estate' ) . '</th><th>' . esc_html__( 'Result', 'solo-estate' ) . '</th></tr></thead><tbody>';
+				foreach ( $log as $entry ) {
+					printf(
+						'<tr><td>%1$s</td><td>#%2$d</td><td>%3$s</td><td>%4$s %5$s</td></tr>',
+						esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry['time'] ) ),
+						(int) $entry['lead'],
+						esc_html( 'email' === $entry['channel'] ? __( 'e-mail', 'solo-estate' ) : 'webhook' ),
+						$entry['ok'] ? '✓' : '✗',
+						esc_html( $entry['detail'] )
+					);
+				}
+				echo '</tbody></table>';
+			}
+			echo '</details>';
+		}
 	}
 }

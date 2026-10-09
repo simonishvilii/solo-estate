@@ -164,11 +164,12 @@
 	background: #f0f6fc !important;
 }
 .solo-estate-handle-col {
-	width: 24px;
+	width: 72px;
 }
 .solo-estate-handle {
 	cursor: move;
 	color: #8c8f94;
+	white-space: nowrap;
 }
 .solo-estate-lead--new td {
 	font-weight: 600;
@@ -249,6 +250,11 @@
 }
 .solo-estate-poly__svg:focus {
 	outline: none;
+}
+/* The image takes keys while focused: the frame shows it (the svg itself is clipped). */
+.solo-estate-poly__viewport:has(.solo-estate-poly__svg:focus-visible) {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
 }
 .solo-estate-poly__edge {
 	stroke: transparent;
@@ -385,6 +391,46 @@
 	font-size: 16px;
 	line-height: 22px;
 	cursor: pointer;
+}
+
+/* Arrows that move an image without dragging: shown on hover and keyboard focus. */
+.solo-estate-gallery-field__move {
+	position: absolute;
+	bottom: 2px;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	font-size: 16px;
+	line-height: 20px;
+	cursor: pointer;
+	opacity: 0;
+}
+.solo-estate-gallery-field__move--prev {
+	left: 2px;
+}
+.solo-estate-gallery-field__move--next {
+	right: 2px;
+}
+.solo-estate-gallery-field__list li:hover .solo-estate-gallery-field__move,
+.solo-estate-gallery-field__list li:focus-within .solo-estate-gallery-field__move {
+	opacity: 1;
+}
+.solo-estate-gallery-field__list button:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 1px;
+	opacity: 1;
+}
+.solo-estate-move {
+	vertical-align: middle;
+	color: #50575e;
+}
+.solo-estate-move:hover,
+.solo-estate-move:focus {
+	color: #2271b1;
 }
 
 /* New sections typed on a unit */

@@ -58,18 +58,38 @@ class Search {
 			'project'   => isset( $_GET['se_project'] ) ? absint( $_GET['se_project'] ) : 0,
 			'building'  => isset( $_GET['se_building'] ) ? absint( $_GET['se_building'] ) : 0,
 			'rooms'     => preg_match( '/^\d{1,2}\+?$/', $rooms ) ? $rooms : '',
-			'area_min'  => $num( 'se_area_min' ),
-			'area_max'  => $num( 'se_area_max' ),
-			'floor_min' => null === $num( 'se_floor_min' ) ? null : (int) $num( 'se_floor_min' ),
-			'floor_max' => null === $num( 'se_floor_max' ) ? null : (int) $num( 'se_floor_max' ),
-			'price_min' => $num( 'se_price_min' ),
-			'price_max' => $num( 'se_price_max' ),
+			'area_min'  => self::bound( $num( 'se_area_min' ), 0, 100000, 1 ),
+			'area_max'  => self::bound( $num( 'se_area_max' ), 0, 100000, 1 ),
+			'floor_min' => self::bound( $num( 'se_floor_min' ), -20, 300, 0 ),
+			'floor_max' => self::bound( $num( 'se_floor_max' ), -20, 300, 0 ),
+			'price_min' => self::bound( $num( 'se_price_min' ), 0, 1000000000, 0 ),
+			'price_max' => self::bound( $num( 'se_price_max' ), 0, 1000000000, 0 ),
 			'available' => self::is_active() ? ! empty( $_GET['se_available'] ) : true,
 			'sort'      => in_array( $sort, self::SORTS, true ) ? $sort : 'default',
-			'page'      => isset( $_GET['se_page'] ) ? max( 1, absint( $_GET['se_page'] ) ) : 1,
+			'page'      => isset( $_GET['se_page'] ) ? min( 500, max( 1, absint( $_GET['se_page'] ) ) ) : 1,
 		);
+		if ( null !== $params['floor_min'] ) {
+			$params['floor_min'] = (int) $params['floor_min'];
+		}
+		if ( null !== $params['floor_max'] ) {
+			$params['floor_max'] = (int) $params['floor_max'];
+		}
 		// phpcs:enable
 		return $params;
+	}
+
+	/**
+	 * A filter number kept within sensible limits and precision (a few distinct values instead
+	 * of an endless space of URLs that no cache can hold).
+	 *
+	 * @param float|null $value    Value.
+	 * @param float      $min      Lowest.
+	 * @param float      $max      Highest.
+	 * @param int        $decimals Decimals kept.
+	 * @return float|null
+	 */
+	private static function bound( $value, $min, $max, $decimals ) {
+		return null === $value ? null : round( min( $max, max( $min, (float) $value ) ), $decimals );
 	}
 
 	/**
@@ -160,6 +180,7 @@ class Search {
 
 		// Buildings with apartments, also those inside phases ("Phase I — Block A").
 		$buildings = array();
+		Nodes::prime( $ids );
 		foreach ( array_filter( array_map( array( Nodes::class, 'get' ), $ids ) ) as $building ) {
 			if ( ! Nodes::flat_count( $building ) ) {
 				continue;
@@ -238,6 +259,15 @@ class Search {
 		}
 
 		// Never list apartments visitors cannot open; "only available" narrows to available statuses.
+		// Without the statuses (database error) nothing can be told apart: list nothing.
+		Statuses::all();
+		if ( Statuses::$failed ) {
+			Renderer::no_cache();
+			return array(
+				'rows'  => array(),
+				'total' => 0,
+			);
+		}
 		$closed = array();
 		foreach ( Statuses::for_scope( 'flat' ) as $status ) {
 			if ( ! $status->clickable ) {
@@ -269,8 +299,20 @@ class Search {
 		$ids       = $wpdb->get_col( $wpdb->prepare( $rows_sql, array_merge( $params, array( self::PER_PAGE, $offset ) ) ) );
 		// phpcs:enable
 
+		// The page's apartments with one query, then their projects, buildings and floors with
+		// one more (the result table shows them), instead of one query per row and level.
+		Nodes::prime( (array) $ids );
+		$rows      = array_values( array_filter( array_map( array( Nodes::class, 'get' ), (array) $ids ) ) );
+		$ancestors = array();
+		foreach ( $rows as $row ) {
+			foreach ( explode( '/', trim( $row->path, '/' ) ) as $id ) {
+				$ancestors[ (int) $id ] = (int) $id;
+			}
+		}
+		Nodes::prime( $ancestors );
+
 		return array(
-			'rows'  => array_values( array_filter( array_map( array( Nodes::class, 'get' ), (array) $ids ) ) ),
+			'rows'  => $rows,
 			'total' => $total,
 		);
 	}
@@ -282,7 +324,7 @@ class Search {
 	 */
 	public static function price_factor() {
 		$rate = \SoloEstate\Rates::rate();
-		return ( Settings::get( 'alt_enabled' ) && 'alt' === Settings::get( 'default_currency' ) && $rate > 0 ) ? $rate : 1.0;
+		return ( \SoloEstate\Rates::alt_active() && 'alt' === Settings::get( 'default_currency' ) ) ? $rate : 1.0;
 	}
 
 	/**
@@ -311,7 +353,17 @@ class Search {
 	 * @return string
 	 */
 	public static function page_url( $page ) {
-		return add_query_arg( 'se_page', (int) $page ) . '#' . self::anchor();
+		$args = array();
+		foreach ( self::ARGS as $key ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
+			if ( 'se_page' !== $key && isset( $_GET[ $key ] ) && is_scalar( $_GET[ $key ] ) && '' !== $_GET[ $key ] ) {
+				$args[ $key ] = rawurlencode( mb_substr( sanitize_text_field( wp_unslash( (string) $_GET[ $key ] ) ), 0, 30 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			}
+		}
+		if ( $page > 1 ) {
+			$args['se_page'] = (int) $page;
+		}
+		return add_query_arg( $args, Renderer::base_url() ) . '#' . self::anchor();
 	}
 
 	/**
@@ -324,19 +376,16 @@ class Search {
 	}
 
 	/**
-	 * Hidden inputs that keep unrelated query args (e.g. ?lang=, ?page_id=) when the form is submitted.
+	 * Hidden inputs that keep the host page's own query args (e.g. ?lang=, ?page_id=) when the
+	 * form is submitted. Only known ones (Renderer::kept_args()): tracking args of the first
+	 * visitor must not end up in a cached form.
 	 *
 	 * @return string
 	 */
 	public static function hidden_inputs() {
 		$out = '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		foreach ( $_GET as $key => $value ) {
-			$key = sanitize_key( $key );
-			if ( in_array( $key, self::ARGS, true ) || Renderer::QUERY_ARG === $key || is_array( $value ) ) {
-				continue;
-			}
-			$out .= sprintf( '<input type="hidden" name="%1$s" value="%2$s">', esc_attr( $key ), esc_attr( sanitize_text_field( wp_unslash( $value ) ) ) );
+		foreach ( Renderer::kept_args() as $key => $value ) {
+			$out .= sprintf( '<input type="hidden" name="%1$s" value="%2$s">', esc_attr( $key ), esc_attr( $value ) );
 		}
 		return $out;
 	}

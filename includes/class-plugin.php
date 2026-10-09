@@ -29,13 +29,19 @@ final class Plugin {
 	private function __construct() {
 		add_action( 'init', array( $this, 'init' ), 5 );
 		add_action( 'solo_estate_daily', array( Leads::class, 'cleanup' ) );
+		add_action( 'solo_estate_daily', array( Trash::class, 'cleanup' ) );
+		add_action( Leads::RETRY_HOOK, array( Leads::class, 'retry_webhook' ), 10, 2 );
 		Rates::register();
+		Cache::register();
 		Labels::register();
 
 		Frontend\Shortcode::register();
 		Frontend\Lead_Endpoint::register();
 		Frontend\Block::register();
 		Frontend\Language_Links::register();
+		Frontend\Seo::register();
+		Attribution::register();
+		Frontend\Sitemap::register();
 		Frontend\Admin_Bar::register();
 
 		if ( is_admin() ) {

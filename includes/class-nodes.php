@@ -62,13 +62,19 @@ class Nodes {
 	);
 
 	/** Columns that Nodes::save() writes. */
-	const COLUMNS = array( 'parent_id', 'level', 'number', 'entrance', 'status_id', 'access', 'info_modal', 'image_id', 'image2_id', 'gallery', 'tour_url', 'coords', 'area', 'area_living', 'area_summer', 'rooms', 'price_sqm', 'price_total', 'sort_order', 'i18n', 'legacy_id' );
+	const COLUMNS = array( 'parent_id', 'level', 'number', 'entrance', 'status_id', 'access', 'info_modal', 'image_id', 'image2_id', 'coord_w', 'coord_h', 'gallery', 'tour_url', 'coords', 'area', 'area_living', 'area_summer', 'rooms', 'price_sqm', 'price_total', 'sort_order', 'i18n', 'legacy_id' );
 
 	/** @var array<int,object> */
 	private static $cache = array();
 
 	/** @var array<int,array> */
 	private static $stats = array();
+
+	/** @var int Items a duplicate() call could not copy (the admin reports a partial copy). */
+	public static $copy_failures = 0;
+
+	/** @var array<int,int[]> Child ids per parent, in order (per request). */
+	private static $child_ids = array();
 
 	/**
 	 * Levels that can be added inside a level.
@@ -150,7 +156,34 @@ class Nodes {
 	}
 
 	/**
-	 * Children of a node.
+	 * Loads several nodes with one query (those not loaded yet), e.g. search results and
+	 * their buildings and floors.
+	 *
+	 * @param int[] $ids Node ids.
+	 */
+	public static function prime( array $ids ) {
+		global $wpdb;
+
+		$missing = array();
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+			if ( $id > 0 && ! isset( self::$cache[ $id ] ) ) {
+				$missing[ $id ] = $id;
+			}
+		}
+		if ( ! $missing ) {
+			return;
+		}
+		$table = Install::table( 'nodes' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( (array) $wpdb->get_results( "SELECT * FROM $table WHERE id IN (" . implode( ',', $missing ) . ')' ) as $row ) {
+			$node                     = self::hydrate( $row );
+			self::$cache[ $node->id ] = $node;
+		}
+	}
+
+	/**
+	 * Children of a node (one query per parent and request).
 	 *
 	 * @param int         $parent_id Parent id (0 for projects).
 	 * @param string|null $level     Only this level.
@@ -159,15 +192,26 @@ class Nodes {
 	public static function children( $parent_id, $level = null ) {
 		global $wpdb;
 
-		$table = Install::table( 'nodes' );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE parent_id = %d ORDER BY sort_order ASC, id ASC", (int) $parent_id ) );
-
+		$parent_id = (int) $parent_id;
+		if ( ! isset( self::$child_ids[ $parent_id ] ) ) {
+			$table = Install::table( 'nodes' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE parent_id = %d ORDER BY sort_order ASC, id ASC", $parent_id ) );
+			if ( null === $rows || '' !== $wpdb->last_error ) {
+				return array(); // Query failed: not remembered, so a later call tries again.
+			}
+			self::$child_ids[ $parent_id ] = array();
+			foreach ( $rows as $row ) {
+				$node                            = self::hydrate( $row );
+				self::$cache[ $node->id ]        = $node;
+				self::$child_ids[ $parent_id ][] = $node->id;
+			}
+		}
+		self::prime( self::$child_ids[ $parent_id ] );
 		$out = array();
-		foreach ( (array) $rows as $row ) {
-			$node                    = self::hydrate( $row );
-			self::$cache[ $node->id ] = $node;
-			if ( null === $level || $node->level === $level ) {
+		foreach ( self::$child_ids[ $parent_id ] as $id ) {
+			$node = isset( self::$cache[ $id ] ) ? self::$cache[ $id ] : null;
+			if ( $node && ( null === $level || $node->level === $level ) ) {
 				$out[] = $node;
 			}
 		}
@@ -352,7 +396,7 @@ class Nodes {
 		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT n.status_id, COUNT(*) AS c FROM $table n JOIN $table p ON p.id = n.parent_id WHERE n.path LIKE %s AND n.level IN ($in) AND p.level NOT IN ($units) GROUP BY n.status_id", $wpdb->esc_like( $node->path ) . '%' ) );
 		foreach ( $rows as $row ) {
 			$count         = (int) $row->c;
-			$status        = Statuses::get( (int) $row->status_id );
+			$status        = Statuses::of( (int) $row->status_id );
 			$out['total'] += $count;
 			$out['by_status'][ (int) $row->status_id ] = $count;
 			if ( $status && $status->available ) {
@@ -369,6 +413,158 @@ class Nodes {
 		$out['percent']             = $out['total'] ? (int) floor( 100 * $out['sold'] / $out['total'] ) : 0;
 		self::$stats[ $node->id ] = $out;
 		return $out;
+	}
+
+	/**
+	 * Whether any child has an outline on this item's image.
+	 *
+	 * @param int $id Node id.
+	 * @return bool
+	 */
+	public static function has_outlines( $id ) {
+		foreach ( self::children( $id ) as $child ) {
+			if ( self::points( $child->coords ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Natural pixel size of an attachment (from its metadata, else the file).
+	 *
+	 * @param int $id Attachment id.
+	 * @return array{0:int,1:int}
+	 */
+	public static function image_size( $id ) {
+		$meta = wp_get_attachment_metadata( $id );
+		if ( ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) {
+			return array( (int) $meta['width'], (int) $meta['height'] );
+		}
+		$file = get_attached_file( $id );
+		if ( $file && is_readable( $file ) ) {
+			$size = wp_getimagesize( $file );
+			if ( $size ) {
+				return array( (int) $size[0], (int) $size[1] );
+			}
+		}
+		return array( 0, 0 );
+	}
+
+	/**
+	 * Coordinate frame of the outlines on a node's image: the size they were drawn in, or the
+	 * image's own size for items saved before frames were stored.
+	 *
+	 * @param object $node Node.
+	 * @return array{0:int,1:int}
+	 */
+	public static function coord_space( $node ) {
+		if ( ! empty( $node->coord_w ) && ! empty( $node->coord_h ) ) {
+			return array( (int) $node->coord_w, (int) $node->coord_h );
+		}
+		return $node->image_id ? self::image_size( $node->image_id ) : array( 0, 0 );
+	}
+
+	/**
+	 * Whether the image's proportions differ from the frame its outlines were drawn in (an
+	 * image replaced with a different crop): the outlines are then stretched.
+	 *
+	 * @param object $node Node.
+	 * @return bool
+	 */
+	public static function frame_mismatch( $node ) {
+		list( $cw, $ch ) = self::coord_space( $node );
+		list( $iw, $ih ) = $node->image_id ? self::image_size( $node->image_id ) : array( 0, 0 );
+		if ( ! $cw || ! $ch || ! $iw || ! $ih ) {
+			return false;
+		}
+		return abs( ( $cw / $ch ) / ( $iw / $ih ) - 1 ) > 0.01;
+	}
+
+	/**
+	 * Outline converted from one frame to another (apply a floor's layout to a floor whose
+	 * image has another size).
+	 *
+	 * @param string $coords Coordinates.
+	 * @param array  $from   [w, h] frame of the coordinates.
+	 * @param array  $to     [w, h] target frame.
+	 * @return string
+	 */
+	public static function scale_coords( $coords, array $from, array $to ) {
+		if ( ! $from[0] || ! $from[1] || ! $to[0] || ! $to[1] || ( $from[0] === $to[0] && $from[1] === $to[1] ) ) {
+			return (string) $coords;
+		}
+		$out = array();
+		foreach ( self::points( $coords ) as $point ) {
+			$out[] = round( $point[0] * $to[0] / $from[0], 1 );
+			$out[] = round( $point[1] * $to[1] / $from[1], 1 );
+		}
+		return implode( ',', $out );
+	}
+
+	/**
+	 * Computes Nodes::stats() for every item under a root (a whole project, or everything)
+	 * with one query, instead of one query per building, floor and tooltip.
+	 *
+	 * @param object|null $root Root node, or null for all projects.
+	 */
+	public static function prime_stats( $root = null ) {
+		global $wpdb;
+
+		$table = Install::table( 'nodes' );
+		$where = $root ? $wpdb->prepare( 'WHERE n.path LIKE %s', $wpdb->esc_like( (string) $root->path ) . '%' ) : '';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( "SELECT n.id, n.level, n.path, n.status_id, p.level AS parent_level FROM $table n LEFT JOIN $table p ON p.id = n.parent_id $where" );
+		if ( null === $rows || '' !== $wpdb->last_error ) {
+			return;
+		}
+		$empty = array(
+			'total'     => 0,
+			'available' => 0,
+			'sold'      => 0,
+			'open'      => 0,
+			'percent'   => 0,
+			'by_status' => array(),
+		);
+		$level = array();
+		$out   = array();
+		foreach ( $rows as $row ) {
+			$level[ (int) $row->id ] = $row->level;
+			if ( ! self::is_unit( $row->level ) && ! in_array( $row->level, array( 'villa_floor', 'spot' ), true ) && '' !== (string) $row->path ) {
+				$out[ (int) $row->id ] = $empty;
+			}
+		}
+		foreach ( $rows as $row ) {
+			$is_spot = 'spot' === $row->level;
+			// Units count in everything above them except parkings; parking spaces only in
+			// their parking. Items inside a unit (old imports) count nowhere, as in stats().
+			if ( ( ! $is_spot && ! self::is_unit( $row->level ) ) || self::is_unit( (string) $row->parent_level ) ) {
+				continue;
+			}
+			$status = Statuses::of( (int) $row->status_id );
+			foreach ( explode( '/', trim( (string) $row->path, '/' ) ) as $id ) {
+				$id = (int) $id;
+				if ( $id === (int) $row->id || ! isset( $out[ $id ] ) || ( 'parking' === $level[ $id ] ) !== $is_spot ) {
+					continue;
+				}
+				$out[ $id ]['total']++;
+				$sid                             = (int) $row->status_id;
+				$out[ $id ]['by_status'][ $sid ] = ( isset( $out[ $id ]['by_status'][ $sid ] ) ? $out[ $id ]['by_status'][ $sid ] : 0 ) + 1;
+				if ( $status && $status->available ) {
+					$out[ $id ]['available']++;
+				}
+				if ( $status && $status->sold ) {
+					$out[ $id ]['sold']++;
+				}
+				if ( Statuses::is_clickable( $status ) ) {
+					$out[ $id ]['open']++;
+				}
+			}
+		}
+		foreach ( $out as $id => $stats ) {
+			$stats['percent']    = $stats['total'] ? (int) floor( 100 * $stats['sold'] / $stats['total'] ) : 0;
+			self::$stats[ $id ] = $stats;
+		}
 	}
 
 	/**
@@ -456,7 +652,8 @@ class Nodes {
 		$row   = array_intersect_key( $data, array_flip( self::COLUMNS ) );
 
 		if ( isset( $row['i18n'] ) && is_array( $row['i18n'] ) ) {
-			$row['i18n'] = I18n::encode( $row['i18n'] );
+			$stored      = $id ? self::get( $id ) : null;
+			$row['i18n'] = I18n::encode( $stored ? I18n::keep_inactive( $row['i18n'], (array) $stored->i18n ) : $row['i18n'] );
 		}
 		if ( isset( $row['gallery'] ) && is_array( $row['gallery'] ) ) {
 			$row['gallery'] = implode( ',', array_filter( array_map( 'absint', $row['gallery'] ) ) );
@@ -479,14 +676,33 @@ class Nodes {
 
 		$row['updated_at'] = current_time( 'mysql' );
 		self::$stats       = array();
+		self::$child_ids   = array();
+
+		// Coordinate frame of the outlines drawn on this item's image. A new image keeps the old
+		// frame while outlines exist on it (they then stretch with the image, so a larger or
+		// smaller version of the same picture changes nothing); otherwise it takes the image's size.
+		if ( isset( $row['image_id'] ) && ! isset( $row['coord_w'] ) ) {
+			$before = $id ? self::get( $id ) : null;
+			if ( ! $before || (int) $row['image_id'] !== $before->image_id ) {
+				$keep = $before && $before->coord_w && $before->coord_h && self::has_outlines( $before->id );
+				if ( ! $keep && $row['image_id'] ) {
+					list( $row['coord_w'], $row['coord_h'] ) = self::image_size( (int) $row['image_id'] );
+				}
+			}
+		}
 
 		if ( $id ) {
 			$old = self::get( $id );
-			$wpdb->update( $table, $row, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			unset( self::$cache[ (int) $id ] );
-			if ( $old && isset( $row['parent_id'] ) && (int) $row['parent_id'] !== $old->parent_id ) {
-				self::move_path( $old, $parent );
+			// Failed writes are reported (0), so the admin never says "Saved" for nothing.
+			if ( false === $wpdb->update( $table, $row, array( 'id' => (int) $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				return 0;
 			}
+			if ( $old && isset( $row['parent_id'] ) && (int) $row['parent_id'] !== $old->parent_id && ! self::move_path( $old, $parent ) ) {
+				self::rebuild_paths();
+				return 0;
+			}
+			self::changed( 'saved', array( (int) $id ) );
 			return (int) $id;
 		}
 
@@ -500,8 +716,30 @@ class Nodes {
 		if ( isset( $row['level'] ) && 'project' === $row['level'] ) {
 			$update['project_id'] = $id;
 		}
-		$wpdb->update( $table, $update, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// Without its path the item would be invisible; undo the insert rather than keep it so.
+		if ( false === $wpdb->update( $table, $update, array( 'id' => $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->delete( $table, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			return 0;
+		}
+		self::changed( 'created', array( $id ) );
 		return $id;
+	}
+
+	/**
+	 * Announces a change of selector data (statuses, prices, outlines, texts…): page caches
+	 * are purged (Cache) and other plugins can react, e.g. sync a CRM.
+	 *
+	 * @param string $what What happened: saved, created, deleted, status…
+	 * @param int[]  $ids  Node ids concerned (empty when not about nodes).
+	 */
+	public static function changed( $what, array $ids = array() ) {
+		/**
+		 * Selector data changed.
+		 *
+		 * @param string $what What happened.
+		 * @param int[]  $ids  Node ids concerned.
+		 */
+		do_action( 'solo_estate_data_changed', $what, $ids );
 	}
 
 	/**
@@ -509,6 +747,7 @@ class Nodes {
 	 *
 	 * @param object      $old    Node before the move.
 	 * @param object|null $parent New parent.
+	 * @return bool Done.
 	 */
 	private static function move_path( $old, $parent ) {
 		global $wpdb;
@@ -517,9 +756,10 @@ class Nodes {
 		$new     = ( $parent ? $parent->path : '/' ) . $old->id . '/';
 		$project = $parent ? ( 'project' === $parent->level ? $parent->id : $parent->project_id ) : $old->id;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( $wpdb->prepare( "UPDATE $table SET path = CONCAT(%s, SUBSTRING(path, %d)), project_id = %d WHERE path LIKE %s", $new, strlen( $old->path ) + 1, $project, $wpdb->esc_like( $old->path ) . '%' ) );
+		$done = $wpdb->query( $wpdb->prepare( "UPDATE $table SET path = CONCAT(%s, SUBSTRING(path, %d)), project_id = %d WHERE path LIKE %s", $new, strlen( $old->path ) + 1, $project, $wpdb->esc_like( $old->path ) . '%' ) );
 		// phpcs:enable
 		self::flush();
+		return false !== $done;
 	}
 
 	/**
@@ -581,6 +821,7 @@ class Nodes {
 		$count = (int) $wpdb->query( "DELETE FROM $nodes WHERE id IN ($in)" );
 		// phpcs:enable
 		self::flush();
+		self::changed( 'deleted', $ids );
 		return $count;
 	}
 
@@ -633,7 +874,9 @@ class Nodes {
 			Specs::save_values( $new_id, $values );
 		}
 		foreach ( self::children( $node->id ) as $child ) {
-			self::duplicate( $child->id, $new_id );
+			if ( ! self::duplicate( $child->id, $new_id ) ) {
+				self::$copy_failures++;
+			}
 		}
 		return $new_id;
 	}
@@ -656,6 +899,7 @@ class Nodes {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status_id = %d, updated_at = %s WHERE id IN ($in)", (int) $status_id, current_time( 'mysql' ) ) );
 		self::flush();
+		self::changed( 'status', $ids );
 	}
 
 	/**
@@ -721,6 +965,8 @@ class Nodes {
 		$row->info_modal  = isset( $row->info_modal ) ? (int) $row->info_modal : 0;
 		$row->image_id    = (int) $row->image_id;
 		$row->image2_id   = (int) $row->image2_id;
+		$row->coord_w     = isset( $row->coord_w ) ? (int) $row->coord_w : 0;
+		$row->coord_h     = isset( $row->coord_h ) ? (int) $row->coord_h : 0;
 		$row->sort_order  = (int) $row->sort_order;
 		$row->path        = isset( $row->path ) ? (string) $row->path : '';
 		$row->entrance    = isset( $row->entrance ) ? (string) $row->entrance : '';
@@ -740,7 +986,8 @@ class Nodes {
 	 * Clears the in-request caches.
 	 */
 	public static function flush() {
-		self::$cache = array();
-		self::$stats = array();
+		self::$cache     = array();
+		self::$stats     = array();
+		self::$child_ids = array();
 	}
 }

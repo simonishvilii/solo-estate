@@ -36,6 +36,11 @@ class Transfer_Page {
 		$error = isset( $_GET['csv_error'] ) ? sanitize_key( wp_unslash( $_GET['csv_error'] ) ) : '';
 		if ( 'file' === $error ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Please choose a .csv file up to 10 MB.', 'solo-estate' ) . '</p></div>';
+		} elseif ( 'too_big' === $error ) {
+			/* translators: %s: size like 8 MB */
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'The file is larger than this server accepts (%s). Split it into smaller files or ask your host to raise upload_max_filesize / post_max_size.', 'solo-estate' ), size_format( wp_max_upload_size() ) ) ) . '</p></div>';
+		} elseif ( 'upload' === $error ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'The upload failed on the server (temporary folder or disk). Try again or ask your host.', 'solo-estate' ) . '</p></div>';
 		} elseif ( 'none' === $error ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Select at least one project to export.', 'solo-estate' ) . '</p></div>';
 		}
@@ -71,7 +76,8 @@ class Transfer_Page {
 		echo '<li>' . esc_html__( 'Empty cells leave the value unchanged. Type a single "-" to clear a value.', 'solo-estate' ) . '</li>';
 		echo '<li>' . esc_html__( 'Status can be written in any site language (e.g. Sold, გაყიდულია).', 'solo-estate' ) . '</li>';
 		echo '</ul>';
-		echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		// The action is in the URL too: a file over post_max_size empties the whole POST.
+		echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( add_query_arg( 'action', 'solo_estate_csv_import', admin_url( 'admin-post.php' ) ) ) . '">';
 		wp_nonce_field( 'solo_estate_csv_import' );
 		echo '<input type="hidden" name="action" value="solo_estate_csv_import">';
 		self::project_select( $projects, __( 'From the file ("project" column)', 'solo-estate' ) );
@@ -157,8 +163,25 @@ class Transfer_Page {
 	 * Upload, preview or apply.
 	 */
 	public static function handle_import() {
-		Admin::check( 'solo_estate_csv_import' );
 		$back = Admin::url( 'solo-estate-transfer' );
+		// Larger than post_max_size: PHP dropped the whole POST (nonce included), so instead of
+		// "The link you followed has expired" say what happened. Nothing is changed here.
+		$length = isset( $_SERVER['CONTENT_LENGTH'] ) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
+		if ( empty( $_POST ) && empty( $_FILES ) && $length > 0 && \SoloEstate\Admin\Admin::can_manage() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			wp_safe_redirect( add_query_arg( 'csv_error', 'too_big', $back ) );
+			exit;
+		}
+		Admin::check( 'solo_estate_csv_import' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above.
+		$code = isset( $_FILES['csv']['error'] ) ? (int) $_FILES['csv']['error'] : UPLOAD_ERR_NO_FILE;
+		if ( in_array( $code, array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) {
+			wp_safe_redirect( add_query_arg( 'csv_error', 'too_big', $back ) );
+			exit;
+		}
+		if ( in_array( $code, array( UPLOAD_ERR_PARTIAL, UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION ), true ) ) {
+			wp_safe_redirect( add_query_arg( 'csv_error', 'upload', $back ) );
+			exit;
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified above.
 		$pid     = isset( $_POST['project'] ) ? absint( $_POST['project'] ) : 0;

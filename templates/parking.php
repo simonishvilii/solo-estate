@@ -24,7 +24,7 @@ $solo_estate_spots  = Nodes::sorted_children( $node->id );
 $solo_estate_prices = Settings::get( 'show_prices' ) && array_filter(
 	$solo_estate_spots,
 	static function ( $spot ) {
-		return null !== Nodes::total_price( $spot ) && Statuses::is_clickable( Statuses::get( $spot->status_id ) );
+		return null !== Nodes::total_price( $spot ) && Statuses::is_clickable( Statuses::of( $spot->status_id ) );
 	}
 );
 ?>
@@ -54,21 +54,22 @@ $solo_estate_prices = Settings::get( 'show_prices' ) && array_filter(
 <?php if ( Settings::get( 'show_lists' ) && $solo_estate_spots ) : ?>
 	<div class="solo-estate-table-wrap">
 		<table class="solo-estate-table">
+			<caption class="screen-reader-text"><?php echo esc_html( Nodes::display_title( $node ) ); ?></caption>
 			<thead>
 				<tr>
-					<th><?php echo esc_html( Texts::get( 'spot' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'spot' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
 					<?php if ( $solo_estate_prices ) : ?>
-						<th><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
+						<th scope="col"><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
 					<?php endif; ?>
-					<th><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach ( $solo_estate_spots as $solo_estate_spot ) : ?>
-					<?php $solo_estate_status = Statuses::get( $solo_estate_spot->status_id ); ?>
+					<?php $solo_estate_status = Statuses::of( $solo_estate_spot->status_id ); ?>
 					<tr data-solo-estate-for="<?php echo (int) $solo_estate_spot->id; ?>">
-						<td><strong><?php echo esc_html( '' !== $solo_estate_spot->number ? $solo_estate_spot->number : Nodes::display_title( $solo_estate_spot ) ); ?></strong></td>
+						<th scope="row"><?php echo esc_html( '' !== $solo_estate_spot->number ? $solo_estate_spot->number : Nodes::display_title( $solo_estate_spot ) ); ?></th>
 						<td><?php echo esc_html( Renderer::area( $solo_estate_spot->area ) ); ?></td>
 						<?php if ( $solo_estate_prices ) : ?>
 							<td><?php echo Statuses::is_clickable( $solo_estate_status ) ? Renderer::price( Nodes::total_price( $solo_estate_spot ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>

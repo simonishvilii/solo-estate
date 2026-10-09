@@ -235,6 +235,13 @@ class Csv {
 								)
 							)
 						) : null;
+						// Counted only when it was really created (or would be, in a preview).
+						if ( $apply && ! $projects[ $p_key ] ) {
+							unset( $projects[ $p_key ] );
+							/* translators: %s: project name */
+							$report['errors'][] = array( $line, sprintf( __( 'Project "%s" could not be created.', 'solo-estate' ), $p_name ) );
+							continue;
+						}
 						$report['created']['project']++;
 					}
 				}
@@ -294,9 +301,18 @@ class Csv {
 						}
 						if ( ! isset( $virtual[ $key ] ) ) {
 							$virtual[ $key ] = ( $apply && $parent ) ? Nodes::save( array( 'parent_id' => $parent->id, 'level' => $level, 'number' => $num ) ) : -1;
-							$report['created'][ $level ]++;
+							if ( $virtual[ $key ] ) {
+								$report['created'][ $level ]++;
+							}
 						}
 						$node = $apply ? Nodes::get( $virtual[ $key ] ) : null;
+						if ( $apply && ! $node ) {
+							unset( $virtual[ $key ] );
+							/* translators: 1: e.g. Building, 2: number */
+							$report['errors'][] = array( $line, sprintf( __( '%1$s %2$s could not be created.', 'solo-estate' ), Nodes::level_label( $level ), $num ) );
+							$failed = true;
+							break;
+						}
 					}
 					$parent = $node;
 				}
@@ -311,7 +327,6 @@ class Csv {
 						$report['errors'][] = array( $line, sprintf( __( '%1$s %2$s not found.', 'solo-estate' ), Nodes::level_label( $type ), $u_num ) );
 						continue;
 					}
-					$report['created']['flat']++;
 					$is_new = true;
 					if ( $apply ) {
 						$flat = ( $parent && Nodes::allows( $parent->level, $type ) ) ? Nodes::get( Nodes::save( array( 'parent_id' => $parent->id, 'level' => $type, 'number' => $u_num ) ) ) : null;
@@ -319,7 +334,9 @@ class Csv {
 							$report['errors'][] = array( $line, __( 'Could not create the apartment.', 'solo-estate' ) );
 							continue;
 						}
-					} else {
+					}
+					$report['created']['flat']++;
+					if ( ! $apply ) {
 						// Preview: validate the row against an empty unit.
 						$flat = (object) array(
 							'id'          => 0,
@@ -412,20 +429,22 @@ class Csv {
 			);
 			$specs_changed = $specs != $old_specs; // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- order-insensitive compare.
 
-			if ( ! $is_new ) {
-				if ( ! $changed && ! $specs_changed ) {
-					$report['unchanged']++;
-					continue;
-				}
-				$report['updated']++;
+			if ( ! $is_new && ! $changed && ! $specs_changed ) {
+				$report['unchanged']++;
+				continue;
 			}
 			if ( $apply ) {
-				if ( $changed ) {
-					Nodes::save( $changed, $flat->id );
+				if ( $changed && ! Nodes::save( $changed, $flat->id ) ) {
+					$report['errors'][] = array( $line, __( 'Could not save the changes of this row.', 'solo-estate' ) );
+					continue;
 				}
 				if ( $specs_changed ) {
 					Specs::save_values( $flat->id, $specs );
 				}
+			}
+			// Counted after the write succeeded (or would, in a preview).
+			if ( ! $is_new ) {
+				$report['updated']++;
 			}
 		}
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose

@@ -57,9 +57,10 @@ usort(
 		<span class="solo-estate-head__meta"><?php echo esc_html( $solo_estate_part[0] . ': ' . $solo_estate_part[1] ); ?></span>
 	<?php endforeach; ?>
 	<?php if ( count( $solo_estate_floors ) > 1 ) : ?>
-		<label class="solo-estate-floor-switch">
-			<span class="screen-reader-text"><?php echo esc_html( Texts::get( 'select_floor' ) ); ?></span>
-			<select data-solo-estate-nav>
+		<?php // Choosing with the mouse opens the floor at once; arrow keys only move the choice (Enter or "Show" opens it). ?>
+		<span class="solo-estate-floor-switch">
+			<label class="screen-reader-text" for="solo-estate-floor-<?php echo (int) $node->id; ?>"><?php echo esc_html( Texts::get( 'select_floor' ) ); ?></label>
+			<select id="solo-estate-floor-<?php echo (int) $node->id; ?>" data-solo-estate-nav>
 				<?php foreach ( $solo_estate_floors as $solo_estate_floor ) : ?>
 					<?php $solo_estate_target = Renderer::target( $solo_estate_floor ); ?>
 					<option value="<?php echo esc_url( $solo_estate_target['href'] ); ?>"<?php selected( $solo_estate_floor->id, $node->id ); ?><?php disabled( '' === $solo_estate_target['href'] && $solo_estate_floor->id !== $node->id ); ?>>
@@ -67,7 +68,8 @@ usort(
 					</option>
 				<?php endforeach; ?>
 			</select>
-		</label>
+			<button type="button" class="solo-estate-floor-switch__go" data-solo-estate-go hidden><?php echo esc_html( Texts::get( 'show' ) ); ?></button>
+		</span>
 	<?php endif; ?>
 	<?php if ( $solo_estate_prices ) : ?>
 		<?php echo Renderer::currency_switch(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -90,27 +92,36 @@ usort(
 	<aside class="solo-estate-layout__side">
 	<div class="solo-estate-table-wrap">
 		<table class="solo-estate-table">
+			<caption class="screen-reader-text"><?php echo esc_html( Nodes::display_title( $node ) . ' — ' . Texts::get( 'select_flat' ) ); ?></caption>
 			<thead>
 				<tr>
-					<th><?php echo esc_html( Texts::get( 'flat' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'flat' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
 					<?php if ( $solo_estate_prices ) : ?>
-						<th><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
+						<th scope="col"><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
 					<?php endif; ?>
-					<th><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
 					<?php if ( '' === $solo_estate_stage ) : ?>
-						<th></th>
+						<th scope="col"><span class="screen-reader-text"><?php echo esc_html( Texts::get( 'details' ) ); ?></span></th>
 					<?php endif; ?>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach ( $solo_estate_units as $solo_estate_unit ) : ?>
 					<?php
-					$solo_estate_status = Statuses::get( $solo_estate_unit->status_id );
+					$solo_estate_status = Statuses::of( $solo_estate_unit->status_id );
 					$solo_estate_target = Renderer::target( $solo_estate_unit );
+					$solo_estate_name   = ( 'flat' === $solo_estate_unit->level && '' !== $solo_estate_unit->number ) ? $solo_estate_unit->number : Nodes::display_title( $solo_estate_unit );
 					?>
 					<tr data-solo-estate-for="<?php echo (int) $solo_estate_unit->id; ?>" class="<?php echo $solo_estate_target['href'] ? 'is-link' : 'is-disabled'; ?> solo-estate-row--<?php echo esc_attr( $solo_estate_unit->level ); ?>"<?php echo $solo_estate_target['href'] ? ' data-href="' . esc_url( $solo_estate_target['href'] ) . '"' : ''; ?>>
-						<td><strong><?php echo esc_html( ( 'flat' === $solo_estate_unit->level && '' !== $solo_estate_unit->number ) ? $solo_estate_unit->number : Nodes::display_title( $solo_estate_unit ) ); ?></strong></td>
+						<?php // The number is a real link: rows are reachable by keyboard and on phones, with or without a polygon. ?>
+						<th scope="row">
+							<?php if ( $solo_estate_target['href'] ) : ?>
+								<a href="<?php echo esc_url( $solo_estate_target['href'] ); ?>" aria-label="<?php echo esc_attr( Nodes::display_title( $solo_estate_unit ) ); ?>"><?php echo esc_html( $solo_estate_name ); ?></a>
+							<?php else : ?>
+								<?php echo esc_html( $solo_estate_name ); ?>
+							<?php endif; ?>
+						</th>
 						<td><?php echo esc_html( Renderer::area( $solo_estate_unit->area ) ); ?></td>
 						<?php if ( $solo_estate_prices ) : ?>
 							<td><?php echo $solo_estate_target['href'] ? Renderer::price( Nodes::total_price( $solo_estate_unit ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
@@ -120,7 +131,7 @@ usort(
 						<?php if ( '' === $solo_estate_stage ) : ?>
 							<td class="solo-estate-table__action">
 								<?php if ( $solo_estate_target['href'] ) : ?>
-									<a href="<?php echo esc_url( $solo_estate_target['href'] ); ?>"><?php echo esc_html( Texts::get( 'details' ) ); ?> →</a>
+									<a href="<?php echo esc_url( $solo_estate_target['href'] ); ?>" tabindex="-1" aria-hidden="true"><?php echo esc_html( Texts::get( 'details' ) ); ?> →</a>
 								<?php endif; ?>
 							</td>
 						<?php endif; ?>

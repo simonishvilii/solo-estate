@@ -56,6 +56,9 @@ class Statuses {
 	/** @var object[]|null */
 	private static $all = null;
 
+	/** @var bool The last attempt to read the statuses failed (database error). */
+	public static $failed = false;
+
 	/**
 	 * All statuses, ordered.
 	 *
@@ -67,7 +70,12 @@ class Statuses {
 		if ( null === self::$all ) {
 			$table = Install::table( 'statuses' );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$rows      = (array) $wpdb->get_results( "SELECT * FROM $table ORDER BY scope ASC, sort_order ASC, id ASC" );
+			$rows = $wpdb->get_results( "SELECT * FROM $table ORDER BY scope ASC, sort_order ASC, id ASC" );
+			if ( null === $rows || '' !== $wpdb->last_error ) {
+				self::$failed = true;
+				return array(); // Query failed: not remembered; Statuses::of() treats items as closed.
+			}
+			self::$failed = false;
 			self::$all = array();
 			foreach ( $rows as $row ) {
 				$row->id                = (int) $row->id;
@@ -108,6 +116,36 @@ class Statuses {
 	public static function get( $id ) {
 		$all = self::all();
 		return isset( $all[ (int) $id ] ) ? $all[ (int) $id ] : null;
+	}
+
+	/**
+	 * Status of an item for the site: null when it has none (open), the status, or, when its
+	 * status cannot be found (database error, removed), a closed stand-in. Sold apartments must
+	 * never turn into open ones because a lookup failed.
+	 *
+	 * @param int $id Status id of the item.
+	 * @return object|null
+	 */
+	public static function of( $id ) {
+		$id = (int) $id;
+		if ( $id <= 0 ) {
+			return null;
+		}
+		$status = self::get( $id );
+		if ( $status ) {
+			return $status;
+		}
+		return (object) array(
+			'id'         => $id,
+			'scope'      => '',
+			'color'      => '#9ca3af',
+			'clickable'  => 0,
+			'available'  => 0,
+			'sold'       => 0,
+			'sort_order' => 0,
+			'i18n'       => array(),
+			'missing'    => true,
+		);
 	}
 
 	/**
@@ -160,9 +198,11 @@ class Statuses {
 		$table = Install::table( 'statuses' );
 		$row   = array_intersect_key( $data, array_flip( array( 'scope', 'color', 'clickable', 'available', 'sold', 'sort_order', 'i18n', 'legacy_id' ) ) );
 		if ( isset( $row['i18n'] ) && is_array( $row['i18n'] ) ) {
-			$row['i18n'] = I18n::encode( $row['i18n'] );
+			$stored      = $id ? self::get( $id ) : null;
+			$row['i18n'] = I18n::encode( $stored ? I18n::keep_inactive( $row['i18n'], (array) $stored->i18n ) : $row['i18n'] );
 		}
 		self::$all = null;
+		Nodes::changed( 'statuses' );
 
 		if ( $id ) {
 			$wpdb->update( $table, $row, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -173,16 +213,62 @@ class Statuses {
 	}
 
 	/**
-	 * Deletes a status; nodes using it fall back to "no status".
+	 * Deletes a status. A status in use is deleted only together with a replacement of the
+	 * same list, which its items get.
 	 *
-	 * @param int $id Id.
+	 * @param int $id          Id.
+	 * @param int $replacement Status the items move to.
+	 * @return bool Whether it was deleted.
 	 */
-	public static function delete( $id ) {
+	public static function delete( $id, $replacement = 0 ) {
 		global $wpdb;
 
-		$wpdb->delete( Install::table( 'statuses' ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$wpdb->update( Install::table( 'nodes' ), array( 'status_id' => 0 ), array( 'status_id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		self::$all = null;
+		$id     = (int) $id;
+		$status = self::get( $id );
+		if ( ! $status ) {
+			return false;
+		}
+		// Items with this status move to another status of the same list first: without one,
+		// sold and reserved apartments would become open, clickable units with a call form.
+		if ( self::usage( $id ) ) {
+			$target = self::get( (int) $replacement );
+			if ( ! $target || $target->id === $id || $target->scope !== $status->scope ) {
+				return false;
+			}
+			$wpdb->update( Install::table( 'nodes' ), array( 'status_id' => $target->id ), array( 'status_id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			Nodes::flush();
+		}
+		$wpdb->delete( Install::table( 'statuses' ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		self::$all   = null;
+		self::$usage = null;
+		Nodes::changed( 'statuses' );
+		return true;
+	}
+
+	/** @var array<int,int>|null */
+	private static $usage = null;
+
+	/**
+	 * Number of items that have a status (all statuses when $id is omitted).
+	 *
+	 * @param int|null $id Status id.
+	 * @return int|array<int,int>
+	 */
+	public static function usage( $id = null ) {
+		global $wpdb;
+
+		if ( null === self::$usage ) {
+			self::$usage = array();
+			$table       = Install::table( 'nodes' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			foreach ( (array) $wpdb->get_results( "SELECT status_id, COUNT(*) AS c FROM $table WHERE status_id > 0 GROUP BY status_id" ) as $row ) {
+				self::$usage[ (int) $row->status_id ] = (int) $row->c;
+			}
+		}
+		if ( null === $id ) {
+			return self::$usage;
+		}
+		return isset( self::$usage[ (int) $id ] ) ? self::$usage[ (int) $id ] : 0;
 	}
 
 	/**

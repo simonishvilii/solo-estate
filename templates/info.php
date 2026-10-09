@@ -34,7 +34,8 @@ $solo_estate_description = Nodes::field( $node, 'description' );
 			<?php foreach ( $solo_estate_photos as $solo_estate_index => $solo_estate_photo ) : ?>
 				<?php $solo_estate_full = wp_get_attachment_image_url( $solo_estate_photo, 'full' ); ?>
 				<?php if ( $solo_estate_full ) : ?>
-					<a class="solo-estate-info__photo" href="<?php echo esc_url( $solo_estate_full ); ?>" data-solo-estate-lightbox="<?php echo esc_attr( $solo_estate_group ); ?>">
+					<?php // The image inside has no alt (decorative in the grid), so the link carries the name. ?>
+					<a class="solo-estate-info__photo" href="<?php echo esc_url( $solo_estate_full ); ?>" data-solo-estate-lightbox="<?php echo esc_attr( $solo_estate_group ); ?>" aria-label="<?php echo esc_attr( Nodes::display_title( $node ) . ' — ' . sprintf( \SoloEstate\Texts::get( 'photo_n' ), $solo_estate_index + 1 ) ); ?>">
 						<?php echo wp_get_attachment_image( $solo_estate_photo, 0 === $solo_estate_index ? 'large' : 'medium', false, array( 'alt' => '', 'loading' => 'lazy' ) ); ?>
 					</a>
 				<?php endif; ?>

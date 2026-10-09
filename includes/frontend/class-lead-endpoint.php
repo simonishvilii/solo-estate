@@ -1,6 +1,7 @@
 <?php
 /**
- * AJAX endpoint for the lead form.
+ * Endpoints of the lead form: AJAX, and a plain POST fallback for pages where JavaScript
+ * did not run.
  *
  * Public form for anonymous visitors: a nonce would break on cached pages and gives
  * no real protection for logged-out users, so spam is filtered with a honeypot,
@@ -31,32 +32,70 @@ class Lead_Endpoint {
 	public static function register() {
 		add_action( 'wp_ajax_solo_estate_lead', array( __CLASS__, 'handle' ) );
 		add_action( 'wp_ajax_nopriv_solo_estate_lead', array( __CLASS__, 'handle' ) );
+		add_action( 'admin_post_solo_estate_lead_post', array( __CLASS__, 'handle_post' ) );
+		add_action( 'admin_post_nopriv_solo_estate_lead_post', array( __CLASS__, 'handle_post' ) );
+	}
+
+	/**
+	 * AJAX submission (the form with JavaScript): JSON answer.
+	 */
+	public static function handle() {
+		$result = self::process();
+		$data   = array( 'message' => $result['message'] );
+		if ( $result['fields'] ) {
+			$data['fields'] = $result['fields'];
+		}
+		if ( $result['ok'] ) {
+			wp_send_json_success( $data );
+		}
+		wp_send_json_error( $data, $result['status'] );
+	}
+
+	/**
+	 * Plain form submission, when the page's JavaScript did not run (blocked, broken by an
+	 * optimization plugin): the lead is stored the same way and the visitor goes back to the
+	 * page with the result. POST keeps the name and phone out of URLs and logs.
+	 */
+	public static function handle_post() {
+		$result = self::process();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- see class docblock.
+		$back = isset( $_POST['page_url'] ) ? esc_url_raw( wp_unslash( $_POST['page_url'] ) ) : '';
+		if ( '' === $back || wp_parse_url( $back, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+			$back = home_url( '/' );
+		}
+		$back = add_query_arg( 'solo_estate_lead', $result['ok'] ? 'sent' : 'error', remove_query_arg( 'solo_estate_lead', $back ) );
+		wp_safe_redirect( $back . '#solo-estate-lead-result' );
+		exit;
 	}
 
 	/**
 	 * Validates and stores a lead.
+	 *
+	 * @return array{ok:bool,status:int,message:string,fields:string[]}
 	 */
-	public static function handle() {
+	private static function process() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- see class docblock.
 		$lang = I18n::sanitize_code( isset( $_POST['lang'] ) ? sanitize_text_field( wp_unslash( $_POST['lang'] ) ) : '' );
 
 		if ( ! Settings::get( 'leads_enabled' ) ) {
-			wp_send_json_error( array( 'message' => Texts::get( 'lead_error', $lang ) ), 403 );
+			return self::result( false, 403, $lang );
 		}
 
 		$honeypot = isset( $_POST['website'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['website'] ) ) ) : '';
 		$ts       = isset( $_POST['ts'] ) ? absint( $_POST['ts'] ) : 0;
 		// The form always sends its render time; missing, too fast or future values mean a bot.
 		if ( '' !== $honeypot || ! $ts || time() - $ts < self::MIN_SECONDS || $ts > time() + 60 ) {
-			// Pretend success so bots don't retry.
-			wp_send_json_success( array( 'message' => Texts::get( 'lead_success', $lang ) ) );
+			// Pretend success so bots don't retry; counted, so the admin sees that the filter works.
+			Leads::count_rejected( '' !== $honeypot ? 'honeypot' : 'timing' );
+			return self::result( true, 200, $lang );
 		}
 
 		$ip     = self::ip();
 		$key    = 'solo_estate_rl_' . md5( $ip );
 		$hit    = (int) get_transient( $key );
 		if ( $hit >= self::RATE_LIMIT ) {
-			wp_send_json_error( array( 'message' => Texts::get( 'lead_error', $lang ) ), 429 );
+			Leads::count_rejected( 'rate_limit' );
+			return self::result( false, 429, $lang );
 		}
 
 		$name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
@@ -76,13 +115,7 @@ class Lead_Endpoint {
 			$errors[] = 'phone';
 		}
 		if ( $errors ) {
-			wp_send_json_error(
-				array(
-					'message' => Texts::get( 'lead_error', $lang ),
-					'fields'  => $errors,
-				),
-				422
-			);
+			return self::result( false, 422, $lang, $errors );
 		}
 
 		// Only keep page URLs from this site.
@@ -102,13 +135,30 @@ class Lead_Endpoint {
 				'lang'     => $lang,
 				'page_url' => $page,
 				'ip'       => $ip,
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized by Attribution::sanitize().
+				'attribution' => \SoloEstate\Attribution::enabled() && isset( $_POST['attribution'] ) ? \SoloEstate\Attribution::sanitize( wp_unslash( $_POST['attribution'] ) ) : array(),
 			)
 		);
 
-		if ( ! $id ) {
-			wp_send_json_error( array( 'message' => Texts::get( 'lead_error', $lang ) ), 500 );
-		}
-		wp_send_json_success( array( 'message' => Texts::get( 'lead_success', $lang ) ) );
+		return self::result( (bool) $id, $id ? 200 : 500, $lang );
+	}
+
+	/**
+	 * Result of a submission.
+	 *
+	 * @param bool     $ok     Stored (or a bot answered with fake success).
+	 * @param int      $status HTTP status.
+	 * @param string   $lang   Language of the message.
+	 * @param string[] $fields Invalid fields.
+	 * @return array{ok:bool,status:int,message:string,fields:string[]}
+	 */
+	private static function result( $ok, $status, $lang, array $fields = array() ) {
+		return array(
+			'ok'      => $ok,
+			'status'  => $status,
+			'message' => Texts::get( $ok ? 'lead_success' : 'lead_error', $lang ),
+			'fields'  => $fields,
+		);
 	}
 
 	/**

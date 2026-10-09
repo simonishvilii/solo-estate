@@ -13,6 +13,18 @@ class Leads {
 
 	const STATUSES = array( 'new', 'contacted', 'closed' );
 
+	/** Delivery log (last entries), shown on the Leads screen. */
+	const LOG_OPTION = 'solo_estate_delivery_log';
+
+	/** Rejected (spam) submissions: count and last time. */
+	const REJECTED_OPTION = 'solo_estate_rejected_leads';
+
+	/** Cron hook that retries a failed webhook. */
+	const RETRY_HOOK = 'solo_estate_webhook_retry';
+
+	/** Seconds before each webhook retry. */
+	const RETRY_DELAYS = array( 300, 1800, 7200 );
+
 	/**
 	 * Stores a lead and sends notifications. Values must be sanitized.
 	 *
@@ -33,6 +45,7 @@ class Leads {
 			'project_id' => $node ? ( 'project' === $node->level ? $node->id : $node->project_id ) : 0,
 			'lang'       => isset( $data['lang'] ) ? $data['lang'] : '',
 			'page_url'   => isset( $data['page_url'] ) ? $data['page_url'] : '',
+			'attribution' => empty( $data['attribution'] ) ? '' : (string) wp_json_encode( $data['attribution'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ),
 			'ip'         => isset( $data['ip'] ) ? $data['ip'] : '',
 			'status'     => 'new',
 		);
@@ -45,16 +58,29 @@ class Leads {
 		$row['id'] = $id;
 		$context   = self::context( $node );
 
-		self::send_email( $row, $context );
-		self::send_webhook( $row, $context );
+		// Notifications go out after the visitor has the answer (a slow mail server or CRM must
+		// not keep the form waiting); their results are logged.
+		add_action(
+			'shutdown',
+			static function () use ( $row, $context ) {
+				if ( function_exists( 'fastcgi_finish_request' ) ) {
+					fastcgi_finish_request();
+				} elseif ( function_exists( 'litespeed_finish_request' ) ) {
+					litespeed_finish_request();
+				}
+				self::send_email( $row, $context );
+				self::send_webhook( $row, $context );
 
-		/**
-		 * Fires after a lead has been stored and notifications were sent.
-		 *
-		 * @param array $row     Lead row.
-		 * @param array $context project/building/floor/flat titles.
-		 */
-		do_action( 'solo_estate_lead_created', $row, $context );
+				/**
+				 * Fires after a lead has been stored and notifications were sent.
+				 *
+				 * @param array $row     Lead row.
+				 * @param array $context project/building/floor/flat titles.
+				 */
+				do_action( 'solo_estate_lead_created', $row, $context );
+			},
+			0
+		);
 
 		return $id;
 	}
@@ -82,6 +108,12 @@ class Leads {
 		return $out;
 	}
 
+	/**
+	 * Sends the notification e-mail and records whether it was accepted for delivery.
+	 *
+	 * @param array $row     Lead row.
+	 * @param array $context Titles.
+	 */
 	private static function send_email( array $row, array $context ) {
 		$to = array_filter( array_map( 'trim', explode( ',', (string) Settings::get( 'lead_recipients' ) ) ), 'is_email' );
 		if ( ! $to ) {
@@ -120,17 +152,38 @@ class Leads {
 		}
 		$lines[] = '';
 		$lines[] = __( 'Page', 'solo-estate' ) . ': ' . $row['page_url'];
+		foreach ( Attribution::lines( Attribution::of( $row ) ) as $label => $value ) {
+			$lines[] = $label . ': ' . $value;
+		}
 		$lines[] = __( 'All leads', 'solo-estate' ) . ': ' . admin_url( 'admin.php?page=solo-estate-leads' );
 
-		wp_mail( $to, $subject, implode( "\n", $lines ) );
+		$error  = '';
+		$listen = static function ( $wp_error ) use ( &$error ) {
+			$error = is_wp_error( $wp_error ) ? $wp_error->get_error_message() : 'wp_mail failed';
+		};
+		add_action( 'wp_mail_failed', $listen );
+		$sent = wp_mail( $to, $subject, implode( "\n", $lines ) );
+		remove_action( 'wp_mail_failed', $listen );
+		self::log( (int) $row['id'], 'email', $sent, $sent ? implode( ', ', $to ) : ( '' !== $error ? $error : __( 'The mail server did not accept the message.', 'solo-estate' ) ) );
 	}
 
-	private static function send_webhook( array $row, array $context ) {
+	/**
+	 * Posts the lead to the CRM webhook. A failure (no answer, or not a 2xx status) is
+	 * logged and retried by cron after RETRY_DELAYS.
+	 *
+	 * @param array $row     Lead row.
+	 * @param array $context Titles.
+	 * @param int   $attempt 0 for the first try.
+	 * @return bool Delivered.
+	 */
+	private static function send_webhook( array $row, array $context, $attempt = 0 ) {
 		$url = (string) Settings::get( 'lead_webhook' );
 		if ( '' === $url ) {
-			return;
+			return true;
 		}
 		unset( $row['ip'] ); // Not needed by a CRM.
+		// The source as an object: utm_*, click ids, referrer, landing_page, first_seen (UTC).
+		$row['attribution'] = (object) Attribution::of( $row );
 		$body    = (string) wp_json_encode(
 			array(
 				'lead'    => $row,
@@ -145,15 +198,89 @@ class Leads {
 			$headers['X-Solo-Estate-Signature'] = 'sha256=' . hash_hmac( 'sha256', $body, $secret );
 		}
 		// wp_safe_remote_post() refuses localhost/private network targets.
-		wp_safe_remote_post(
+		$response = wp_safe_remote_post(
 			$url,
 			array(
 				'timeout'  => 5,
-				'blocking' => false,
 				'headers'  => $headers,
 				'body'     => $body,
 			)
 		);
+		$code = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
+		$ok   = $code >= 200 && $code < 300;
+		$note = is_wp_error( $response ) ? $response->get_error_message() : 'HTTP ' . $code;
+		if ( ! $ok && isset( self::RETRY_DELAYS[ $attempt ] ) ) {
+			wp_schedule_single_event( time() + self::RETRY_DELAYS[ $attempt ], self::RETRY_HOOK, array( (int) $row['id'], $attempt + 1 ) );
+			/* translators: %d: minutes */
+			$note .= ' — ' . sprintf( __( 'will retry in %d min', 'solo-estate' ), (int) ( self::RETRY_DELAYS[ $attempt ] / 60 ) );
+		}
+		self::log( (int) $row['id'], 'webhook', $ok, ( $attempt ? '#' . ( $attempt + 1 ) . ' ' : '' ) . $note );
+		return $ok;
+	}
+
+	/**
+	 * Cron: retries a webhook delivery.
+	 *
+	 * @param int $id      Lead id.
+	 * @param int $attempt Attempt number (1…).
+	 */
+	public static function retry_webhook( $id, $attempt ) {
+		global $wpdb;
+		$table = Install::table( 'leads' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE id = %d", (int) $id ), ARRAY_A );
+		if ( $row ) {
+			self::send_webhook( $row, self::context( Nodes::get( (int) $row['node_id'] ) ), (int) $attempt );
+		}
+	}
+
+	/**
+	 * Adds a delivery result to the log (newest first, last 30 kept).
+	 *
+	 * @param int    $lead_id Lead id.
+	 * @param string $channel email|webhook.
+	 * @param bool   $ok      Delivered.
+	 * @param string $detail  Recipients, HTTP status or error.
+	 */
+	public static function log( $lead_id, $channel, $ok, $detail ) {
+		$log = get_option( self::LOG_OPTION, array() );
+		$log = is_array( $log ) ? $log : array();
+		array_unshift(
+			$log,
+			array(
+				'time'    => time(),
+				'lead'    => (int) $lead_id,
+				'channel' => $channel,
+				'ok'      => (bool) $ok,
+				'detail'  => mb_substr( (string) $detail, 0, 300 ),
+			)
+		);
+		update_option( self::LOG_OPTION, array_slice( $log, 0, 30 ), false );
+	}
+
+	/**
+	 * Delivery log, newest first.
+	 *
+	 * @return array[]
+	 */
+	public static function delivery_log() {
+		$log = get_option( self::LOG_OPTION, array() );
+		return is_array( $log ) ? $log : array();
+	}
+
+	/**
+	 * Counts a rejected submission (honeypot filled, sent too fast, rate limit, invalid).
+	 *
+	 * @param string $reason Reason key.
+	 */
+	public static function count_rejected( $reason ) {
+		$data = get_option( self::REJECTED_OPTION, array() );
+		$data = is_array( $data ) ? $data : array();
+		$data['since']               = isset( $data['since'] ) ? (int) $data['since'] : time();
+		$data['last']                = time();
+		$data['total']               = ( isset( $data['total'] ) ? (int) $data['total'] : 0 ) + 1;
+		$data['reasons'][ $reason ] = ( isset( $data['reasons'][ $reason ] ) ? (int) $data['reasons'][ $reason ] : 0 ) + 1;
+		update_option( self::REJECTED_OPTION, $data, false );
 	}
 
 	/**

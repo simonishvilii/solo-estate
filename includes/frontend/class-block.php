@@ -79,6 +79,6 @@ class Block {
 	 */
 	public static function render( $attributes ) {
 		Assets::enqueue();
-		return Renderer::project( isset( $attributes['projectId'] ) ? absint( $attributes['projectId'] ) : 0 );
+		return Assets::late_styles() . Renderer::project( isset( $attributes['projectId'] ) ? absint( $attributes['projectId'] ) : 0 );
 	}
 }

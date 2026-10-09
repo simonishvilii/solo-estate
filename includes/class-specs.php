@@ -115,9 +115,11 @@ class Specs {
 		$table = Install::table( 'spec_fields' );
 		$row   = array_intersect_key( $data, array_flip( array( 'sort_order', 'highlight', 'unit', 'i18n', 'legacy_id' ) ) );
 		if ( isset( $row['i18n'] ) && is_array( $row['i18n'] ) ) {
-			$row['i18n'] = I18n::encode( $row['i18n'] );
+			$stored      = $id ? self::field( $id ) : null;
+			$row['i18n'] = I18n::encode( $stored ? I18n::keep_inactive( $row['i18n'], (array) $stored->i18n ) : $row['i18n'] );
 		}
 		self::$fields = null;
+		Nodes::changed( 'specs' );
 
 		if ( $id ) {
 			$wpdb->update( $table, $row, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -147,16 +149,48 @@ class Specs {
 	 * @return array<int,string>
 	 */
 	public static function values( $node_id ) {
+		$node_id = (int) $node_id;
+		if ( ! isset( self::$values[ $node_id ] ) ) {
+			self::prime( array( $node_id ) );
+		}
+		return isset( self::$values[ $node_id ] ) ? self::$values[ $node_id ] : array();
+	}
+
+	/** @var array<int,array<int,string>> Values per node (per request). */
+	private static $values = array();
+
+	/**
+	 * Loads the values of several nodes with one query (all units of a floor for its tooltips).
+	 *
+	 * @param int[] $node_ids Node ids.
+	 */
+	public static function prime( array $node_ids ) {
 		global $wpdb;
 
+		$ids = array();
+		foreach ( $node_ids as $id ) {
+			$id = (int) $id;
+			if ( $id > 0 && ! isset( self::$values[ $id ] ) ) {
+				$ids[ $id ]           = $id;
+				self::$values[ $id ] = array();
+			}
+		}
+		if ( ! $ids ) {
+			return;
+		}
 		$table = Install::table( 'spec_values' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT field_id, value FROM $table WHERE node_id = %d", (int) $node_id ) );
-		$out  = array();
-		foreach ( $rows as $row ) {
-			$out[ (int) $row->field_id ] = (string) $row->value;
+		$rows = $wpdb->get_results( "SELECT node_id, field_id, value FROM $table WHERE node_id IN (" . implode( ',', $ids ) . ')' );
+		if ( null === $rows || '' !== $wpdb->last_error ) {
+			// Failed query: forget, so a later call tries again.
+			foreach ( $ids as $id ) {
+				unset( self::$values[ $id ] );
+			}
+			return;
 		}
-		return $out;
+		foreach ( $rows as $row ) {
+			self::$values[ (int) $row->node_id ][ (int) $row->field_id ] = (string) $row->value;
+		}
 	}
 
 	/**
@@ -169,20 +203,23 @@ class Specs {
 		global $wpdb;
 
 		$table = Install::table( 'spec_values' );
+		Nodes::changed( 'specs', array( (int) $node_id ) );
+		unset( self::$values[ (int) $node_id ] );
 		$wpdb->delete( $table, array( 'node_id' => (int) $node_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// All values in one INSERT (import, duplicate and apply-layout save many units).
+		$rows = array();
+		$args = array();
 		foreach ( $values as $field_id => $value ) {
 			$value = trim( (string) $value );
 			if ( '' === $value || ! (int) $field_id ) {
 				continue;
 			}
-			$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				$table,
-				array(
-					'node_id'  => (int) $node_id,
-					'field_id' => (int) $field_id,
-					'value'    => mb_substr( $value, 0, 100 ),
-				)
-			);
+			$rows[] = '(%d, %d, %s)';
+			array_push( $args, (int) $node_id, (int) $field_id, mb_substr( $value, 0, 100 ) );
+		}
+		if ( $rows ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( $wpdb->prepare( "INSERT INTO $table (node_id, field_id, value) VALUES " . implode( ', ', $rows ), $args ) );
 		}
 	}
 

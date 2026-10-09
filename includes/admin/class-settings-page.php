@@ -101,17 +101,32 @@ class Settings_Page {
 		self::row( __( 'Base currency', 'solo-estate' ), self::text( 'base_currency', $s['base_currency'], 'small-text' ) . ' ' . self::text( 'base_symbol', $s['base_symbol'], 'small-text' ) . '<p class="description">' . esc_html__( 'Code and symbol, e.g. GEL ₾. Prices are entered and shown in this currency.', 'solo-estate' ) . '</p>' );
 		self::row( __( 'Second currency', 'solo-estate' ), self::checkbox( 'alt_enabled', $s['alt_enabled'], __( 'Show a currency switcher', 'solo-estate' ) ) );
 		self::row( __( 'Second currency code / symbol', 'solo-estate' ), self::text( 'alt_currency', $s['alt_currency'], 'small-text' ) . ' ' . self::text( 'alt_symbol', $s['alt_symbol'], 'small-text' ) . '<p class="description">' . esc_html__( 'e.g. USD $. Prices in this currency are calculated with the exchange rate.', 'solo-estate' ) . '</p>' );
-		$stored = Rates::stored();
-		$status = '';
-		if ( ! empty( $stored['rate'] ) && ! empty( $stored['base'] ) ) {
+		$stored  = Rates::stored();
+		$current = Rates::current();
+		// What the site uses right now, said plainly.
+		if ( 'bank' === $current['source'] ) {
 			$status = sprintf(
 				/* translators: 1: base currency, 2: rate, 3: second currency, 4: date */
-				__( 'Current rate: 1 %1$s = %2$s %3$s (National Bank of Georgia, %4$s).', 'solo-estate' ),
-				$stored['base'],
-				number_format_i18n( (float) $stored['rate'], 4 ),
-				$stored['alt'],
-				isset( $stored['date'] ) ? $stored['date'] : ''
+				__( 'Rate in use: 1 %1$s = %2$s %3$s (National Bank of Georgia, %4$s).', 'solo-estate' ),
+				$s['base_currency'],
+				number_format_i18n( $current['rate'], 4 ),
+				$s['alt_currency'],
+				$current['date']
 			);
+		} elseif ( 'fixed' === $current['source'] ) {
+			$status = sprintf(
+				/* translators: 1: base currency, 2: rate, 3: second currency */
+				__( 'Rate in use: 1 %1$s = %2$s %3$s (the fixed rate below).', 'solo-estate' ),
+				$s['base_currency'],
+				number_format_i18n( $current['rate'], 4 ),
+				$s['alt_currency']
+			);
+		} else {
+			$status = __( 'No valid exchange rate: prices are shown in the base currency only.', 'solo-estate' );
+		}
+		if ( $current['stale'] ) {
+			/* translators: %s: date */
+			$status .= ' ' . sprintf( __( 'The bank rate (%s) is older than 7 days and is not used.', 'solo-estate' ), $current['date'] );
 		}
 		self::row(
 			__( 'Exchange rate', 'solo-estate' ),
@@ -123,7 +138,7 @@ class Settings_Page {
 				esc_html__( 'Fixed rate entered below', 'solo-estate' )
 			) .
 			( '' !== $status ? '<p>' . esc_html( $status ) . '</p>' : '' ) .
-			( ! empty( $stored['error'] ) ? '<p class="solo-estate-warn">' . esc_html( $stored['error'] ) . ' ' . esc_html__( 'The fixed rate below is used until it works again.', 'solo-estate' ) . '</p>' : '' ) .
+			( ! empty( $stored['error'] ) && Rates::uses_bank() ? '<p class="solo-estate-warn">' . esc_html( $stored['error'] ) . '</p>' : '' ) .
 			sprintf( ' <a class="button" href="%1$s">%2$s</a>', esc_url( wp_nonce_url( add_query_arg( 'action', 'solo_estate_refresh_rate', admin_url( 'admin-post.php' ) ), 'solo_estate_refresh_rate' ) ), esc_html__( 'Update the rate now', 'solo-estate' ) ) .
 			'<p class="description">' . esc_html__( 'The rate is checked every 6 hours in the background.', 'solo-estate' ) . '</p>'
 		);
@@ -180,7 +195,8 @@ class Settings_Page {
 				esc_html__( 'Reverse proxy (X-Forwarded-For)', 'solo-estate' )
 			) . '<p class="description">' . esc_html__( 'Used for spam rate limiting. Change it only if the site is behind Cloudflare or a proxy — otherwise visitors could fake their IP.', 'solo-estate' ) . '</p>'
 		);
-		self::row( __( 'Analytics events', 'solo-estate' ), self::checkbox( 'tracking_events', $s['tracking_events'], __( 'Send "generate_lead" to Google Analytics (gtag) and "Lead" to Meta Pixel when they are present on the site', 'solo-estate' ) ) );
+		self::row( __( 'Analytics events', 'solo-estate' ), self::checkbox( 'tracking_events', $s['tracking_events'], __( 'Send "generate_lead" to Google Analytics (gtag, or Google Tag Manager\'s dataLayer) and "Lead" to Meta Pixel when they are present on the site, with the apartment and its price', 'solo-estate' ) ) );
+		self::row( __( 'Lead source', 'solo-estate' ), self::checkbox( 'lead_attribution', $s['lead_attribution'], __( 'Remember where visitors came from (ad campaign tags, ad click ids, the referring site, the first page) and save it with their request', 'solo-estate' ) ) . '<p class="description">' . esc_html__( 'Kept in the visitor\'s browser for 90 days (localStorage, no cookie). Turn it off if your privacy policy does not allow it.', 'solo-estate' ) . '</p>' );
 		self::close();
 
 		// Appearance.
@@ -447,6 +463,10 @@ class Settings_Page {
 		}
 		// phpcs:enable
 		Rates::maybe_schedule();
+		if ( Settings::$warnings ) {
+			set_transient( 'solo_estate_settings_warnings_' . get_current_user_id(), Settings::$warnings, 5 * MINUTE_IN_SECONDS );
+			Admin::redirect( Admin::url( 'solo-estate-settings' ), 'saved_warnings' );
+		}
 		Admin::redirect( Admin::url( 'solo-estate-settings' ) );
 	}
 }

@@ -61,6 +61,13 @@ class Texts {
 			'summer_area'     => array( 'Summer area', 'საზაფხულო ფართი', 'Летняя площадь' ),
 			'sold_percent'    => array( 'Sold: %d%%', 'გაყიდულია: %d%%', 'Продано: %d%%' ),
 			'virtual_tour'    => array( 'Virtual tour', 'ვირტუალური ტური', 'Виртуальный тур' ),
+			'previous'        => array( 'Previous', 'წინა', 'Назад' ),
+			'next'            => array( 'Next', 'შემდეგი', 'Далее' ),
+			'photos'          => array( 'Photos', 'ფოტოები', 'Фотографии' ),
+			'photo_n'         => array( 'Photo %d', 'ფოტო %d', 'Фото %d' ),
+			'breadcrumbs'     => array( 'You are here', 'თქვენ აქ ხართ', 'Вы здесь' ),
+			'currency'        => array( 'Currency', 'ვალუტა', 'Валюта' ),
+			'show'            => array( 'Show', 'ჩვენება', 'Показать' ),
 			'gallery'         => array( 'Gallery', 'გალერეა', 'Галерея' ),
 			'plan_2d'         => array( '2D plan', '2D გეგმა', '2D планировка' ),
 			'plan_3d'         => array( '3D plan', '3D გეგმა', '3D планировка' ),
@@ -90,6 +97,8 @@ class Texts {
 			'lead_name'       => array( 'Name', 'სახელი', 'Имя' ),
 			'lead_phone'      => array( 'Phone', 'ტელეფონი', 'Телефон' ),
 			'lead_submit'     => array( 'Send', 'გაგზავნა', 'Отправить' ),
+			'lead_name_error' => array( 'Please enter your name.', 'გთხოვთ, მიუთითოთ სახელი.', 'Укажите, пожалуйста, имя.' ),
+			'lead_phone_error' => array( 'Please enter a phone number (at least 6 digits).', 'გთხოვთ, მიუთითოთ ტელეფონის ნომერი (მინიმუმ 6 ციფრი).', 'Укажите номер телефона (не менее 6 цифр).' ),
 			'lead_success'    => array( 'Thank you, your request has been received. Our representative will contact you within 24 hours.', 'მადლობა, თქვენი მოთხოვნა მიღებულია. ჩვენი წარმომადგენელი 24 საათის განმავლობაში დაგიკავშირდებათ.', 'Спасибо, ваш запрос принят. Наш представитель свяжется с вами в течение 24 часов.' ),
 			'lead_error'      => array( 'Something went wrong. Please check the fields and try again.', 'დაფიქსირდა შეცდომა. გთხოვთ, შეამოწმოთ ველები და სცადოთ ხელახლა.', 'Произошла ошибка. Проверьте поля и попробуйте ещё раз.' ),
 			'no_items'        => array( 'Nothing to show yet.', 'ჯერ არაფერია დამატებული.', 'Пока ничего нет.' ),
@@ -158,6 +167,7 @@ class Texts {
 			}
 		}
 		update_option( self::OPTION, $out );
+		Nodes::changed( 'texts' );
 	}
 
 	/**
@@ -187,5 +197,6 @@ class Texts {
 			}
 		}
 		update_option( self::OPTION, $saved );
+		Nodes::changed( 'texts' );
 	}
 }

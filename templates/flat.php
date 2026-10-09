@@ -24,7 +24,7 @@ use SoloEstate\Texts;
 
 defined( 'ABSPATH' ) || exit;
 
-$solo_estate_status = Statuses::get( $node->status_id );
+$solo_estate_status = Statuses::of( $node->status_id );
 $solo_estate_open   = Renderer::is_open( $node );
 $solo_estate_total  = Nodes::total_price( $node );
 $solo_estate_title  = Nodes::display_title( $node );
@@ -133,15 +133,21 @@ $solo_estate_rooms = static function ( $item ) {
  * @return string
  */
 $solo_estate_image = static function ( $id, $group, $size, $alt, $class = '' ) {
+	// The first image is the one on screen when the page opens (largest contentful paint):
+	// loaded right away and first; the others lazily.
+	static $solo_estate_first = true;
 	$full = wp_get_attachment_image_url( $id, 'full' );
 	if ( ! $full ) {
 		return '';
 	}
+	$alt   = Renderer::alt( $id, $alt );
+	$attrs = $solo_estate_first ? array( 'alt' => $alt, 'loading' => 'eager', 'fetchpriority' => 'high' ) : array( 'alt' => $alt, 'loading' => 'lazy' );
+	$solo_estate_first = false;
 	return sprintf(
 		'<a class="solo-estate-flat__image %4$s" href="%1$s" data-solo-estate-lightbox="%2$s">%3$s</a>',
 		esc_url( $full ),
 		esc_attr( $group ),
-		wp_get_attachment_image( $id, $size, false, array( 'alt' => $alt, 'loading' => 'lazy' ) ),
+		wp_get_attachment_image( $id, $size, false, $attrs ),
 		esc_attr( $class )
 	);
 };
@@ -152,10 +158,10 @@ $solo_estate_image = static function ( $id, $group, $size, $alt, $class = '' ) {
 	<div class="solo-estate-flat__media">
 		<div class="solo-estate-flat__stage solo-estate-switch" data-solo-estate-switch>
 			<?php if ( count( $solo_estate_media ) > 1 ) : ?>
-				<div class="solo-estate-switch__tabs" role="tablist">
+				<div class="solo-estate-switch__tabs" role="group">
 					<?php $solo_estate_first = true; ?>
 					<?php foreach ( $solo_estate_media as $solo_estate_key => $solo_estate_tab ) : ?>
-						<button type="button" role="tab" class="<?php echo $solo_estate_first ? 'is-active' : ''; ?>" aria-selected="<?php echo $solo_estate_first ? 'true' : 'false'; ?>" data-switch-to="<?php echo esc_attr( $solo_estate_key ); ?>"><?php echo esc_html( $solo_estate_tab[0] ); ?></button>
+						<button type="button" class="<?php echo $solo_estate_first ? 'is-active' : ''; ?>" aria-pressed="<?php echo $solo_estate_first ? 'true' : 'false'; ?>" data-switch-to="<?php echo esc_attr( $solo_estate_key ); ?>"><?php echo esc_html( $solo_estate_tab[0] ); ?></button>
 						<?php $solo_estate_first = false; ?>
 					<?php endforeach; ?>
 				</div>
@@ -253,9 +259,9 @@ $solo_estate_image = static function ( $id, $group, $size, $alt, $class = '' ) {
 	<section class="solo-estate-section solo-estate-vfloors solo-estate-switch" data-solo-estate-switch>
 		<h3 class="solo-estate-section__title"><?php echo esc_html( Texts::get( 'floors' ) ); ?></h3>
 		<?php if ( count( $solo_estate_villa_floors ) > 1 ) : ?>
-			<div class="solo-estate-switch__tabs" role="tablist">
+			<div class="solo-estate-switch__tabs" role="group" aria-label="<?php echo esc_attr( Texts::get( 'floors' ) ); ?>">
 				<?php foreach ( $solo_estate_villa_floors as $solo_estate_i => $solo_estate_vfloor ) : ?>
-					<button type="button" role="tab" class="<?php echo 0 === $solo_estate_i ? 'is-active' : ''; ?>" aria-selected="<?php echo 0 === $solo_estate_i ? 'true' : 'false'; ?>" data-switch-to="vf<?php echo (int) $solo_estate_vfloor->id; ?>"><?php echo esc_html( Nodes::display_title( $solo_estate_vfloor ) ); ?></button>
+					<button type="button" class="<?php echo 0 === $solo_estate_i ? 'is-active' : ''; ?>" aria-pressed="<?php echo 0 === $solo_estate_i ? 'true' : 'false'; ?>" data-switch-to="vf<?php echo (int) $solo_estate_vfloor->id; ?>"><?php echo esc_html( Nodes::display_title( $solo_estate_vfloor ) ); ?></button>
 				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>

@@ -72,11 +72,8 @@ class I18n {
 			case 'translatepress':
 				$trp = get_option( 'trp_settings' );
 				if ( ! empty( $trp['translation-languages'] ) ) {
-					require_once ABSPATH . 'wp-admin/includes/translation-install.php';
-					$names = wp_get_available_translations();
 					foreach ( (array) $trp['translation-languages'] as $locale ) {
-						$name            = isset( $names[ $locale ]['native_name'] ) ? $names[ $locale ]['native_name'] : $locale;
-						$list[ $locale ] = self::lang( $locale, $name, $locale );
+						$list[ $locale ] = self::lang( $locale, self::locale_name( $locale ), $locale );
 					}
 				}
 				break;
@@ -221,8 +218,36 @@ class I18n {
 		if ( ! is_string( $json ) || '' === $json ) {
 			return array();
 		}
-		$data = json_decode( $json, true );
+		// Invalid UTF-8 (e.g. after a dump restored with the wrong charset) would otherwise make
+		// the whole blob unreadable, and the next save would overwrite it with empty fields.
+		$data = json_decode( $json, true, 512, JSON_INVALID_UTF8_SUBSTITUTE );
 		return is_array( $data ) ? $data : array();
+	}
+
+	/**
+	 * Adds the stored values of languages that are not active right now to newly entered
+	 * i18n data, so saving a form (which only has fields for the active languages) does not
+	 * delete them: a language removed from Polylang/WPML for a while, or a switch between
+	 * multilingual plugins, keeps its texts.
+	 *
+	 * @param array $new Field => [lang => value] being saved.
+	 * @param array $old Field => [lang => value] stored.
+	 * @return array
+	 */
+	public static function keep_inactive( array $new, array $old ) {
+		$active = self::codes();
+		foreach ( $old as $field => $values ) {
+			if ( ! is_array( $values ) || ! array_key_exists( $field, $new ) ) {
+				continue;
+			}
+			foreach ( $values as $code => $value ) {
+				if ( ! in_array( (string) $code, $active, true ) && ! isset( $new[ $field ][ $code ] ) && '' !== (string) $value ) {
+					$new[ $field ]           = is_array( $new[ $field ] ) ? $new[ $field ] : array();
+					$new[ $field ][ $code ] = $value;
+				}
+			}
+		}
+		return $new;
 	}
 
 	/**
@@ -303,6 +328,31 @@ class I18n {
 		}
 		$codes = array_keys( $list );
 		return (string) reset( $codes );
+	}
+
+	/**
+	 * Native name of a locale ("ka_GE" → "ქართული") without any network request: WordPress's
+	 * cached list of translations when present, else PHP intl, else the locale itself.
+	 * (wp_get_available_translations() would call api.wordpress.org on page views.)
+	 *
+	 * @param string $locale Locale.
+	 * @return string
+	 */
+	private static function locale_name( $locale ) {
+		$cached = get_site_transient( 'available_translations' );
+		if ( is_array( $cached ) && ! empty( $cached[ $locale ]['native_name'] ) ) {
+			return (string) $cached[ $locale ]['native_name'];
+		}
+		if ( 'en_US' === $locale ) {
+			return 'English (United States)';
+		}
+		if ( class_exists( 'Locale' ) ) {
+			$name = \Locale::getDisplayName( $locale, $locale );
+			if ( is_string( $name ) && '' !== $name && $name !== $locale ) {
+				return $name;
+			}
+		}
+		return (string) $locale;
 	}
 
 	private static function code_from_locale( $locale ) {

@@ -84,7 +84,7 @@
 		this.w = parseInt( this.root.getAttribute( 'data-width' ), 10 ) || this.img.naturalWidth;
 		this.h = parseInt( this.root.getAttribute( 'data-height' ), 10 ) || this.img.naturalHeight;
 
-		this.svg = el( 'svg', { viewBox: '0 0 ' + this.w + ' ' + this.h, preserveAspectRatio: 'none', class: 'solo-estate-poly__svg', tabindex: '0' } );
+		this.svg = el( 'svg', { viewBox: '0 0 ' + this.w + ' ' + this.h, preserveAspectRatio: 'none', class: 'solo-estate-poly__svg', tabindex: '0', role: 'application', 'aria-label': text( 'polyEditor', 'Outline editor' ), 'aria-describedby': 'solo-estate-poly-keys' } );
 		this.siblingLayer = el( 'g', { class: 'solo-estate-poly__siblings' } );
 		this.shape = el( 'polygon', { class: 'solo-estate-poly__shape' } );
 		this.edgeLayer = el( 'g', { class: 'solo-estate-poly__edges' } );
@@ -460,10 +460,96 @@
 		this.draw( true );
 	};
 
+	/** Text from the admin script's translations, with placeholders filled in. */
+	function text( key, fallback, values ) {
+		var str = ( window.soloEstateAdmin && soloEstateAdmin.i18n && soloEstateAdmin.i18n[ key ] ) || fallback;
+		( values || [] ).forEach( function ( v, i ) {
+			str = str.replace( '%' + ( i + 1 ) + '$d', v );
+		} );
+		return str;
+	}
+
+	/** Screen reader announcement of the selected point (or the outline). */
+	PolygonEditor.prototype.announce = function () {
+		if ( ! window.wp || ! wp.a11y ) {
+			return;
+		}
+		if ( null !== this.selected && this.points[ this.selected ] ) {
+			var p = this.points[ this.selected ];
+			wp.a11y.speak( text( 'polyPoint', 'Point %1$d of %2$d: %3$d, %4$d.', [ this.selected + 1, this.points.length, Math.round( p[ 0 ] ), Math.round( p[ 1 ] ) ] ) );
+		} else {
+			wp.a11y.speak( text( 'polyPoints', 'Outline with %1$d points.', [ this.points.length ] ) );
+		}
+	};
+
+	/**
+	 * Keyboard: ] and [ select the next / previous point, arrows move it (with Shift: 10×
+	 * further; with no point selected, the whole outline), Enter or Insert adds a point after
+	 * the selected one (or in the middle of the view), Delete removes it, Esc deselects,
+	 * Ctrl+Z undoes.
+	 */
 	PolygonEditor.prototype.onKey = function ( event ) {
-		if ( ( 'Delete' === event.key || 'Backspace' === event.key ) && null !== this.selected ) {
+		var arrows = { ArrowLeft: [ -1, 0 ], ArrowRight: [ 1, 0 ], ArrowUp: [ 0, -1 ], ArrowDown: [ 0, 1 ] };
+		if ( arrows[ event.key ] && this.points.length && ! event.altKey && ! event.ctrlKey && ! event.metaKey ) {
+			event.preventDefault();
+			// One screen pixel per press at the current zoom (Shift: ten).
+			var step = Math.max( 1, Math.round( this.scale() ) ) * ( event.shiftKey ? 10 : 1 );
+			var dx = arrows[ event.key ][ 0 ] * step;
+			var dy = arrows[ event.key ][ 1 ] * step;
+			var w = this.w;
+			var h = this.h;
+			var clamp = function ( p ) {
+				return [ Math.max( 0, Math.min( w, p[ 0 ] + dx ) ), Math.max( 0, Math.min( h, p[ 1 ] + dy ) ) ];
+			};
+			// Successive presses are undone together.
+			if ( ! event.repeat && ( ! this.keyMoving || Date.now() - this.keyMoving > 800 ) ) {
+				this.remember();
+			}
+			this.keyMoving = Date.now();
+			if ( null !== this.selected && this.points[ this.selected ] ) {
+				this.points[ this.selected ] = clamp( this.points[ this.selected ] );
+			} else {
+				this.points = this.points.map( clamp );
+			}
+			this.draw( true );
+			clearTimeout( this.announceTimer );
+			this.announceTimer = setTimeout( this.announce.bind( this ), 500 );
+		} else if ( ( ']' === event.key || '[' === event.key ) && this.points.length ) {
+			event.preventDefault();
+			var dir = ']' === event.key ? 1 : -1;
+			this.selected = null === this.selected ? ( dir > 0 ? 0 : this.points.length - 1 ) : ( this.selected + dir + this.points.length ) % this.points.length;
+			this.draw( false );
+			this.announce();
+		} else if ( 'Enter' === event.key || 'Insert' === event.key ) {
+			event.preventDefault();
+			var at;
+			var index;
+			if ( null !== this.selected && this.points.length >= 2 ) {
+				var a = this.points[ this.selected ];
+				var b = this.points[ ( this.selected + 1 ) % this.points.length ];
+				at = [ Math.round( ( a[ 0 ] + b[ 0 ] ) / 2 ), Math.round( ( a[ 1 ] + b[ 1 ] ) / 2 ) ];
+				index = this.selected + 1;
+			} else {
+				// The middle of the visible part of the image, a little apart from the last point.
+				var view = this.viewport.getBoundingClientRect();
+				var rect = this.svg.getBoundingClientRect();
+				var s = this.scale();
+				var offset = this.points.length * 24 * s;
+				at = [
+					Math.max( 0, Math.min( this.w, ( view.left + view.width / 2 - rect.left ) * s + offset ) ),
+					Math.max( 0, Math.min( this.h, ( view.top + view.height / 2 - rect.top ) * s + offset ) )
+				];
+				index = this.points.length;
+			}
+			this.remember();
+			this.points.splice( index, 0, at );
+			this.selected = index;
+			this.draw( true );
+			this.announce();
+		} else if ( ( 'Delete' === event.key || 'Backspace' === event.key ) && null !== this.selected ) {
 			event.preventDefault();
 			this.deleteSelected();
+			this.announce();
 		} else if ( 'Escape' === event.key ) {
 			this.selected = null;
 			this.draw( false );

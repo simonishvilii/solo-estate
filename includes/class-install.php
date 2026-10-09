@@ -38,17 +38,31 @@ class Install {
 	 * Runs on every load; upgrades the schema when the stored version is older.
 	 */
 	public static function maybe_upgrade() {
-		if ( get_option( 'solo_estate_db_version' ) !== SOLO_ESTATE_DB_VERSION ) {
+		// A failed upgrade is retried after a while, not on every page view.
+		if ( get_option( 'solo_estate_db_version' ) !== SOLO_ESTATE_DB_VERSION && ! get_transient( self::ERROR_TRANSIENT ) ) {
 			self::install();
 		}
 	}
+
+	/** Set when creating or upgrading the tables failed: [message, time]. */
+	const ERROR_TRANSIENT = 'solo_estate_install_error';
 
 	/**
 	 * Creates/updates tables, capabilities and default data.
 	 */
 	public static function install() {
-		$from = (string) get_option( 'solo_estate_db_version', '' );
+		global $wpdb, $EZSQL_ERROR;
+
+		$from   = (string) get_option( 'solo_estate_db_version', '' );
+		$errors = is_array( $EZSQL_ERROR ) ? count( $EZSQL_ERROR ) : 0;
 		self::create_tables();
+		// The schema must be there before anything else runs on it.
+		foreach ( self::tables() as $table ) {
+			if ( $table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				self::failed( sprintf( 'Table %s could not be created: %s', $table, $wpdb->last_error ) );
+				return;
+			}
+		}
 		self::add_caps();
 		self::seed_defaults();
 		self::seed_project_statuses();
@@ -67,7 +81,29 @@ class Install {
 		if ( '' !== $from && version_compare( $from, '8', '<' ) ) {
 			self::migrate_8();
 		}
+		if ( '' !== $from && version_compare( $from, '9', '<' ) ) {
+			self::migrate_9();
+		}
+		// The version is recorded only when nothing failed; otherwise the upgrade runs again.
+		if ( is_array( $EZSQL_ERROR ) && count( $EZSQL_ERROR ) > $errors ) {
+			$last = end( $EZSQL_ERROR );
+			self::failed( isset( $last['error_str'] ) ? (string) $last['error_str'] : 'database error' );
+			return;
+		}
+		delete_transient( self::ERROR_TRANSIENT );
 		update_option( 'solo_estate_db_version', SOLO_ESTATE_DB_VERSION );
+	}
+
+	/**
+	 * Remembers a failed install/upgrade for the admin notice; retried in an hour.
+	 *
+	 * @param string $message Error.
+	 */
+	private static function failed( $message ) {
+		set_transient( self::ERROR_TRANSIENT, array( mb_substr( $message, 0, 500 ), time() ), HOUR_IN_SECONDS );
+		if ( function_exists( 'error_log' ) ) {
+			error_log( 'Solo Estate: database upgrade failed: ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		}
 	}
 
 	/**
@@ -89,7 +125,11 @@ class Install {
 			foreach ( $children as $child ) {
 				Nodes::save( array( 'parent_id' => (int) $entrance->parent_id ), (int) $child );
 			}
-			Nodes::delete( (int) $entrance->id );
+			// Removed only when everything really moved out of it.
+			Nodes::flush();
+			if ( ! Nodes::children( (int) $entrance->id ) ) {
+				Nodes::delete( (int) $entrance->id );
+			}
 		}
 		Nodes::flush();
 	}
@@ -125,6 +165,24 @@ class Install {
 		$table = self::table( 'nodes' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( "UPDATE $table SET project_id = id WHERE level = 'project' AND project_id <> id" );
+		Nodes::flush();
+	}
+
+	/**
+	 * Version 9: outlines keep the coordinate frame they were drawn in (coord_w × coord_h), so
+	 * replacing an image with a larger or smaller version no longer shifts them. Existing
+	 * outlines were drawn in the size from the attachment metadata.
+	 */
+	private static function migrate_9() {
+		global $wpdb;
+		$table = self::table( 'nodes' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( (array) $wpdb->get_results( "SELECT id, image_id FROM $table WHERE image_id > 0 AND coord_w = 0" ) as $row ) {
+			list( $w, $h ) = Nodes::image_size( (int) $row->image_id );
+			if ( $w && $h ) {
+				$wpdb->update( $table, array( 'coord_w' => $w, 'coord_h' => $h ), array( 'id' => (int) $row->id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		}
 		Nodes::flush();
 	}
 
@@ -199,6 +257,7 @@ class Install {
 			'spec_fields' => $wpdb->prefix . 'solo_estate_spec_fields',
 			'spec_values' => $wpdb->prefix . 'solo_estate_spec_values',
 			'leads'       => $wpdb->prefix . 'solo_estate_leads',
+			'trash'       => $wpdb->prefix . 'solo_estate_trash',
 		);
 	}
 
@@ -235,6 +294,8 @@ class Install {
   info_modal tinyint(1) unsigned NOT NULL DEFAULT 0,
   image_id bigint(20) unsigned NOT NULL DEFAULT 0,
   image2_id bigint(20) unsigned NOT NULL DEFAULT 0,
+  coord_w int(10) unsigned NOT NULL DEFAULT 0,
+  coord_h int(10) unsigned NOT NULL DEFAULT 0,
   gallery text NULL,
   tour_url varchar(255) NOT NULL DEFAULT '',
   coords text NULL,
@@ -251,7 +312,9 @@ class Install {
   updated_at datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY  (id),
   KEY parent_id (parent_id),
+  KEY parent_sort (parent_id,sort_order),
   KEY path (path),
+  KEY level (level),
   KEY project_level (project_id,level),
   KEY legacy_id (legacy_id)
 ) $charset;
@@ -297,11 +360,26 @@ CREATE TABLE {$t['leads']} (
   project_id bigint(20) unsigned NOT NULL DEFAULT 0,
   lang varchar(20) NOT NULL DEFAULT '',
   page_url text NULL,
+  attribution text NULL,
   ip varchar(64) NOT NULL DEFAULT '',
   status varchar(20) NOT NULL DEFAULT 'new',
   PRIMARY KEY  (id),
   KEY created_at (created_at),
   KEY node_id (node_id)
+) $charset;
+CREATE TABLE {$t['trash']} (
+  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  deleted_at datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  user_id bigint(20) unsigned NOT NULL DEFAULT 0,
+  node_id bigint(20) unsigned NOT NULL DEFAULT 0,
+  parent_id bigint(20) unsigned NOT NULL DEFAULT 0,
+  level varchar(20) NOT NULL DEFAULT '',
+  title varchar(191) NOT NULL DEFAULT '',
+  items int(10) unsigned NOT NULL DEFAULT 0,
+  units int(10) unsigned NOT NULL DEFAULT 0,
+  data longtext NULL,
+  PRIMARY KEY  (id),
+  KEY deleted_at (deleted_at)
 ) $charset;";
 
 		dbDelta( $sql );

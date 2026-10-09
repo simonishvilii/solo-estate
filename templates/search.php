@@ -60,21 +60,22 @@ $solo_estate_prices = Settings::get( 'show_prices' ) && array_filter(
 <?php else : ?>
 	<div class="solo-estate-table-wrap">
 		<table class="solo-estate-table solo-estate-results">
+			<caption class="screen-reader-text"><?php echo esc_html( sprintf( Texts::get( 'found' ), $total ) ); ?></caption>
 			<thead>
 				<tr>
 					<?php if ( $solo_estate_multi ) : ?>
-						<th><?php echo esc_html( Texts::get( 'project' ) ); ?></th>
+						<th scope="col"><?php echo esc_html( Texts::get( 'project' ) ); ?></th>
 					<?php endif; ?>
-					<th><?php echo esc_html( Texts::get( 'building' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'floor' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'flat' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'rooms' ) ); ?></th>
-					<th><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'building' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'floor' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'flat' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'rooms' ) ); ?></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'area' ) ); ?></th>
 					<?php if ( $solo_estate_prices ) : ?>
-						<th><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
+						<th scope="col"><?php echo esc_html( Texts::get( 'price' ) ); ?></th>
 					<?php endif; ?>
-					<th><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
-					<th></th>
+					<th scope="col"><?php echo esc_html( Texts::get( 'status' ) ); ?></th>
+					<th scope="col"><span class="screen-reader-text"><?php echo esc_html( Texts::get( 'details' ) ); ?></span></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -93,14 +94,15 @@ $solo_estate_prices = Settings::get( 'show_prices' ) && array_filter(
 						<?php endif; ?>
 						<td><?php echo esc_html( isset( $solo_estate_by['building'] ) ? Nodes::display_title( $solo_estate_by['building'] ) : '' ); ?></td>
 						<td><?php echo esc_html( isset( $solo_estate_by['floor'] ) ? $solo_estate_by['floor']->number : '' ); ?></td>
-						<td><strong><?php echo esc_html( $solo_estate_flat->number ); ?></strong></td>
+						<?php // The number is the row's link (the "Details" column is hidden on phones). ?>
+						<th scope="row"><a href="<?php echo esc_url( $solo_estate_href ); ?>" aria-label="<?php echo esc_attr( implode( ', ', array_filter( array( isset( $solo_estate_by['building'] ) ? Nodes::display_title( $solo_estate_by['building'] ) : '', Nodes::display_title( $solo_estate_flat ) ) ) ) ); ?>"><?php echo esc_html( '' !== $solo_estate_flat->number ? $solo_estate_flat->number : Nodes::display_title( $solo_estate_flat ) ); ?></a></th>
 						<td><?php echo esc_html( null === $solo_estate_flat->rooms ? '—' : ( 0 === $solo_estate_flat->rooms ? Texts::get( 'studio' ) : $solo_estate_flat->rooms ) ); ?></td>
 						<td><?php echo esc_html( Renderer::area( $solo_estate_flat->area ) ); ?></td>
 						<?php if ( $solo_estate_prices ) : ?>
 							<td><?php echo Renderer::price( Nodes::total_price( $solo_estate_flat ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 						<?php endif; ?>
-						<td><?php echo Renderer::badge( Statuses::get( $solo_estate_flat->status_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
-						<td class="solo-estate-table__action"><a href="<?php echo esc_url( $solo_estate_href ); ?>"><?php echo esc_html( Texts::get( 'details' ) ); ?> →</a></td>
+						<td><?php echo Renderer::badge( Statuses::of( $solo_estate_flat->status_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+						<td class="solo-estate-table__action"><a href="<?php echo esc_url( $solo_estate_href ); ?>" tabindex="-1" aria-hidden="true"><?php echo esc_html( Texts::get( 'details' ) ); ?> →</a></td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>

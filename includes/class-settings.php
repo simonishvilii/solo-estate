@@ -79,7 +79,8 @@ class Settings {
 			'alt_symbol'         => '$',
 			// "nbg" = National Bank of Georgia, refreshed automatically; "manual" = alt_rate below.
 			'rate_source'        => 'nbg',
-			'alt_rate'           => '0.37',
+			// No made-up rate: until the bank answers (or a rate is entered), prices stay in the base currency only.
+			'alt_rate'           => '',
 			'default_currency'   => 'base',
 			'area_unit'          => 'm²',
 
@@ -93,6 +94,7 @@ class Settings {
 			'ip_header'          => '',
 			'lead_show_on'       => 'flat',
 			'tracking_events'    => 1,
+			'lead_attribution'   => 1,
 
 			// Appearance.
 			'accent_color'       => '#164d47',
@@ -116,7 +118,7 @@ class Settings {
 			'font_size'          => 0,
 			'radius'             => 10,
 			'text_color'         => '#1f2a2e',
-			'muted_color'        => '#6b7478',
+			'muted_color'        => '#5b6468',
 			'line_color'         => '#e3e6e8',
 			'soft_color'         => '#f5f6f4',
 			'card_color'         => '#ffffff',
@@ -154,16 +156,21 @@ class Settings {
 		return isset( $all[ $key ] ) ? $all[ $key ] : null;
 	}
 
+	/** @var string[] Values the last save() changed or dropped, for the admin to see. */
+	public static $warnings = array();
+
 	/**
-	 * Sanitizes and stores settings from a request array.
+	 * Sanitizes and stores settings from a request array; Settings::$warnings lists what was
+	 * not taken as entered.
 	 *
 	 * @param array $input Raw input.
 	 */
 	public static function save( array $input ) {
-		$defaults = self::defaults();
-		$out      = array();
+		$defaults       = self::defaults();
+		$out            = array();
+		self::$warnings = array();
 
-		$checkboxes = array( 'show_prices', 'alt_enabled', 'leads_enabled', 'tracking_events', 'show_lists', 'project_cards', 'show_filter', 'tooltip_image', 'auto_sold_out', 'sold_out_nolink', 'card_shadow', 'delete_on_uninstall' );
+		$checkboxes = array( 'show_prices', 'alt_enabled', 'leads_enabled', 'tracking_events', 'lead_attribution', 'show_lists', 'project_cards', 'show_filter', 'tooltip_image', 'auto_sold_out', 'sold_out_nolink', 'card_shadow', 'delete_on_uninstall' );
 		foreach ( $checkboxes as $key ) {
 			$out[ $key ] = empty( $input[ $key ] ) ? 0 : 1;
 		}
@@ -181,14 +188,34 @@ class Settings {
 		$out['lead_show_on']     = ( isset( $input['lead_show_on'] ) && in_array( $input['lead_show_on'], array( 'flat', 'all', 'none' ), true ) ) ? $input['lead_show_on'] : 'flat';
 		$out['lead_webhook']     = isset( $input['lead_webhook'] ) ? esc_url_raw( wp_unslash( $input['lead_webhook'] ), array( 'https' ) ) : '';
 		$out['lead_webhook_secret'] = isset( $input['lead_webhook_secret'] ) ? preg_replace( '/[^A-Za-z0-9_\-]/', '', wp_unslash( $input['lead_webhook_secret'] ) ) : '';
+		// Say what was not taken as entered, instead of a plain "Saved".
+		if ( '' === $out['lead_webhook'] && isset( $input['lead_webhook'] ) && '' !== trim( wp_unslash( $input['lead_webhook'] ) ) ) {
+			self::$warnings[] = __( 'Webhook URL was not saved: it must be a full https:// address.', 'solo-estate' );
+		}
+		if ( isset( $input['lead_webhook_secret'] ) && $out['lead_webhook_secret'] !== trim( wp_unslash( $input['lead_webhook_secret'] ) ) ) {
+			self::$warnings[] = __( 'Webhook secret: only letters, digits, - and _ are kept; other characters were removed.', 'solo-estate' );
+		}
+		if ( isset( $input['alt_rate'] ) && '' !== trim( wp_unslash( $input['alt_rate'] ) ) && (float) str_replace( ',', '.', wp_unslash( $input['alt_rate'] ) ) <= 0 ) {
+			self::$warnings[] = __( 'The fixed exchange rate must be a number above 0; it is not used.', 'solo-estate' );
+		}
+		foreach ( array( 'base_currency', 'alt_currency' ) as $key ) {
+			if ( '' !== $out[ $key ] && ! preg_match( '/^[A-Za-z]{3}$/', $out[ $key ] ) ) {
+				/* translators: %s: entered currency code */
+				self::$warnings[] = sprintf( __( 'Currency code "%s" is not a 3-letter code (like GEL, USD); the bank rate cannot be found for it.', 'solo-estate' ), $out[ $key ] );
+			}
+		}
 		$out['lead_retention']   = isset( $input['lead_retention'] ) ? min( 3650, absint( $input['lead_retention'] ) ) : 0;
 		$out['ip_header']        = ( isset( $input['ip_header'] ) && in_array( $input['ip_header'], array( '', 'cf', 'xff' ), true ) ) ? $input['ip_header'] : '';
 
 		$emails = array();
 		foreach ( explode( ',', isset( $input['lead_recipients'] ) ? wp_unslash( $input['lead_recipients'] ) : '' ) as $email ) {
-			$email = sanitize_email( trim( $email ) );
+			$raw   = trim( $email );
+			$email = sanitize_email( $raw );
 			if ( is_email( $email ) ) {
 				$emails[] = $email;
+			} elseif ( '' !== $raw ) {
+				/* translators: %s: entered address */
+				self::$warnings[] = sprintf( __( 'Lead e-mail "%s" is not a valid address and was left out.', 'solo-estate' ), $raw );
 			}
 		}
 		$out['lead_recipients'] = implode( ', ', $emails );
@@ -196,6 +223,22 @@ class Settings {
 		foreach ( array( 'accent_color', 'highlight_color', 'sold_color', 'commercial_color', 'commercial_hover', 'text_color', 'muted_color', 'line_color', 'soft_color', 'card_color', 'button_color', 'button_text', 'accent_text' ) as $key ) {
 			$color       = isset( $input[ $key ] ) ? sanitize_hex_color( wp_unslash( $input[ $key ] ) ) : '';
 			$out[ $key ] = $color ? $color : $defaults[ $key ];
+		}
+		// Text that would be hard to read with these colours (below WCAG AA, 4.5:1).
+		$pairs = array(
+			array( 'text_color', 'card_color', __( 'Text on cards', 'solo-estate' ) ),
+			array( 'text_color', 'soft_color', __( 'Text on soft backgrounds', 'solo-estate' ) ),
+			array( 'muted_color', 'card_color', __( 'Secondary text on cards', 'solo-estate' ) ),
+			array( 'muted_color', 'soft_color', __( 'Secondary text on soft backgrounds', 'solo-estate' ) ),
+			array( 'accent_text', 'accent_color', __( 'Text on the accent colour (tooltips, active tabs)', 'solo-estate' ) ),
+			array( 'button_text', '' !== (string) $out['button_color'] ? 'button_color' : 'accent_color', __( 'Button text', 'solo-estate' ) ),
+		);
+		foreach ( $pairs as $pair ) {
+			$ratio = self::contrast( (string) $out[ $pair[0] ], (string) $out[ $pair[1] ] );
+			if ( $ratio && $ratio < 4.5 ) {
+				/* translators: 1: what, 2: contrast ratio like 3.9 */
+				self::$warnings[] = sprintf( __( '%1$s: contrast %2$s:1 is below 4.5:1, which is hard to read for many visitors. Choose a darker or lighter colour.', 'solo-estate' ), $pair[2], number_format_i18n( $ratio, 1 ) );
+			}
 		}
 		// A font stack like: Manrope, "Noto Sans Georgian", sans-serif. Nothing that could end the CSS rule.
 		$font                = isset( $input['font_family'] ) ? preg_replace( '/[^A-Za-z0-9 ,\'"\-]/', '', wp_unslash( $input['font_family'] ) ) : '';
@@ -212,5 +255,37 @@ class Settings {
 		update_option( self::OPTION, $out );
 		self::$cache = null;
 		I18n::reset();
+		Nodes::changed( 'settings' );
+	}
+
+	/**
+	 * WCAG contrast ratio of two hex colours (1–21), or 0 when one is missing.
+	 *
+	 * @param string $a Colour.
+	 * @param string $b Colour.
+	 * @return float
+	 */
+	public static function contrast( $a, $b ) {
+		$lum = static function ( $hex ) {
+			$hex = ltrim( (string) $hex, '#' );
+			if ( 3 === strlen( $hex ) ) {
+				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+			}
+			if ( 6 !== strlen( $hex ) || ! ctype_xdigit( $hex ) ) {
+				return null;
+			}
+			$out = 0.0;
+			foreach ( array( 0.2126, 0.7152, 0.0722 ) as $i => $weight ) {
+				$c    = hexdec( substr( $hex, $i * 2, 2 ) ) / 255;
+				$out += $weight * ( $c <= 0.03928 ? $c / 12.92 : pow( ( $c + 0.055 ) / 1.055, 2.4 ) );
+			}
+			return $out;
+		};
+		$la = $lum( $a );
+		$lb = $lum( $b );
+		if ( null === $la || null === $lb ) {
+			return 0.0;
+		}
+		return round( ( max( $la, $lb ) + 0.05 ) / ( min( $la, $lb ) + 0.05 ), 2 );
 	}
 }

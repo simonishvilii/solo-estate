@@ -114,11 +114,33 @@ class Assets {
 				'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 				'lang'     => I18n::current(),
 				'tracking' => (bool) Settings::get( 'tracking_events' ),
+				'attribution' => \SoloEstate\Attribution::enabled(),
 				'i18n'     => array(
-					'error'   => Texts::get( 'lead_error' ),
-					'success' => Texts::get( 'lead_success' ),
+					'error'    => Texts::get( 'lead_error' ),
+					'success'  => Texts::get( 'lead_success' ),
+					'close'    => Texts::get( 'close' ),
+					'previous' => Texts::get( 'previous' ),
+					'next'     => Texts::get( 'next' ),
+					'photos'   => Texts::get( 'photos' ),
+					'tour'     => Texts::get( 'virtual_tour' ),
 				),
 			)
 		);
+	}
+
+	/**
+	 * Styles that could not go into <head> any more (the selector was found only while the
+	 * page body was rendered: page builder, widget, template part). Printed right before the
+	 * selector so it never shows unstyled; WordPress would otherwise print them in the footer.
+	 *
+	 * @return string
+	 */
+	public static function late_styles() {
+		if ( ! did_action( 'wp_head' ) || wp_style_is( 'solo-estate', 'done' ) ) {
+			return '';
+		}
+		ob_start();
+		wp_print_styles( array( 'solo-estate-font', 'solo-estate' ) );
+		return (string) ob_get_clean();
 	}
 }

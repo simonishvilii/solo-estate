@@ -38,6 +38,8 @@ class Nodes_Page {
 		add_action( 'admin_post_solo_estate_bulk_nodes', array( __CLASS__, 'handle_bulk' ) );
 		add_action( 'admin_post_solo_estate_apply_layout', array( __CLASS__, 'handle_apply_layout' ) );
 		add_action( 'admin_post_solo_estate_delete_misplaced', array( __CLASS__, 'handle_delete_misplaced' ) );
+		add_action( 'admin_post_solo_estate_restore_trash', array( __CLASS__, 'handle_restore_trash' ) );
+		add_action( 'admin_post_solo_estate_purge_trash', array( __CLASS__, 'handle_purge_trash' ) );
 	}
 
 	/**
@@ -75,6 +77,8 @@ class Nodes_Page {
 			} else {
 				self::render_sales( $node );
 			}
+		} elseif ( 'trash' === $action && Admin::can_manage() ) {
+			self::render_trash();
 		} else {
 			self::render_misplaced();
 			self::render_projects();
@@ -103,7 +107,7 @@ class Nodes_Page {
 		echo '</ul>';
 		if ( Admin::can_manage() ) {
 			printf(
-				'<p><a class="button" href="%1$s" data-solo-estate-confirm>%2$s</a></p>',
+				'<p><a class="button" href="%1$s" data-solo-estate-confirm="trash">%2$s</a></p>',
 				esc_url( wp_nonce_url( add_query_arg( 'action', 'solo_estate_delete_misplaced', admin_url( 'admin-post.php' ) ), 'solo_estate_delete_misplaced' ) ),
 				esc_html__( 'Delete them', 'solo-estate' )
 			);
@@ -112,14 +116,61 @@ class Nodes_Page {
 	}
 
 	/**
+	 * Deleted items, restorable for Trash::RETENTION days.
+	 */
+	private static function render_trash() {
+		echo '<h1 class="wp-heading-inline">' . esc_html__( 'Trash', 'solo-estate' ) . '</h1><hr class="wp-header-end">';
+		/* translators: %d: number of days */
+		echo '<p class="description">' . esc_html( sprintf( __( 'Deleted projects, buildings, floors and apartments stay here for %d days with everything inside (outlines, prices, specification). Restoring puts them back where they were.', 'solo-estate' ), \SoloEstate\Trash::RETENTION ) ) . '</p>';
+		$entries = \SoloEstate\Trash::all();
+		if ( ! $entries ) {
+			echo '<div class="solo-estate-empty"><p>' . esc_html__( 'The trash is empty.', 'solo-estate' ) . '</p></div>';
+		} else {
+			echo '<table class="wp-list-table widefat fixed striped solo-estate-table"><thead><tr>';
+			echo '<th class="column-primary">' . esc_html__( 'Item', 'solo-estate' ) . '</th><th>' . esc_html__( 'Items inside', 'solo-estate' ) . '</th><th>' . esc_html__( 'Deleted', 'solo-estate' ) . '</th><th></th></tr></thead><tbody>';
+			foreach ( $entries as $entry ) {
+				$user = $entry->user_id ? get_userdata( (int) $entry->user_id ) : null;
+				echo '<tr><td class="column-primary"><strong>' . esc_html( $entry->title ) . '</strong> <span class="description">' . esc_html( Nodes::level_label( $entry->level ) ) . '</span></td>';
+				echo '<td>' . (int) max( 0, $entry->items - 1 ) . '</td>';
+				echo '<td>' . esc_html( mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry->deleted_at ) ) . ( $user ? ' — ' . esc_html( $user->display_name ) : '' ) . '</td><td>';
+				printf( '<a class="button" href="%1$s">%2$s</a> ', esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'solo_estate_restore_trash', 'id' => (int) $entry->id ), admin_url( 'admin-post.php' ) ), 'solo_estate_restore_trash_' . (int) $entry->id ) ), esc_html__( 'Restore', 'solo-estate' ) );
+				printf( '<a class="solo-estate-delete" data-solo-estate-confirm href="%1$s">%2$s</a>', esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'solo_estate_purge_trash', 'id' => (int) $entry->id ), admin_url( 'admin-post.php' ) ), 'solo_estate_purge_trash_' . (int) $entry->id ) ), esc_html__( 'Delete permanently', 'solo-estate' ) );
+				echo '</td></tr>';
+			}
+			echo '</tbody></table>';
+		}
+		echo '<p><a href="' . esc_url( Admin::url() ) . '">' . esc_html__( '← All projects', 'solo-estate' ) . '</a></p>';
+	}
+
+	/**
+	 * Restores a trash entry.
+	 */
+	public static function handle_restore_trash() {
+		$id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		Admin::check( 'solo_estate_restore_trash_' . $id );
+		$error = \SoloEstate\Trash::restore( $id );
+		Admin::redirect( Admin::url( 'solo-estate', array( 'action' => 'trash' ) ), '' === $error ? 'restored' : ( 'parent' === $error ? 'restore_parent' : 'error' ) );
+	}
+
+	/**
+	 * Deletes a trash entry for good.
+	 */
+	public static function handle_purge_trash() {
+		$id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		Admin::check( 'solo_estate_purge_trash_' . $id );
+		\SoloEstate\Trash::purge( $id );
+		Admin::redirect( Admin::url( 'solo-estate', array( 'action' => 'trash' ) ), 'deleted' );
+	}
+
+	/**
 	 * Deletes the units that sit inside other units.
 	 */
 	public static function handle_delete_misplaced() {
 		Admin::check( 'solo_estate_delete_misplaced' );
 		foreach ( Nodes::misplaced() as $item ) {
-			Nodes::delete( $item->id );
+			\SoloEstate\Trash::move( $item->id );
 		}
-		Admin::redirect( Admin::url(), 'deleted' );
+		Admin::redirect( Admin::url(), 'trashed' );
 	}
 
 	private static function not_found() {
@@ -142,6 +193,11 @@ class Nodes_Page {
 		echo '<h1 class="wp-heading-inline">' . esc_html__( 'Projects', 'solo-estate' ) . '</h1>';
 		if ( Admin::can_edit() ) {
 			printf( ' <a class="page-title-action" href="%1$s">%2$s</a>', esc_url( Admin::url( 'solo-estate', array( 'action' => 'new' ) ) ), esc_html__( 'Add project', 'solo-estate' ) );
+		}
+		$trashed = Admin::can_manage() ? \SoloEstate\Trash::count() : 0;
+		if ( $trashed ) {
+			/* translators: %d: number of deleted items */
+			printf( ' <a class="page-title-action" href="%1$s">%2$s</a>', esc_url( Admin::url( 'solo-estate', array( 'action' => 'trash' ) ) ), esc_html( sprintf( __( 'Trash (%d)', 'solo-estate' ), $trashed ) ) );
 		}
 		echo '<hr class="wp-header-end">';
 
@@ -170,7 +226,7 @@ class Nodes_Page {
 			echo '<div class="row-actions">';
 			printf( '<span class="edit"><a href="%1$s">%2$s</a></span>', esc_url( $edit ), esc_html__( 'Open', 'solo-estate' ) );
 			if ( Admin::can_manage() ) {
-				printf( ' | <span class="trash"><a href="%1$s" data-solo-estate-confirm>%2$s</a></span>', esc_url( self::action_url( 'solo_estate_delete_node', $project->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
+				printf( ' | <span class="trash"><a href="%1$s" data-solo-estate-confirm="trash">%2$s</a></span>', esc_url( self::action_url( 'solo_estate_delete_node', $project->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
 			}
 			echo '</div></td>';
 			echo '<td>' . (int) ( isset( $counts[ $project->id ] ) ? $counts[ $project->id ] : 0 ) . '</td>';
@@ -492,7 +548,7 @@ class Nodes_Page {
 				printf( '<a href="%1$s">%2$s</a><br>', esc_url( self::action_url( 'solo_estate_duplicate_node', $node->id ) ), esc_html__( 'Duplicate (with everything inside)', 'solo-estate' ) );
 			}
 			if ( Admin::can_manage() ) {
-				printf( '<a class="solo-estate-delete" href="%1$s" data-solo-estate-confirm>%2$s</a>', esc_url( self::action_url( 'solo_estate_delete_node', $node->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
+				printf( '<a class="solo-estate-delete" href="%1$s" data-solo-estate-confirm="trash">%2$s</a>', esc_url( self::action_url( 'solo_estate_delete_node', $node->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
 			}
 			echo '</p>';
 		}
@@ -741,11 +797,12 @@ class Nodes_Page {
 		echo '<li>' . esc_html__( 'Point at an edge: a new point appears — press and drag to add it there.', 'solo-estate' ) . '</li>';
 		echo '<li>' . esc_html__( 'Drag inside the outline to move the whole outline. Other items on this image are shown in grey.', 'solo-estate' ) . '</li>';
 		echo '<li>' . esc_html__( 'Mouse wheel zooms in and out; drag outside the outline to move the zoomed image.', 'solo-estate' ) . '</li>';
+		echo '<li id="solo-estate-poly-keys">' . esc_html__( 'Keyboard (click the image or Tab to it): ] and [ select the next and previous point, arrows move it (Shift: faster; with no point selected, the whole outline), Enter adds a point after the selected one, Delete removes it, Esc deselects, Ctrl+Z undoes.', 'solo-estate' ) . '</li>';
 		echo '</ul>';
 		// Same coordinate frame as the front end (Renderer::stage), which reads the size from the
 		// attachment metadata. The file itself can differ (resized by an optimization plugin,
 		// replaced in the media library); drawing in its pixels shifted outlines on the site.
-		list( $frame_w, $frame_h ) = Renderer::image_size( $parent->image_id );
+		list( $frame_w, $frame_h ) = Nodes::coord_space( $parent );
 		printf(
 			'<div class="solo-estate-poly" data-solo-estate-poly data-src="%1$s" data-siblings="%2$s" data-width="%3$d" data-height="%4$d">',
 			esc_url( $src ),
@@ -804,8 +861,11 @@ class Nodes_Page {
 		// Overview map: every child polygon on this node's image.
 		$src = $node->image_id ? wp_get_attachment_image_url( $node->image_id, 'full' ) : '';
 		if ( $src ) {
-			list( $w, $h ) = Renderer::image_size( $node->image_id );
+			list( $w, $h ) = Nodes::coord_space( $node );
 			if ( $w && $h ) {
+				if ( Nodes::frame_mismatch( $node ) ) {
+					echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'This image has different proportions than the one the outlines were drawn on, so they are stretched to fit. Check them on the map below and redraw the ones that are off.', 'solo-estate' ) . '</p></div>';
+				}
 				echo '<details class="solo-estate-card solo-estate-overview" open><summary>' . esc_html__( 'Map', 'solo-estate' ) . '</summary><div class="solo-estate-overview__stage">';
 				printf( '<img src="%s" alt="">', esc_url( $src ) );
 				printf( '<svg viewBox="0 0 %1$d %2$d" preserveAspectRatio="none">', (int) $w, (int) $h );
@@ -864,7 +924,7 @@ class Nodes_Page {
 			echo '<option value="delete">' . esc_html__( 'Delete', 'solo-estate' ) . '</option>';
 		}
 		echo '</select> ';
-		submit_button( __( 'Apply', 'solo-estate' ), 'action', 'apply', false, array( 'data-solo-estate-bulk-confirm' => '1' ) );
+		submit_button( __( 'Apply', 'solo-estate' ), 'action', 'apply', false, array( 'data-solo-estate-bulk-confirm' => 'trash' ) );
 		echo '</div></div>';
 
 		echo '<table class="wp-list-table widefat fixed striped solo-estate-table"><thead><tr>';
@@ -895,7 +955,7 @@ class Nodes_Page {
 				$actions[] = sprintf( '<span><a href="%1$s">%2$s</a></span>', esc_url( self::action_url( 'solo_estate_duplicate_node', $child->id ) ), esc_html__( 'Duplicate', 'solo-estate' ) );
 			}
 			if ( Admin::can_manage() ) {
-				$actions[] = sprintf( '<span class="trash"><a href="%1$s" data-solo-estate-confirm>%2$s</a></span>', esc_url( self::action_url( 'solo_estate_delete_node', $child->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
+				$actions[] = sprintf( '<span class="trash"><a href="%1$s" data-solo-estate-confirm="trash">%2$s</a></span>', esc_url( self::action_url( 'solo_estate_delete_node', $child->id ) ), esc_html__( 'Delete', 'solo-estate' ) );
 			}
 			echo implode( ' | ', $actions ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
 			echo '</div></td>';
@@ -1106,8 +1166,10 @@ class Nodes_Page {
 		if ( ! $node ) {
 			Admin::redirect( Admin::url(), 'error' );
 		}
-		Nodes::delete( $id );
-		Admin::redirect( $node->parent_id ? Admin::url( 'solo-estate', array( 'node' => $node->parent_id ) ) : Admin::url(), 'deleted' );
+		if ( ! \SoloEstate\Trash::move( $id ) ) {
+			Admin::redirect( Admin::url( 'solo-estate', array( 'node' => $id ) ), 'error' );
+		}
+		Admin::redirect( $node->parent_id ? Admin::url( 'solo-estate', array( 'node' => $node->parent_id ) ) : Admin::url(), 'trashed' );
 	}
 
 	/**
@@ -1120,12 +1182,12 @@ class Nodes_Page {
 		$node   = Nodes::get( $id );
 		$new_id = ( $node && 'project' !== $node->level ) ? Nodes::duplicate( $id ) : 0;
 		if ( ! $new_id ) {
-			Admin::redirect( Admin::url(), 'error' );
+			Admin::redirect( $node ? Admin::url( 'solo-estate', array( 'node' => $node->id ) ) : Admin::url(), 'error' );
 		}
 		if ( is_numeric( $node->number ) && in_array( $node->level, array( 'floor', 'building', 'phase', 'parking', 'villa_floor' ), true ) ) {
 			Nodes::save( array( 'number' => (string) ( (int) $node->number + 1 ) ), $new_id );
 		}
-		Admin::redirect( Admin::url( 'solo-estate', array( 'node' => $new_id ) ), 'duplicated' );
+		Admin::redirect( Admin::url( 'solo-estate', array( 'node' => $new_id ) ), Nodes::$copy_failures ? 'duplicated_partial' : 'duplicated' );
 	}
 
 	/**
@@ -1157,8 +1219,13 @@ class Nodes_Page {
 			}
 			$target = Nodes::get( $target_id );
 			if ( $copy_image && $source->image_id && ( $overwrite || ! $target->image_id ) ) {
-				Nodes::save( array( 'image_id' => $source->image_id ), $target->id );
+				list( $sw, $sh ) = Nodes::coord_space( $source );
+				Nodes::save( array( 'image_id' => $source->image_id, 'coord_w' => $sw, 'coord_h' => $sh ), $target->id );
+				$target = Nodes::get( $target_id );
 			}
+			// Outlines are converted when the target floor's image has another size.
+			$from_frame = Nodes::coord_space( $source );
+			$to_frame   = $target->image_id ? Nodes::coord_space( $target ) : $from_frame;
 			foreach ( Nodes::sorted_children( $target->id ) as $i => $flat ) {
 				if ( ! isset( $flats[ $i ] ) ) {
 					break;
@@ -1166,7 +1233,7 @@ class Nodes_Page {
 				$from = $flats[ $i ];
 				$data = array();
 				if ( '' !== (string) $from->coords && ( $overwrite || ! Nodes::points( $flat->coords ) ) ) {
-					$data['coords'] = $from->coords;
+					$data['coords'] = Nodes::scale_coords( $from->coords, $from_frame, $to_frame );
 				}
 				if ( $copy_details ) {
 					foreach ( array( 'area', 'area_living', 'area_summer', 'rooms' ) as $column ) {
@@ -1213,9 +1280,9 @@ class Nodes_Page {
 				Admin::deny();
 			}
 			foreach ( array_keys( $children ) as $id ) {
-				Nodes::delete( $id );
+				\SoloEstate\Trash::move( $id );
 			}
-			Admin::redirect( $back, 'deleted' );
+			Admin::redirect( $back, 'trashed' );
 		}
 		if ( 0 === strpos( $bulk, 'access:' ) ) {
 			$access = absint( substr( $bulk, 7 ) );

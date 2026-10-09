@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Solo Estate\n"
 "Report-Msgid-Bugs-To: https://solostudio.ge\n"
-"POT-Creation-Date: 2026-10-07 08:53+0000\n"
+"POT-Creation-Date: 2026-10-09 17:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,13 +22,13 @@ msgstr ""
 msgid "Solo Estate"
 msgstr ""
 
-#: includes/admin/class-admin.php:42 includes/admin/class-nodes-page.php:142
-#: includes/admin/class-nodes-page.php:631
-#: includes/admin/class-statuses-page.php:38 includes/class-nodes.php:113
+#: includes/admin/class-admin.php:42 includes/admin/class-nodes-page.php:193
+#: includes/admin/class-nodes-page.php:687
+#: includes/admin/class-statuses-page.php:44 includes/class-nodes.php:119
 msgid "Projects"
 msgstr ""
 
-#: includes/admin/class-admin.php:43 includes/admin/class-statuses-page.php:31
+#: includes/admin/class-admin.php:43 includes/admin/class-statuses-page.php:37
 msgid "Statuses"
 msgstr ""
 
@@ -69,55 +69,120 @@ msgstr ""
 msgid "Add to gallery"
 msgstr ""
 
-#: includes/admin/class-admin.php:75 includes/admin/class-nodes-page.php:690
-#: includes/admin/class-ui.php:106 includes/admin/class-ui.php:129
+#: includes/admin/class-admin.php:75 includes/admin/class-nodes-page.php:746
+#: includes/admin/class-ui.php:106 includes/admin/class-ui.php:131
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-admin.php:76
+#: includes/admin/class-admin.php:76 includes/admin/class-ui.php:132
+msgid "Move earlier"
+msgstr ""
+
+#: includes/admin/class-admin.php:77 includes/admin/class-ui.php:133
+msgid "Move later"
+msgstr ""
+
+#: includes/admin/class-admin.php:79
+#, php-format
+msgid "Moved to position %1$d of %2$d."
+msgstr ""
+
+#: includes/admin/class-admin.php:81
+#, php-format
+msgid "Point %1$d of %2$d: %3$d, %4$d."
+msgstr ""
+
+#: includes/admin/class-admin.php:83
+#, php-format
+msgid "Outline with %1$d points."
+msgstr ""
+
+#: includes/admin/class-admin.php:84
+msgid "Outline editor"
+msgstr ""
+
+#: includes/admin/class-admin.php:85
 msgid "Delete permanently? Everything inside will be deleted too."
 msgstr ""
 
-#: includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:86
+msgid ""
+"Delete? Everything inside goes too. It stays in the trash for 30 days and "
+"can be restored."
+msgstr ""
+
+#: includes/admin/class-admin.php:87
 msgid "Remove all points of this polygon?"
 msgstr ""
 
-#: includes/admin/class-admin.php:93
+#: includes/admin/class-admin.php:100
+#, php-format
+msgid ""
+"Solo Estate could not update its database tables: %s. It tries again in an "
+"hour; ask your host if the database user may create and alter tables."
+msgstr ""
+
+#: includes/admin/class-admin.php:108
 msgid "Saved."
 msgstr ""
 
-#: includes/admin/class-admin.php:94
+#: includes/admin/class-admin.php:109
 msgid "Deleted."
 msgstr ""
 
-#: includes/admin/class-admin.php:95
+#: includes/admin/class-admin.php:110
 msgid "Duplicated. You are now editing the copy."
 msgstr ""
 
-#: includes/admin/class-admin.php:96
+#: includes/admin/class-admin.php:111
+msgid "Duplicated, but some items inside could not be copied. Check the copy."
+msgstr ""
+
+#: includes/admin/class-admin.php:112
 msgid "Updated."
 msgstr ""
 
-#: includes/admin/class-admin.php:97
+#: includes/admin/class-admin.php:113
 msgid "Something went wrong. Nothing was changed."
 msgstr ""
 
-#: includes/admin/class-admin.php:98
+#: includes/admin/class-admin.php:114
 msgid "Style imported."
 msgstr ""
 
-#: includes/admin/class-admin.php:99
+#: includes/admin/class-admin.php:115
 msgid "This is not a Solo Estate style file. Nothing was changed."
 msgstr ""
 
-#: includes/admin/class-admin.php:104
+#: includes/admin/class-admin.php:116
+msgid ""
+"Moved to the trash. It can be restored from Projects → Trash for 30 days."
+msgstr ""
+
+#: includes/admin/class-admin.php:117
+msgid "Restored."
+msgstr ""
+
+#: includes/admin/class-admin.php:118
+msgid "Its parent no longer exists. Restore the parent first."
+msgstr ""
+
+#: includes/admin/class-admin.php:119
+msgid "Choose the status its items get; nothing was deleted."
+msgstr ""
+
+#: includes/admin/class-admin.php:124
 #, php-format
 msgid "Layout applied to %d apartment."
 msgid_plural "Layout applied to %d apartments."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-admin.php:128 includes/admin/class-nodes-page.php:131
+#: includes/admin/class-admin.php:129
+msgid "Saved, but please check:"
+msgstr ""
+
+#: includes/admin/class-admin.php:158 includes/admin/class-nodes-page.php:182
 msgid "You are not allowed to do this."
 msgstr ""
 
@@ -125,78 +190,124 @@ msgstr ""
 msgid "Export CSV"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:64
+#: includes/admin/class-leads-page.php:65
 #: includes/admin/class-localization.php:85
 #: includes/admin/class-localization.php:87
 msgid "Search"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:69
-#: includes/admin/class-nodes-page.php:845
+#: includes/admin/class-leads-page.php:70
+#: includes/admin/class-nodes-page.php:905
 msgid "Bulk actions"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:72
+#: includes/admin/class-leads-page.php:73
 #, php-format
 msgid "Mark as: %s"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:75
-#: includes/admin/class-nodes-page.php:173
-#: includes/admin/class-nodes-page.php:495
-#: includes/admin/class-nodes-page.php:864
-#: includes/admin/class-nodes-page.php:898
-#: includes/admin/class-specs-page.php:66
-#: includes/admin/class-statuses-page.php:80
+#: includes/admin/class-leads-page.php:76
+#: includes/admin/class-nodes-page.php:229
+#: includes/admin/class-nodes-page.php:551
+#: includes/admin/class-nodes-page.php:924
+#: includes/admin/class-nodes-page.php:958
+#: includes/admin/class-specs-page.php:77
+#: includes/admin/class-statuses-page.php:94
+#: includes/admin/class-statuses-page.php:102
 msgid "Delete"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:78
-#: includes/admin/class-nodes-page.php:867
+#: includes/admin/class-leads-page.php:79
+#: includes/admin/class-nodes-page.php:927
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:81
+#: includes/admin/class-leads-page.php:82
 #, php-format
 msgid "%s item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-leads-page.php:98
+#: includes/admin/class-leads-page.php:99
 msgid "Date"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:98
-#: includes/admin/class-nodes-page.php:872 includes/class-leads.php:106
+#: includes/admin/class-leads-page.php:99
+#: includes/admin/class-nodes-page.php:932 includes/class-leads.php:138
 msgid "Name"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:98 includes/class-leads.php:107
+#: includes/admin/class-leads-page.php:99 includes/class-leads.php:139
 msgid "Phone"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:98 includes/class-nodes.php:118
+#: includes/admin/class-leads-page.php:99 includes/class-nodes.php:124
 msgid "Apartment"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:98
+#: includes/admin/class-leads-page.php:99 includes/class-attribution.php:167
+msgid "Source"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:99
 msgid "Language"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:98
-#: includes/admin/class-nodes-page.php:332
-#: includes/admin/class-nodes-page.php:564
-#: includes/admin/class-nodes-page.php:876
+#: includes/admin/class-leads-page.php:99
+#: includes/admin/class-nodes-page.php:388
+#: includes/admin/class-nodes-page.php:620
+#: includes/admin/class-nodes-page.php:936
 msgid "Status"
 msgstr ""
 
-#: includes/admin/class-leads-page.php:104
+#: includes/admin/class-leads-page.php:105
 msgid "No leads yet."
 msgstr ""
 
-#: includes/admin/class-leads-page.php:128
+#: includes/admin/class-leads-page.php:129
 msgid "Open page"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:142
+msgid "First page"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:242
+#, php-format
+msgid ""
+"A lead notification (%1$s) failed on %2$s: %3$s. The leads are saved here; "
+"check the e-mail / webhook settings."
+msgstr ""
+
+#: includes/admin/class-leads-page.php:242
+#: includes/admin/class-leads-page.php:258
+msgid "e-mail"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:246
+msgid "Notification log"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:249
+#, php-format
+msgid "Spam protection rejected %1$d submissions since %2$s."
+msgstr ""
+
+#: includes/admin/class-leads-page.php:252
+msgid "Time"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:252
+msgid "Lead"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:252
+msgid "Channel"
+msgstr ""
+
+#: includes/admin/class-leads-page.php:252
+msgid "Result"
 msgstr ""
 
 #: includes/admin/class-localization.php:77
@@ -250,7 +361,7 @@ msgid "Admin"
 msgstr ""
 
 #: includes/admin/class-localization.php:129
-#: includes/admin/class-nodes-page.php:488
+#: includes/admin/class-nodes-page.php:544
 msgid "Save changes"
 msgstr ""
 
@@ -262,668 +373,724 @@ msgstr ""
 msgid "Pages"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:94
+#: includes/admin/class-nodes-page.php:98
 #, php-format
 msgid "%d item is inside an apartment, where nothing can be."
 msgid_plural "%d items are inside an apartment, where nothing can be."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-nodes-page.php:95
+#: includes/admin/class-nodes-page.php:99
 msgid ""
 "They came from the old database by mistake (usually duplicates). They are "
 "not shown on the site or counted, so they can be deleted."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:108
+#: includes/admin/class-nodes-page.php:112
 msgid "Delete them"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:126
-msgid "Not found"
+#: includes/admin/class-nodes-page.php:122
+msgid "Trash"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:124
+#, php-format
+msgid ""
+"Deleted projects, buildings, floors and apartments stay here for %d days "
+"with everything inside (outlines, prices, specification). Restoring puts "
+"them back where they were."
 msgstr ""
 
 #: includes/admin/class-nodes-page.php:127
-#: includes/admin/class-nodes-page.php:132
+msgid "The trash is empty."
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:130
+msgid "Item"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:130
+#: includes/admin/class-nodes-page.php:212
+msgid "Items inside"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:130
+msgid "Deleted"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:136
+msgid "Restore"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:137
+msgid "Delete permanently"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:142
+#: includes/admin/class-nodes-page.php:178
+#: includes/admin/class-nodes-page.php:183
 msgid "← All projects"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:144
+#: includes/admin/class-nodes-page.php:177
+msgid "Not found"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:195
 msgid "Add project"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:148
+#: includes/admin/class-nodes-page.php:200
+#, php-format
+msgid "Trash (%d)"
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:204
 #, php-format
 msgid ""
 "Put %s on a page to show all projects (Projects → project → building → floor "
 "→ apartment). Use the per-project shortcode below to show a single project."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:150
+#: includes/admin/class-nodes-page.php:206
 msgid ""
 "No projects yet. Create one, or import apartments from a CSV/Excel file "
 "under Solo Estate → Import / Export."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:155
-#: includes/admin/class-transfer-page.php:86 includes/class-nodes.php:113
+#: includes/admin/class-nodes-page.php:211
+#: includes/admin/class-transfer-page.php:92 includes/class-nodes.php:119
 msgid "Project"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:156
-msgid "Items inside"
-msgstr ""
-
-#: includes/admin/class-nodes-page.php:157
+#: includes/admin/class-nodes-page.php:213
 msgid "Available"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:158
-#: includes/admin/class-nodes-page.php:552
-#: includes/admin/class-nodes-page.php:879
+#: includes/admin/class-nodes-page.php:214
+#: includes/admin/class-nodes-page.php:608
+#: includes/admin/class-nodes-page.php:939
 msgid "Sold"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:159
+#: includes/admin/class-nodes-page.php:215
 msgid "Shortcode"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:171
-#: includes/admin/class-nodes-page.php:893
+#: includes/admin/class-nodes-page.php:227
+#: includes/admin/class-nodes-page.php:953
 msgid "Open"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:179
-#: includes/admin/class-nodes-page.php:230
+#: includes/admin/class-nodes-page.php:235
+#: includes/admin/class-nodes-page.php:286
 msgid "Click to copy"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:225
-#: includes/admin/class-nodes-page.php:791
+#: includes/admin/class-nodes-page.php:281
+#: includes/admin/class-nodes-page.php:848
 #, php-format
 msgid "Add %s"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:240
+#: includes/admin/class-nodes-page.php:296
 #, php-format
 msgid "Available: %1$d of %2$d."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:241
+#: includes/admin/class-nodes-page.php:297
 msgid "Sold:"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:259
+#: includes/admin/class-nodes-page.php:315
 msgid "Project name"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:264
+#: includes/admin/class-nodes-page.php:320
 msgid "Phase number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:265
+#: includes/admin/class-nodes-page.php:321
 msgid "Building number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:266
-#: includes/admin/class-nodes-page.php:271
+#: includes/admin/class-nodes-page.php:322
+#: includes/admin/class-nodes-page.php:327
 msgid "Floor number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:267
+#: includes/admin/class-nodes-page.php:323
 msgid "Parking level"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:268
+#: includes/admin/class-nodes-page.php:324
 msgid "Apartment number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:269
+#: includes/admin/class-nodes-page.php:325
 msgid "Space number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:270
+#: includes/admin/class-nodes-page.php:326
 msgid "Villa number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:272
+#: includes/admin/class-nodes-page.php:328
 msgid "Parking space number"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:278
+#: includes/admin/class-nodes-page.php:334
 msgid "Optional, e.g. -1. Give the parking a name below instead if you like."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:280
+#: includes/admin/class-nodes-page.php:336
 msgid ""
 "Optional: a sports field, boulevard or commercial building needs no number, "
 "only a type below."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:286
+#: includes/admin/class-nodes-page.php:342
 msgid "Type (before the number)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:287
+#: includes/admin/class-nodes-page.php:343
 msgid "e.g. Block, Commercial building"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:288
+#: includes/admin/class-nodes-page.php:344
 msgid ""
 "The name is this word plus the number: \"Block\" + \"A\" = \"Block A\". "
 "Without a number the word alone is the name, e.g. \"Sports field\". Empty = "
 "\"Building\"."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:294
+#: includes/admin/class-nodes-page.php:350
 msgid "e.g. Phase I"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:295
+#: includes/admin/class-nodes-page.php:351
 msgid "Optional, e.g. Ground floor"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:296
+#: includes/admin/class-nodes-page.php:352
 msgid "e.g. Underground parking"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:297
+#: includes/admin/class-nodes-page.php:353
 msgid "Optional, e.g. Penthouse"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:298
+#: includes/admin/class-nodes-page.php:354
 msgid "Optional, e.g. Shop 2"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:299
+#: includes/admin/class-nodes-page.php:355
 msgid "Optional, e.g. Villa Rose"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:301
+#: includes/admin/class-nodes-page.php:357
 msgid "Custom name"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:302
+#: includes/admin/class-nodes-page.php:358
 msgid "Optional"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:305
+#: includes/admin/class-nodes-page.php:361
 msgid ""
 "Optional. When filled in, it replaces the whole name (type and number), e.g. "
 "\"Rose Residence\". Leave empty to show the type and number."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:306
+#: includes/admin/class-nodes-page.php:362
 msgid "Leave empty to show the type and number, e.g. \"Apartment 5\"."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:312
+#: includes/admin/class-nodes-page.php:368
 msgid "Entrance"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:314
+#: includes/admin/class-nodes-page.php:370
 msgid "Optional, e.g. 2 or B. Shown in the apartment details."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:319
+#: includes/admin/class-nodes-page.php:375
 msgid "Completion"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:320
+#: includes/admin/class-nodes-page.php:376
 msgid "e.g. Q4 2027"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:324
+#: includes/admin/class-nodes-page.php:380
 msgid "External link"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:326
+#: includes/admin/class-nodes-page.php:382
 msgid ""
 "Optional. When set, clicking the building opens this page instead of its "
 "floors."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:335
+#: includes/admin/class-nodes-page.php:391
 msgid "Manage statuses"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:338
+#: includes/admin/class-nodes-page.php:394
 msgid "Used for the tabs on the projects page (e.g. Ongoing / Completed)."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:345
+#: includes/admin/class-nodes-page.php:401
 msgid "Can visitors open it?"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:348
+#: includes/admin/class-nodes-page.php:404
 msgid "Automatic"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:349
+#: includes/admin/class-nodes-page.php:405
 msgid "Always open"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:350 includes/class-leads.php:267
+#: includes/admin/class-nodes-page.php:406 includes/class-leads.php:394
 msgid "Closed"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:358
+#: includes/admin/class-nodes-page.php:414
 msgid ""
 "Automatic: follows the status (sold, reserved and rented units do not open)."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:359
+#: includes/admin/class-nodes-page.php:415
 msgid ""
 "Automatic: follows the status; sold out phases and buildings close when this "
 "is enabled in Settings. \"Always open\" and \"Closed\" ignore how much is "
 "sold."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:366
+#: includes/admin/class-nodes-page.php:422
 msgid "Detailed page"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:371
+#: includes/admin/class-nodes-page.php:427
 msgid "Clicking it opens the detailed page"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:373
+#: includes/admin/class-nodes-page.php:429
 msgid ""
 "Turn off for a boulevard, sports field, park and the like: clicking then "
 "opens a window with its photos and description, and no status is shown for "
 "it on the site."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:382
+#: includes/admin/class-nodes-page.php:438
 msgid "Rooms"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:384
+#: includes/admin/class-nodes-page.php:440
 msgid "Used by the apartment filter. 0 = studio."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:387
-#: includes/admin/class-nodes-page.php:539
+#: includes/admin/class-nodes-page.php:443
+#: includes/admin/class-nodes-page.php:595
 msgid "Total area"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:391
+#: includes/admin/class-nodes-page.php:447
 msgid "Living area"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:394
+#: includes/admin/class-nodes-page.php:450
 msgid "Summer area"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:396
+#: includes/admin/class-nodes-page.php:452
 msgid "Balconies, terraces, loggias."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:400
+#: includes/admin/class-nodes-page.php:456
 msgid "Price per m²"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:405
-#: includes/admin/class-nodes-page.php:545
+#: includes/admin/class-nodes-page.php:461
+#: includes/admin/class-nodes-page.php:601
 msgid "Total price"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:408
+#: includes/admin/class-nodes-page.php:464
 msgid ""
 "Filled in automatically: total area × price per m². Type a different total "
 "if needed."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:416
+#: includes/admin/class-nodes-page.php:472
 msgid "Masterplan (optional)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:417
+#: includes/admin/class-nodes-page.php:473
 msgid "Phase render (with buildings)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:418
+#: includes/admin/class-nodes-page.php:474
 msgid "Building render (with floors)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:419
+#: includes/admin/class-nodes-page.php:475
 msgid "Floor plan (with apartments)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:420
+#: includes/admin/class-nodes-page.php:476
 msgid "Parking plan (with parking spaces)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:421
-#: includes/admin/class-nodes-page.php:422
-#: includes/admin/class-nodes-page.php:423
+#: includes/admin/class-nodes-page.php:477
+#: includes/admin/class-nodes-page.php:478
+#: includes/admin/class-nodes-page.php:479
 msgid "2D plan"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:424
+#: includes/admin/class-nodes-page.php:480
 msgid "Floor plan"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:430
+#: includes/admin/class-nodes-page.php:486
 msgid ""
 "Buildings, villas and parkings are drawn on it. Without a masterplan "
 "visitors see a list instead."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:432
+#: includes/admin/class-nodes-page.php:488
 msgid "Polygons of the items inside are drawn on this image."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:437
+#: includes/admin/class-nodes-page.php:493
 msgid "Card image"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:439
+#: includes/admin/class-nodes-page.php:495
 msgid "Shown on the projects page. The masterplan is used when empty."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:443
+#: includes/admin/class-nodes-page.php:499
 msgid "3D plan"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:448
-#: includes/admin/class-nodes-page.php:453
+#: includes/admin/class-nodes-page.php:504
+#: includes/admin/class-nodes-page.php:509
 msgid "Photos"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:450
+#: includes/admin/class-nodes-page.php:506
 msgid "Renders, interior photos, views. Drag to change the order."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:455
+#: includes/admin/class-nodes-page.php:511
 msgid ""
 "Shown in the info window when the detailed page is turned off. Drag to "
 "change the order."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:459
+#: includes/admin/class-nodes-page.php:515
 msgid "Virtual tour link"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:461
+#: includes/admin/class-nodes-page.php:517
 msgid ""
 "Matterport, Kuula, 3DVista or any other 360° tour. It opens embedded on the "
 "page."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:466
+#: includes/admin/class-nodes-page.php:522
 msgid "Description"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:471
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-nodes-page.php:527
+#: includes/admin/class-specs-page.php:39
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:86
 msgid "Order"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:473
+#: includes/admin/class-nodes-page.php:529
 msgid "Lower numbers come first."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:488
+#: includes/admin/class-nodes-page.php:544
 msgid "Create"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:492
+#: includes/admin/class-nodes-page.php:548
 msgid "Duplicate (with everything inside)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:517
+#: includes/admin/class-nodes-page.php:573
 msgid "No status"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:534
-#: includes/admin/class-nodes-page.php:874
+#: includes/admin/class-nodes-page.php:590
+#: includes/admin/class-nodes-page.php:934
 msgid "Type"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:567
+#: includes/admin/class-nodes-page.php:623
 msgid "Save status"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:596
+#: includes/admin/class-nodes-page.php:652
 msgid "Apply this layout to other floors"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:597
+#: includes/admin/class-nodes-page.php:653
 msgid ""
 "Copies the outline of each apartment to the apartment in the same position "
 "on the selected floors (1st to 1st, 2nd to 2nd… by apartment number order). "
 "Use it for floors with the same plan."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:602
+#: includes/admin/class-nodes-page.php:658
 msgid "Select all"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:610
+#: includes/admin/class-nodes-page.php:666
 #, php-format
 msgid "%d apartment"
 msgid_plural "%d apartments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-nodes-page.php:615
+#: includes/admin/class-nodes-page.php:671
 msgid "Also use this floor plan image"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:616
+#: includes/admin/class-nodes-page.php:672
 msgid "Also copy area and specification of each apartment"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:617
+#: includes/admin/class-nodes-page.php:673
 msgid "Overwrite outlines that are already drawn"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:619
+#: includes/admin/class-nodes-page.php:675
 #, php-format
 msgid ""
 "This floor has %d apartments. Floors marked in orange have a different "
 "number, only the matching positions are copied."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:620
+#: includes/admin/class-nodes-page.php:676
 msgid "Apply layout"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:639
+#: includes/admin/class-nodes-page.php:695
 #, php-format
 msgid "New %s"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:666
+#: includes/admin/class-nodes-page.php:722
 msgid "Rooms and sections"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:667
+#: includes/admin/class-nodes-page.php:723
 msgid ""
 "Area of each room (bedroom, kitchen, balcony…). Empty fields are not shown "
 "on the site."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:687
+#: includes/admin/class-nodes-page.php:743
 msgid "Name, e.g. Bedroom 3"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:688
+#: includes/admin/class-nodes-page.php:744
 msgid "Value"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:692
+#: includes/admin/class-nodes-page.php:748
 msgid "Add a new section"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:693
+#: includes/admin/class-nodes-page.php:749
 msgid ""
 "A new section (e.g. \"Bedroom 3\") is saved to the shared list, so it can be "
 "filled on any unit later. Translate its name under Specification."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:704
+#: includes/admin/class-nodes-page.php:760
 msgid "Position on the image"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:713
+#: includes/admin/class-nodes-page.php:769
 #, php-format
 msgid ""
 "Add an image to <a href=\"%2$s\">%1$s</a> first, then draw this item on it."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:739
+#: includes/admin/class-nodes-page.php:795
 msgid "Click on the image to add a point. The outline always closes by itself."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:740
+#: includes/admin/class-nodes-page.php:796
 msgid ""
 "Drag a point to move it. Click a point to select it and press Delete to "
 "remove it."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:741
+#: includes/admin/class-nodes-page.php:797
 msgid "Point at an edge: a new point appears — press and drag to add it there."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:742
+#: includes/admin/class-nodes-page.php:798
 msgid ""
 "Drag inside the outline to move the whole outline. Other items on this image "
 "are shown in grey."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:743
+#: includes/admin/class-nodes-page.php:799
 msgid ""
 "Mouse wheel zooms in and out; drag outside the outline to move the zoomed "
 "image."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:757
+#: includes/admin/class-nodes-page.php:800
+msgid ""
+"Keyboard (click the image or Tab to it): ] and [ select the next and "
+"previous point, arrows move it (Shift: faster; with no point selected, the "
+"whole outline), Enter adds a point after the selected one, Delete removes "
+"it, Esc deselects, Ctrl+Z undoes."
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:814
 msgid "Undo last point"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:758
+#: includes/admin/class-nodes-page.php:815
 msgid "Delete point"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:759
+#: includes/admin/class-nodes-page.php:816
 msgid "Clean up points"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:759
+#: includes/admin/class-nodes-page.php:816
 msgid ""
 "Removes points that sit on top of each other (common in imported outlines)"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:760
+#: includes/admin/class-nodes-page.php:817
 msgid "Clear"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:761
+#: includes/admin/class-nodes-page.php:818
 msgid "Show other items"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:762
+#: includes/admin/class-nodes-page.php:819
 msgid "Zoom out"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:762
+#: includes/admin/class-nodes-page.php:819
 msgid "Zoom in"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:765
+#: includes/admin/class-nodes-page.php:822
 msgid "Coordinates"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:766
+#: includes/admin/class-nodes-page.php:823
 msgid "Draw on the image or paste coordinates copied from another item"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:767
+#: includes/admin/class-nodes-page.php:824
 msgid "Copy"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:767
+#: includes/admin/class-nodes-page.php:824
 msgid ""
 "Filled in automatically while you draw. Paste coordinates here to reuse an "
 "outline — the drawing updates instantly."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:784
+#: includes/admin/class-nodes-page.php:841
 msgid "Inside"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:796
+#: includes/admin/class-nodes-page.php:853
 msgid ""
 "Phases are optional: add buildings directly when the project does not use "
 "them."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:800
+#: includes/admin/class-nodes-page.php:857
 msgid "Nothing here yet."
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:809
+#: includes/admin/class-nodes-page.php:867
+msgid ""
+"This image has different proportions than the one the outlines were drawn "
+"on, so they are stretched to fit. Check them on the map below and redraw the "
+"ones that are off."
+msgstr ""
+
+#: includes/admin/class-nodes-page.php:869
 msgid "Map"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:852
+#: includes/admin/class-nodes-page.php:912
 #, php-format
 msgid "Set status: %s"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:859
+#: includes/admin/class-nodes-page.php:919
 msgid "Visitors: automatic"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:859
+#: includes/admin/class-nodes-page.php:919
 msgid "Visitors: always open"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:859
+#: includes/admin/class-nodes-page.php:919
 msgid "Visitors: closed"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:877
+#: includes/admin/class-nodes-page.php:937
 msgid "Area / items"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:878
+#: includes/admin/class-nodes-page.php:938
 msgid "Price / available"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:880
+#: includes/admin/class-nodes-page.php:940
 msgid "On map"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:890
+#: includes/admin/class-nodes-page.php:950
 msgid "always open"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:890
+#: includes/admin/class-nodes-page.php:950
 msgid "closed"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:893
+#: includes/admin/class-nodes-page.php:953
 #: includes/frontend/class-admin-bar.php:60
 msgid "Edit"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:895
+#: includes/admin/class-nodes-page.php:955
 msgid "Duplicate"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:922
+#: includes/admin/class-nodes-page.php:982
 msgid "Copy coordinates"
 msgstr ""
 
-#: includes/admin/class-nodes-page.php:924
+#: includes/admin/class-nodes-page.php:984
 msgid "Not drawn on the image yet"
 msgstr ""
 
 #: includes/admin/class-settings-page.php:40
-#: includes/admin/class-settings-page.php:85
+#: includes/admin/class-settings-page.php:88
 msgid "Languages"
 msgstr ""
 
@@ -951,539 +1118,566 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:50
+#: includes/admin/class-settings-page.php:53
 msgid "Solo Estate settings"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:69
+#: includes/admin/class-settings-page.php:72
 msgid "none"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:72
+#: includes/admin/class-settings-page.php:75
 msgid "Multilingual plugin"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:75
+#: includes/admin/class-settings-page.php:78
 msgid ""
 "No multilingual plugin detected. The languages below are used for content "
 "fields."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:76
+#: includes/admin/class-settings-page.php:79
 msgid ""
 "Content languages are taken automatically from this plugin. Add or remove "
 "languages there."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:80
+#: includes/admin/class-settings-page.php:83
 msgid "default"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:82
+#: includes/admin/class-settings-page.php:85
 msgid "Content languages"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:87
+#: includes/admin/class-settings-page.php:90
 msgid ""
 "One per line: code|Name|locale, e.g. ka|ქართული|ka_GE. The first line is the "
 "default language."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:96
+#: includes/admin/class-settings-page.php:99
 msgid "Show prices"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:97
+#: includes/admin/class-settings-page.php:100
 msgid "Area unit"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:98
+#: includes/admin/class-settings-page.php:101
 msgid "Base currency"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:98
+#: includes/admin/class-settings-page.php:101
 msgid ""
 "Code and symbol, e.g. GEL ₾. Prices are entered and shown in this currency."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:99
+#: includes/admin/class-settings-page.php:102
 msgid "Second currency"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:99
+#: includes/admin/class-settings-page.php:102
 msgid "Show a currency switcher"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:100
+#: includes/admin/class-settings-page.php:103
 msgid "Second currency code / symbol"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:100
+#: includes/admin/class-settings-page.php:103
 msgid ""
 "e.g. USD $. Prices in this currency are calculated with the exchange rate."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:106
+#: includes/admin/class-settings-page.php:110
 #, php-format
-msgid "Current rate: 1 %1$s = %2$s %3$s (National Bank of Georgia, %4$s)."
-msgstr ""
-
-#: includes/admin/class-settings-page.php:114
-msgid "Exchange rate"
+msgid "Rate in use: 1 %1$s = %2$s %3$s (National Bank of Georgia, %4$s)."
 msgstr ""
 
 #: includes/admin/class-settings-page.php:119
-msgid "National Bank of Georgia (updated automatically)"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:120
-msgid "Fixed rate entered below"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:123
-msgid "The fixed rate below is used until it works again."
-msgstr ""
-
-#: includes/admin/class-settings-page.php:124
-msgid "Update the rate now"
+#, php-format
+msgid "Rate in use: 1 %1$s = %2$s %3$s (the fixed rate below)."
 msgstr ""
 
 #: includes/admin/class-settings-page.php:125
+msgid "No valid exchange rate: prices are shown in the base currency only."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:129
+#, php-format
+msgid "The bank rate (%s) is older than 7 days and is not used."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:132
+msgid "Exchange rate"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:137
+msgid "National Bank of Georgia (updated automatically)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:138
+msgid "Fixed rate entered below"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:142
+msgid "Update the rate now"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:143
 msgid "The rate is checked every 6 hours in the background."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:128
+#: includes/admin/class-settings-page.php:146
 msgid "Fixed / fallback rate"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:133
+#: includes/admin/class-settings-page.php:151
 msgid "Currency shown first"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:146
+#: includes/admin/class-settings-page.php:164
 msgid "Lead form"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:146
+#: includes/admin/class-settings-page.php:164
 msgid "Enabled"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:148
+#: includes/admin/class-settings-page.php:166
 msgid "Show form on"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:154
+#: includes/admin/class-settings-page.php:172
 msgid "Apartment pages"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:155
+#: includes/admin/class-settings-page.php:173
 msgid "Every level"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:156
+#: includes/admin/class-settings-page.php:174
 msgid "Nowhere (use the [solo_estate_lead_form] shortcode)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:159
+#: includes/admin/class-settings-page.php:177
 msgid "Email recipients"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:159
+#: includes/admin/class-settings-page.php:177
 msgid "Comma separated. Leave empty to disable emails."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:160
+#: includes/admin/class-settings-page.php:178
 msgid "Email subject"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:160
+#: includes/admin/class-settings-page.php:178
 msgid "Placeholders: {site} {project} {building} {floor} {flat} {name} {phone}"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:161
+#: includes/admin/class-settings-page.php:179
 msgid "Webhook URL"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:161
+#: includes/admin/class-settings-page.php:179
 msgid ""
 "Optional. Every lead is POSTed here as JSON — use it for Zoho CRM (via Zoho "
 "Flow), Make, Zapier or your own CRM."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:162
+#: includes/admin/class-settings-page.php:180
 msgid "Webhook secret"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:162
+#: includes/admin/class-settings-page.php:180
 msgid "Generate"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:162
+#: includes/admin/class-settings-page.php:180
 msgid ""
 "Optional. When set, each webhook request carries an X-Solo-Estate-Signature "
 "header: sha256 HMAC of the body with this secret, so your CRM can verify the "
 "request really came from this site. Only HTTPS webhook URLs are accepted."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:164
+#: includes/admin/class-settings-page.php:182
 msgid "Keep leads for"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:165
+#: includes/admin/class-settings-page.php:183
 msgid "days"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:166
+#: includes/admin/class-settings-page.php:184
 msgid ""
 "0 = keep forever. Older leads are deleted automatically once a day. Visitor "
 "IP addresses are always removed after 30 days."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:169
+#: includes/admin/class-settings-page.php:187
 msgid "Visitor IP source"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:175
+#: includes/admin/class-settings-page.php:193
 msgid "Direct connection (REMOTE_ADDR) — default"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:176
+#: includes/admin/class-settings-page.php:194
 msgid "Cloudflare (CF-Connecting-IP)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:177
+#: includes/admin/class-settings-page.php:195
 msgid "Reverse proxy (X-Forwarded-For)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:178
+#: includes/admin/class-settings-page.php:196
 msgid ""
 "Used for spam rate limiting. Change it only if the site is behind Cloudflare "
 "or a proxy — otherwise visitors could fake their IP."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:180
+#: includes/admin/class-settings-page.php:198
 msgid "Analytics events"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:180
+#: includes/admin/class-settings-page.php:198
 msgid ""
-"Send \"generate_lead\" to Google Analytics (gtag) and \"Lead\" to Meta Pixel "
-"when they are present on the site"
+"Send \"generate_lead\" to Google Analytics (gtag, or Google Tag Manager's "
+"dataLayer) and \"Lead\" to Meta Pixel when they are present on the site, "
+"with the apartment and its price"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:185
+#: includes/admin/class-settings-page.php:199
+msgid "Lead source"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:199
+msgid ""
+"Remember where visitors came from (ad campaign tags, ad click ids, the "
+"referring site, the first page) and save it with their request"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:199
+msgid ""
+"Kept in the visitor's browser for 90 days (localStorage, no cookie). Turn it "
+"off if your privacy policy does not allow it."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:204
 msgid "Accent colour"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:186
+#: includes/admin/class-settings-page.php:205
 msgid "Highlight colour"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:188
+#: includes/admin/class-settings-page.php:207
 msgid "Tooltip"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:193
+#: includes/admin/class-settings-page.php:212
 msgid "Dark (accent colour)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:194
+#: includes/admin/class-settings-page.php:213
 msgid "Light (white)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:195
+#: includes/admin/class-settings-page.php:214
 msgid "Show the apartment plan in the tooltip"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:197
+#: includes/admin/class-settings-page.php:216
 msgid "Polygon opacity"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:197
+#: includes/admin/class-settings-page.php:216
 msgid "Normal / on hover, from 0 to 1."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:198
+#: includes/admin/class-settings-page.php:217
 msgid "Sold out"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:198
+#: includes/admin/class-settings-page.php:217
 msgid ""
 "Automatically show projects, phases, buildings and floors whose units are "
 "all sold as \"Sold out\""
 msgstr ""
 
-#: includes/admin/class-settings-page.php:198
+#: includes/admin/class-settings-page.php:217
 msgid "Sold out phases and buildings cannot be opened (no link)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:198
+#: includes/admin/class-settings-page.php:217
 msgid ""
 "The label text is editable under Localization (search: Sold out). A status "
 "set by hand (e.g. Sold) and \"Can visitors open it?\" on each item always "
 "win."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:199
+#: includes/admin/class-settings-page.php:218
 msgid "Sold out colour"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:201 includes/class-nodes.php:119
+#: includes/admin/class-settings-page.php:220 includes/class-nodes.php:125
 msgid "Commercial spaces"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:203
+#: includes/admin/class-settings-page.php:222
 msgid ""
 "Colour and hover colour of commercial spaces on floor plans, so they stand "
 "out from apartments. Sold, reserved and rented spaces use their status "
 "colour."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:205
+#: includes/admin/class-settings-page.php:224
 msgid "Apartment filter"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:205
+#: includes/admin/class-settings-page.php:224
 msgid ""
 "Show the apartment search (rooms, area, price, building) on the projects and "
 "project pages"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:206
+#: includes/admin/class-settings-page.php:225
 msgid "Lists under images"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:206
+#: includes/admin/class-settings-page.php:225
 msgid ""
 "Show a list of floors and apartments next to or below each image (helps on "
 "phones and for SEO)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:206
+#: includes/admin/class-settings-page.php:225
 msgid "Also show cards of the buildings below the masterplan"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:206
+#: includes/admin/class-settings-page.php:225
 msgid "Without a masterplan the buildings are always listed as cards."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:211
+#: includes/admin/class-settings-page.php:230
 msgid ""
 "How the apartment selector looks on the site. Empty fonts and a size of 0 "
 "follow your theme. Accent and highlight colours are on the Appearance tab."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:212
+#: includes/admin/class-settings-page.php:231
 msgid "None — use the theme font"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:217
+#: includes/admin/class-settings-page.php:236
 msgid "Google Font"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:217
+#: includes/admin/class-settings-page.php:236
 msgid ""
 "Loads the font from Google Fonts and uses it for the selector. Noto Sans "
 "Georgian is a clean modern Georgian font; Inter and Manrope use it for "
 "Georgian letters."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:218
+#: includes/admin/class-settings-page.php:237
 msgid "Font"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:218
+#: includes/admin/class-settings-page.php:237
 msgid "Theme font"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:218
+#: includes/admin/class-settings-page.php:237
 msgid ""
 "Advanced: your own font list, e.g. Manrope, \"Noto Sans Georgian\", sans-"
 "serif — Latin letters in Manrope, Georgian in Noto Sans Georgian. It wins "
 "over the Google Font above."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:219
+#: includes/admin/class-settings-page.php:238
 msgid "Text size"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:219
+#: includes/admin/class-settings-page.php:238
 msgid ""
 "0 = the theme size. 15–17 px suits most sites; use it when the theme makes "
 "everything too large or too small."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:220
+#: includes/admin/class-settings-page.php:239
 msgid "Corner rounding"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:220
+#: includes/admin/class-settings-page.php:239
 msgid "0 = square corners."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:222
+#: includes/admin/class-settings-page.php:241
 msgid "Text"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:223
+#: includes/admin/class-settings-page.php:242
 msgid "Secondary text"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:224
+#: includes/admin/class-settings-page.php:243
 msgid "Lines and borders"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:225
+#: includes/admin/class-settings-page.php:244
 msgid "Light backgrounds"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:226
+#: includes/admin/class-settings-page.php:245
 msgid "Cards and panels"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:232
+#: includes/admin/class-settings-page.php:251
 msgid "Buttons"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:234
+#: includes/admin/class-settings-page.php:253
 msgid ""
 "Background and text. Leave the background empty to use the accent colour."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:237
+#: includes/admin/class-settings-page.php:256
 msgid "Text on the accent colour"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:239
+#: includes/admin/class-settings-page.php:258
 msgid ""
 "Tooltips, active tabs and chips, the price box and other places with the "
 "accent colour as background."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:241
+#: includes/admin/class-settings-page.php:260
 msgid "Shadows"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:241
+#: includes/admin/class-settings-page.php:260
 msgid "Soft shadow under cards and panels"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:247
+#: includes/admin/class-settings-page.php:286
+msgid "Uninstall"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:286
+msgid ""
+"Delete all Solo Estate data (projects, apartments, leads, settings) when the "
+"plugin is deleted"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid "Shortcodes"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid "all projects: Projects → project → building → floor → apartment"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid "one project only"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid "lead form only"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid ""
+"Works in any theme and page builder (Avada: use a Text Block or Code Block "
+"element). A Gutenberg block \"Solo Estate project\" is also available."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:299
 msgid "Solo Estate roles"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:248
-#: includes/admin/class-settings-page.php:257
+#: includes/admin/class-settings-page.php:300
+#: includes/admin/class-settings-page.php:309
 msgid "Manager"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:248
+#: includes/admin/class-settings-page.php:300
 msgid ""
 "everything, including deleting, statuses, specification list, import and "
 "settings."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:249
-#: includes/admin/class-settings-page.php:256
+#: includes/admin/class-settings-page.php:301
+#: includes/admin/class-settings-page.php:308
 msgid "Marketing"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:249
+#: includes/admin/class-settings-page.php:301
 msgid ""
 "adds and changes projects, buildings, floors and units: photos, prices, "
 "rooms and new sections, statuses. Cannot delete anything."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:250
-#: includes/admin/class-settings-page.php:255
+#: includes/admin/class-settings-page.php:302
+#: includes/admin/class-settings-page.php:307
 msgid "Sales"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:250
+#: includes/admin/class-settings-page.php:302
 msgid ""
 "sees everything and changes statuses only (e.g. For sale → Reserved → Sold); "
 "reads leads."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:251
+#: includes/admin/class-settings-page.php:303
 msgid ""
 "Give a user the role \"Solo Estate Manager\", \"Solo Estate Marketing\" or "
 "\"Solo Estate Sales\" under Users, or give an existing WordPress role a "
 "level below. Administrators are always managers."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:254
+#: includes/admin/class-settings-page.php:306
 msgid "No access"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:274
-msgid "Uninstall"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:274
-msgid ""
-"Delete all Solo Estate data (projects, apartments, leads, settings) when the "
-"plugin is deleted"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:275
-msgid "Shortcodes"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:275
-msgid "all projects: Projects → project → building → floor → apartment"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:275
-msgid "one project only"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:275
-msgid "lead form only"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:275
-msgid ""
-"Works in any theme and page builder (Avada: use a Text Block or Code Block "
-"element). A Gutenberg block \"Solo Estate project\" is also available."
-msgstr ""
-
-#: includes/admin/class-settings-page.php:318
+#: includes/admin/class-settings-page.php:356
 msgid "Import / export style"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:319
+#: includes/admin/class-settings-page.php:357
 msgid ""
 "Colours, fonts, sizes, rounding, tooltip and polygon settings in one JSON "
 "file. Use it to copy a look to another site or keep a backup. Other settings "
 "(prices, leads, texts) are not included."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:324
+#: includes/admin/class-settings-page.php:362
 msgid "Download style (.json)"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:330
+#: includes/admin/class-settings-page.php:368
 msgid "Upload a style file"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:331
+#: includes/admin/class-settings-page.php:369
 msgid "or paste the JSON code"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:332
+#: includes/admin/class-settings-page.php:370
 msgid "Import style"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:338
+#: includes/admin/class-settings-page.php:376
 msgid "Reset style to defaults"
 msgstr ""
 
 #: includes/admin/class-specs-page.php:34
 msgid ""
 "Rooms and areas listed on the apartment page. Values are entered on each "
-"apartment. Drag rows to reorder. \"Highlight\" makes the row stand out (e.g. "
-"living area)."
+"apartment. Drag rows or use the arrows to reorder. \"Highlight\" makes the "
+"row stand out (e.g. living area)."
 msgstr ""
 
 #: includes/admin/class-specs-page.php:43
@@ -1494,15 +1688,54 @@ msgstr ""
 msgid "Highlight"
 msgstr ""
 
-#: includes/admin/class-specs-page.php:56
+#: includes/admin/class-specs-page.php:43
+#: includes/admin/class-statuses-page.php:57
+msgid "Actions"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:48
+msgid "New field"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:52
+#, php-format
+msgid "Move up: %s"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:54
+#, php-format
+msgid "Move down: %s"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:63
 msgid "New field…"
 msgstr ""
 
-#: includes/admin/class-specs-page.php:72
+#: includes/admin/class-specs-page.php:65
+#, php-format
+msgid "%1$s, name in %2$s"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:69
+#, php-format
+msgid "%s, unit"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:71
+#, php-format
+msgid "%s, highlight"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:79
+#, php-format
+msgid "Delete %s"
+msgstr ""
+
+#: includes/admin/class-specs-page.php:85
 msgid "Save fields"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:32
+#: includes/admin/class-statuses-page.php:38
 msgid ""
 "Colours are used for polygons and labels on the site. \"Clickable\" lets "
 "visitors open the item (turn it off for Sold, Reserved and Rented). \"Counts "
@@ -1510,182 +1743,281 @@ msgid ""
 "the sold percentages of projects, phases and buildings."
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:33
+#: includes/admin/class-statuses-page.php:39
 msgid ""
 "Projects: when every apartment of a project is sold, the projects page shows "
 "it under the status marked \"Sold-out projects move here\" (e.g. Completed), "
 "whatever status is set on it."
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:35
+#: includes/admin/class-statuses-page.php:41
 msgid "Apartments, commercial spaces, villas and parking spaces"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:36
+#: includes/admin/class-statuses-page.php:42
 msgid "Floors and parkings"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:37
+#: includes/admin/class-statuses-page.php:43
 msgid "Phases and buildings"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:80
 msgid "Colour"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:81
 msgid "Clickable"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:82
 msgid "Counts as available"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:84
 msgid "Counts as sold"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:51
+#: includes/admin/class-statuses-page.php:57
+#: includes/admin/class-statuses-page.php:84
 msgid "Sold-out projects move here"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:64
+#: includes/admin/class-statuses-page.php:65
+msgid "New status"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:68
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:76
 msgid "New status…"
 msgstr ""
 
-#: includes/admin/class-statuses-page.php:88
+#: includes/admin/class-statuses-page.php:96
+#, php-format
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/admin/class-statuses-page.php:110
 msgid "Save statuses"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:176
+#, php-format
+msgid "Delete status \"%s\""
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:178
+#, php-format
+msgid ""
+"%d item has this status. Choose the status it gets instead; then this status "
+"is deleted."
+msgid_plural ""
+"%d items have this status. Choose the status they get instead; then this "
+"status is deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/admin/class-statuses-page.php:180
+msgid "There is no other status in this list. Add one first."
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:181
+msgid "Back"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:187
+msgid "Move them to"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:192
+msgid "Move items and delete status"
+msgstr ""
+
+#: includes/admin/class-statuses-page.php:193
+msgid "Cancel"
 msgstr ""
 
 #: includes/admin/class-transfer-page.php:38
 msgid "Please choose a .csv file up to 10 MB."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:40
+#: includes/admin/class-transfer-page.php:41
+#, php-format
+msgid ""
+"The file is larger than this server accepts (%s). Split it into smaller "
+"files or ask your host to raise upload_max_filesize / post_max_size."
+msgstr ""
+
+#: includes/admin/class-transfer-page.php:43
+msgid ""
+"The upload failed on the server (temporary folder or disk). Try again or ask "
+"your host."
+msgstr ""
+
+#: includes/admin/class-transfer-page.php:45
 msgid "Select at least one project to export."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:46
+#: includes/admin/class-transfer-page.php:51
 msgid "Export apartments"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:47
+#: includes/admin/class-transfer-page.php:52
 msgid ""
 "Downloads every apartment of the selected projects in one file, with the "
 "project name, status, rooms, area, prices and specification. Edit it in "
 "Excel or Google Sheets and import it back to update everything at once."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:51
+#: includes/admin/class-transfer-page.php:56
 msgid "All projects"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:61
+#: includes/admin/class-transfer-page.php:66
 msgid "Download CSV"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:66
+#: includes/admin/class-transfer-page.php:71
 msgid "Import apartments"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:68
+#: includes/admin/class-transfer-page.php:73
 msgid ""
 "Use the exported file as a template. Units are matched by id, or by project "
 "+ phase + building + floor + unit number (phase only when the project uses "
 "phases). The entrance column is a detail of the apartment."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:69
+#: includes/admin/class-transfer-page.php:74
 msgid ""
 "The \"type\" column is flat, commercial, villa or spot (parking space). "
 "Villas leave building and floor empty. Parking spaces can only be updated, "
 "by id."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:70
+#: includes/admin/class-transfer-page.php:75
 msgid ""
 "The \"project\" column says which project each row belongs to. A project "
 "that does not exist on the site yet is created during the import."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:71
+#: includes/admin/class-transfer-page.php:76
 msgid ""
 "Empty cells leave the value unchanged. Type a single \"-\" to clear a value."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:72
+#: includes/admin/class-transfer-page.php:77
 msgid "Status can be written in any site language (e.g. Sold, გაყიდულია)."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:77
+#: includes/admin/class-transfer-page.php:83
 msgid "From the file (\"project\" column)"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:79
+#: includes/admin/class-transfer-page.php:85
 msgid "Create projects, buildings, floors and apartments that do not exist yet"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:80
+#: includes/admin/class-transfer-page.php:86
 msgid "Preview only — show what would change, without saving"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:81
+#: includes/admin/class-transfer-page.php:87
 msgid "Upload"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:108
+#: includes/admin/class-transfer-page.php:114
 msgid "Import finished."
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:108
-msgid "Preview — nothing was saved yet."
-msgstr ""
-
-#: includes/admin/class-transfer-page.php:110
-#, php-format
-msgid "Rows read: %d"
-msgstr ""
-
-#: includes/admin/class-transfer-page.php:112
-#, php-format
-msgid "Apartments updated: %d"
-msgstr ""
-
 #: includes/admin/class-transfer-page.php:114
-#, php-format
-msgid "Unchanged: %d"
+msgid "Preview — nothing was saved yet."
 msgstr ""
 
 #: includes/admin/class-transfer-page.php:116
 #, php-format
+msgid "Rows read: %d"
+msgstr ""
+
+#: includes/admin/class-transfer-page.php:118
+#, php-format
+msgid "Apartments updated: %d"
+msgstr ""
+
+#: includes/admin/class-transfer-page.php:120
+#, php-format
+msgid "Unchanged: %d"
+msgstr ""
+
+#: includes/admin/class-transfer-page.php:122
+#, php-format
 msgid "New: %1$d projects, %2$d buildings, %3$d floors, %4$d apartments"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:119
+#: includes/admin/class-transfer-page.php:125
 #, php-format
 msgid "New phases: %d"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:124
+#: includes/admin/class-transfer-page.php:130
 #, php-format
 msgid "%d problem:"
 msgid_plural "%d problems:"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-transfer-page.php:127
+#: includes/admin/class-transfer-page.php:133
 #, php-format
 msgid "Line %1$d: %2$s"
 msgstr ""
 
-#: includes/admin/class-transfer-page.php:132
+#: includes/admin/class-transfer-page.php:138
 msgid ""
 "If this looks right, upload the same file again with \"Preview only\" "
 "unticked."
 msgstr ""
 
-#: includes/admin/class-ui.php:133
+#: includes/admin/class-ui.php:137
 msgid "Add images"
+msgstr ""
+
+#: includes/class-attribution.php:147
+#, php-format
+msgid "%s (ad click)"
+msgstr ""
+
+#: includes/class-attribution.php:154
+msgid "Direct"
+msgstr ""
+
+#: includes/class-attribution.php:168
+msgid "Keyword"
+msgstr ""
+
+#: includes/class-attribution.php:168
+msgid "Ad content"
+msgstr ""
+
+#: includes/class-attribution.php:179
+msgid "Referring page"
+msgstr ""
+
+#: includes/class-attribution.php:182
+msgid "First page of the visit"
+msgstr ""
+
+#: includes/class-attribution.php:185
+msgid "Arrived"
 msgstr ""
 
 #: includes/class-csv.php:162
@@ -1717,142 +2049,222 @@ msgstr ""
 msgid "Project \"%s\" not found."
 msgstr ""
 
-#: includes/class-csv.php:259 includes/class-csv.php:280
+#: includes/class-csv.php:242
+#, php-format
+msgid "Project \"%s\" could not be created."
+msgstr ""
+
+#: includes/class-csv.php:266 includes/class-csv.php:287
 msgid "Building, floor and unit numbers are required when there is no id."
 msgstr ""
 
-#: includes/class-csv.php:263
+#: includes/class-csv.php:270
 msgid "Parking spaces can only be updated by id. Add new ones in wp-admin."
 msgstr ""
 
-#: includes/class-csv.php:291 includes/class-csv.php:311
+#: includes/class-csv.php:298 includes/class-csv.php:327
 #, php-format
 msgid "%1$s %2$s not found."
 msgstr ""
 
-#: includes/class-csv.php:319
+#: includes/class-csv.php:312
+#, php-format
+msgid "%1$s %2$s could not be created."
+msgstr ""
+
+#: includes/class-csv.php:334
 msgid "Could not create the apartment."
 msgstr ""
 
-#: includes/class-csv.php:351
+#: includes/class-csv.php:368
 #, php-format
 msgid "Unknown status \"%s\" — status left unchanged."
 msgstr ""
 
-#: includes/class-csv.php:362
+#: includes/class-csv.php:379
 #, php-format
 msgid "Column rooms: \"%s\" must be a whole number 0–20."
 msgstr ""
 
-#: includes/class-csv.php:385
+#: includes/class-csv.php:402
 #, php-format
 msgid "Column %1$s: \"%2$s\" is not a number."
 msgstr ""
 
-#: includes/class-install.php:309
+#: includes/class-csv.php:438
+msgid "Could not save the changes of this row."
+msgstr ""
+
+#: includes/class-install.php:402
 msgid "Solo Estate Manager"
 msgstr ""
 
-#: includes/class-install.php:310
+#: includes/class-install.php:403
 msgid "Solo Estate Marketing"
 msgstr ""
 
-#: includes/class-install.php:311
+#: includes/class-install.php:404
 msgid "Solo Estate Sales"
 msgstr ""
 
-#: includes/class-leads.php:110
+#: includes/class-leads.php:142
 msgid "Email"
 msgstr ""
 
-#: includes/class-leads.php:113
+#: includes/class-leads.php:145
 msgid "Message"
 msgstr ""
 
-#: includes/class-leads.php:122
+#: includes/class-leads.php:154
 msgid "Page"
 msgstr ""
 
-#: includes/class-leads.php:123
+#: includes/class-leads.php:158
 msgid "All leads"
 msgstr ""
 
-#: includes/class-leads.php:265
+#: includes/class-leads.php:167
+msgid "The mail server did not accept the message."
+msgstr ""
+
+#: includes/class-leads.php:215
+#, php-format
+msgid "will retry in %d min"
+msgstr ""
+
+#: includes/class-leads.php:392
 msgid "New"
 msgstr ""
 
-#: includes/class-leads.php:266
+#: includes/class-leads.php:393
 msgid "Contacted"
 msgstr ""
 
-#: includes/class-nodes.php:114
+#: includes/class-nodes.php:120
 msgid "Phase"
 msgstr ""
 
-#: includes/class-nodes.php:114
+#: includes/class-nodes.php:120
 msgid "Phases"
 msgstr ""
 
-#: includes/class-nodes.php:115
+#: includes/class-nodes.php:121
 msgid "Building"
 msgstr ""
 
-#: includes/class-nodes.php:115
+#: includes/class-nodes.php:121
 msgid "Buildings"
 msgstr ""
 
-#: includes/class-nodes.php:116
+#: includes/class-nodes.php:122
 msgid "Floor"
 msgstr ""
 
-#: includes/class-nodes.php:116
+#: includes/class-nodes.php:122
 msgid "Floors"
 msgstr ""
 
-#: includes/class-nodes.php:117
+#: includes/class-nodes.php:123
 msgid "Parking"
 msgstr ""
 
-#: includes/class-nodes.php:117
+#: includes/class-nodes.php:123
 msgid "Parkings"
 msgstr ""
 
-#: includes/class-nodes.php:118
+#: includes/class-nodes.php:124
 msgid "Apartments"
 msgstr ""
 
-#: includes/class-nodes.php:119
+#: includes/class-nodes.php:125
 msgid "Commercial space"
 msgstr ""
 
-#: includes/class-nodes.php:120
+#: includes/class-nodes.php:126
 msgid "Villa"
 msgstr ""
 
-#: includes/class-nodes.php:120
+#: includes/class-nodes.php:126
 msgid "Villas"
 msgstr ""
 
-#: includes/class-nodes.php:121
+#: includes/class-nodes.php:127
 msgid "Villa floor"
 msgstr ""
 
-#: includes/class-nodes.php:121
+#: includes/class-nodes.php:127
 msgid "Villa floors"
 msgstr ""
 
-#: includes/class-nodes.php:122
+#: includes/class-nodes.php:128
 msgid "Parking space"
 msgstr ""
 
-#: includes/class-nodes.php:122
+#: includes/class-nodes.php:128
 msgid "Parking spaces"
 msgstr ""
 
-#: includes/class-rates.php:108
+#: includes/class-rates.php:157
 msgid ""
 "The National Bank of Georgia could not be reached, or it has no rate for "
 "this currency."
+msgstr ""
+
+#: includes/class-settings.php:193
+msgid "Webhook URL was not saved: it must be a full https:// address."
+msgstr ""
+
+#: includes/class-settings.php:196
+msgid ""
+"Webhook secret: only letters, digits, - and _ are kept; other characters "
+"were removed."
+msgstr ""
+
+#: includes/class-settings.php:199
+msgid "The fixed exchange rate must be a number above 0; it is not used."
+msgstr ""
+
+#: includes/class-settings.php:204
+#, php-format
+msgid ""
+"Currency code \"%s\" is not a 3-letter code (like GEL, USD); the bank rate "
+"cannot be found for it."
+msgstr ""
+
+#: includes/class-settings.php:218
+#, php-format
+msgid "Lead e-mail \"%s\" is not a valid address and was left out."
+msgstr ""
+
+#: includes/class-settings.php:229
+msgid "Text on cards"
+msgstr ""
+
+#: includes/class-settings.php:230
+msgid "Text on soft backgrounds"
+msgstr ""
+
+#: includes/class-settings.php:231
+msgid "Secondary text on cards"
+msgstr ""
+
+#: includes/class-settings.php:232
+msgid "Secondary text on soft backgrounds"
+msgstr ""
+
+#: includes/class-settings.php:233
+msgid "Text on the accent colour (tooltips, active tabs)"
+msgstr ""
+
+#: includes/class-settings.php:234
+msgid "Button text"
+msgstr ""
+
+#: includes/class-settings.php:240
+#, php-format
+msgid ""
+"%1$s: contrast %2$s:1 is below 4.5:1, which is hard to read for many "
+"visitors. Choose a darker or lighter colour."
 msgstr ""
 
 #: includes/frontend/class-admin-bar.php:45
@@ -1899,6 +2311,6 @@ msgstr ""
 msgid "Edit page"
 msgstr ""
 
-#: includes/frontend/class-renderer.php:46
+#: includes/frontend/class-renderer.php:48
 msgid "Solo Estate: project not found. Check the id in the shortcode."
 msgstr ""

@@ -37,6 +37,8 @@ class Renderer {
 	 * @return string
 	 */
 	public static function project( $project_id, $show_title = true ) {
+		global $EZSQL_ERROR;
+		$db_errors     = is_array( $EZSQL_ERROR ) ? count( $EZSQL_ERROR ) : 0;
 		self::$catalog = ! $project_id;
 		$project       = null;
 
@@ -48,21 +50,17 @@ class Renderer {
 		}
 		self::$anchor = self::$catalog ? 'solo-estate-catalog' : 'solo-estate-' . $project->id;
 
-		$current = $project;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public, read-only navigation.
-		$requested = isset( $_GET[ self::QUERY_ARG ] ) ? absint( $_GET[ self::QUERY_ARG ] ) : 0;
-		if ( $requested && ( ! $project || $requested !== $project->id ) ) {
-			$node = Nodes::get( $requested );
-			if ( $node && ( self::$catalog || $node->project_id === $project->id ) ) {
-				// A closed item (e.g. a sold apartment from an old link) shows its nearest open parent.
-				foreach ( Nodes::ancestors( $node ) as $item ) {
-					if ( ! self::is_open( $item ) && ( 'project' !== $item->level || self::$catalog ) ) {
-						break;
-					}
-					$current = $item;
-				}
-			}
-		}
+		$current = self::resolve( $project, isset( $_GET[ self::QUERY_ARG ] ) ? absint( $_GET[ self::QUERY_ARG ] ) : 0 );
+		// Images and specification values of the items on screen in a few queries, instead of
+		// two per image (stage, tooltips, cards, gallery) and one per tooltip.
+		$children = $current ? Nodes::children( $current->id ) : Nodes::projects();
+		self::prime_images( $current ? array_merge( array( $current ), $children ) : $children );
+		\SoloEstate\Specs::prime( wp_list_pluck( $children, 'id' ) );
+		// Availability of every building, floor and parking of the project (or of all projects).
+		$root = $current ? Nodes::get( $current->project_id ? $current->project_id : $current->id ) : null;
+		Nodes::prime_stats( $root );
+
 		// Optional levels: a project, phase or building without an image and with a
 		// single item inside shows that item straight away.
 		$guard = 0;
@@ -97,15 +95,91 @@ class Renderer {
 		}
 		self::$info = array();
 
+		// A database error during rendering (statuses or items missing): this page must not be
+		// kept by a page cache and served to everyone.
+		if ( ( is_array( $EZSQL_ERROR ) ? count( $EZSQL_ERROR ) : 0 ) > $db_errors ) {
+			self::no_cache();
+		}
+
 		return sprintf(
 			'<div class="solo-estate-app solo-estate-app--%1$s solo-estate-tips--%5$s alignwide" id="%2$s" data-currency="%3$s" data-version="%6$s">%4$s</div>',
 			esc_attr( $level ),
 			esc_attr( self::$anchor ),
-			esc_attr( Settings::get( 'alt_enabled' ) ? Settings::get( 'default_currency' ) : 'base' ),
+			esc_attr( \SoloEstate\Rates::alt_active() ? Settings::get( 'default_currency' ) : 'base' ),
 			$html,
 			'light' === Settings::get( 'tooltip_style' ) ? 'light' : 'dark',
 			esc_attr( SOLO_ESTATE_VERSION )
 		);
+	}
+
+	/**
+	 * Loads the attachment posts and metadata of the nodes' images, gallery included.
+	 *
+	 * @param object[] $nodes Nodes.
+	 */
+	public static function prime_images( array $nodes ) {
+		$ids = array();
+		foreach ( $nodes as $node ) {
+			foreach ( array_merge( array( $node->image_id, $node->image2_id ), Nodes::gallery( $node ) ) as $id ) {
+				if ( $id ) {
+					$ids[ (int) $id ] = (int) $id;
+				}
+			}
+		}
+		if ( $ids ) {
+			_prime_post_caches( array_values( $ids ), false, true );
+		}
+	}
+
+	/**
+	 * Tells WordPress and page caches not to store this response.
+	 */
+	public static function no_cache() {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		do_action( 'litespeed_control_set_nocache', 'Solo Estate: database error' );
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
+	}
+
+	/**
+	 * The item a request shows: the requested node, or its nearest open parent when it is
+	 * closed (e.g. a sold apartment from an old link). Unknown ids and items of another
+	 * project show the project (the catalog when there is none).
+	 *
+	 * @param object|null $project   Project of the shortcode; null for the catalog.
+	 * @param int         $requested Requested node id (0: none).
+	 * @return object|null
+	 */
+	public static function resolve( $project, $requested ) {
+		$current = $project;
+		if ( $requested && ( ! $project || $requested !== (int) $project->id ) ) {
+			$node = Nodes::get( $requested );
+			if ( $node && ( ! $project || (int) $node->project_id === (int) $project->id ) ) {
+				foreach ( Nodes::ancestors( $node ) as $item ) {
+					if ( ! self::is_open( $item ) && ( 'project' !== $item->level || ! $project ) ) {
+						break;
+					}
+					$current = $item;
+				}
+			}
+		}
+		return $current;
+	}
+
+	/**
+	 * Alt text of an image: the one written in the media library, otherwise the fallback
+	 * (usually the item's name).
+	 *
+	 * @param int    $attachment_id Attachment id.
+	 * @param string $fallback      Fallback.
+	 * @return string
+	 */
+	public static function alt( $attachment_id, $fallback ) {
+		$alt = trim( (string) get_post_meta( (int) $attachment_id, '_wp_attachment_image_alt', true ) );
+		return '' !== $alt ? $alt : (string) $fallback;
 	}
 
 	/**
@@ -117,13 +191,45 @@ class Renderer {
 		return self::$catalog;
 	}
 
+	/** Query args of the host page that links keep (plain permalinks, language). */
+	const KEPT_ARGS = array( 'page_id', 'p', 'lang', 'preview', 'preview_id', 'post_type', 'pagename' );
+
 	/**
-	 * Current page URL without Solo Estate navigation and filter arguments.
+	 * Current page URL without Solo Estate navigation and filter arguments, and without any
+	 * other query args (utm_*, fbclid…): those would be written into every link and form of a
+	 * cached page and handed to all later visitors.
 	 *
 	 * @return string
 	 */
 	public static function base_url() {
-		return remove_query_arg( array_merge( array( self::QUERY_ARG ), Search::ARGS ) );
+		static $base = null;
+		if ( null === $base ) {
+			$path = strtok( (string) ( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/' ), '?' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- escaped where printed.
+			$base = add_query_arg( array_map( 'rawurlencode', self::kept_args() ), $path ? $path : '/' );
+		}
+		return $base;
+	}
+
+	/**
+	 * Host page query args that links and forms keep.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function kept_args() {
+		/**
+		 * Query args of the page holding the shortcode that Solo Estate links keep.
+		 *
+		 * @param string[] $keys Arg names.
+		 */
+		$keys = (array) apply_filters( 'solo_estate_kept_query_args', self::KEPT_ARGS );
+		$out  = array();
+		foreach ( $keys as $key ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation.
+			if ( isset( $_GET[ $key ] ) && is_scalar( $_GET[ $key ] ) ) {
+				$out[ $key ] = mb_substr( sanitize_text_field( wp_unslash( (string) $_GET[ $key ] ) ), 0, 100 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			}
+		}
+		return $out;
 	}
 
 	/**
@@ -210,7 +316,7 @@ class Renderer {
 		if ( self::is_info( $node ) ) {
 			return true;
 		}
-		if ( ! Statuses::is_clickable( Statuses::get( $node->status_id ) ) ) {
+		if ( ! Statuses::is_clickable( Statuses::of( $node->status_id ) ) ) {
 			return false;
 		}
 		if ( in_array( $node->level, array( 'phase', 'building' ), true ) && Settings::get( 'sold_out_nolink' ) && self::state( $node )['sold_out'] ) {
@@ -236,7 +342,7 @@ class Renderer {
 				}
 			}
 		}
-		return Statuses::get( $project->status_id );
+		return Statuses::of( $project->status_id );
 	}
 
 	/**
@@ -310,16 +416,20 @@ class Renderer {
 		if ( ! $node->image_id ) {
 			return '';
 		}
-		list( $w, $h ) = self::image_size( $node->image_id );
-		$img           = wp_get_attachment_image(
+		// The SVG uses the frame the outlines were drawn in and is stretched over the image, so
+		// outlines stay in place when the image is replaced with a larger or smaller version.
+		list( $w, $h )   = Nodes::coord_space( $node );
+		list( $iw, $ih ) = self::image_size( $node->image_id );
+		$img             = wp_get_attachment_image(
 			$node->image_id,
 			'full',
 			false,
 			array(
-				'class'    => 'solo-estate-stage__img',
-				'loading'  => 'eager',
-				'alt'      => Nodes::display_title( $node ),
-				'decoding' => 'async',
+				'class'         => 'solo-estate-stage__img',
+				'loading'       => 'eager',
+				'fetchpriority' => 'high',
+				'alt'           => self::alt( $node->image_id, Nodes::display_title( $node ) ),
+				'decoding'      => 'async',
 			)
 		);
 		if ( ! $w || ! $h ) {
@@ -333,7 +443,7 @@ class Renderer {
 			if ( ! $points ) {
 				continue;
 			}
-			$status = Statuses::get( $child->status_id );
+			$status = Statuses::of( $child->status_id );
 			$target = self::target( $child );
 			$state  = self::state( $child );
 			$style  = '--solo-estate-shape:' . $state['color'];
@@ -356,34 +466,81 @@ class Renderer {
 					)
 				)
 			);
+			$sold_out = $state['sold_out'] || ( ! Nodes::is_unit( $child->level ) && 'spot' !== $child->level && ! $target['href'] );
+			// The name says what the tooltip shows (status, area, price or counts): screen
+			// readers never get the tooltip itself.
 			$attrs = sprintf(
 				'class="solo-estate-shape solo-estate-shape--%5$s%1$s" style="%2$s" data-tip="%3$s" aria-label="%4$s"',
-				( $target['href'] ? ' is-link' : ' is-disabled' ) . ( $state['sold_out'] || ( ! Nodes::is_unit( $child->level ) && 'spot' !== $child->level && ! $target['href'] ) ? ' is-sold-out' : '' ),
+				( $target['href'] ? ' is-link' : ' is-disabled' ) . ( $sold_out ? ' is-sold-out' : '' ),
 				esc_attr( $style ),
 				esc_attr( $tip_id ),
-				esc_attr( Nodes::display_title( $child ) ),
+				esc_attr( self::shape_label( $child, $status ) ),
 				esc_attr( $child->level )
 			);
+			// Units that cannot be bought (sold, reserved…) get hatching too, so the plan does not
+			// rely on colour alone.
+			if ( ! $target['href'] || $sold_out || ( $status && ! $status->available && Nodes::is_unit( $child->level ) ) ) {
+				$poly .= str_replace( '<polygon ', '<polygon class="solo-estate-shape__hatch" style="fill:url(#solo-estate-hatch-' . (int) $node->id . ')" ', $poly );
+			}
 			if ( $target['href'] ) {
 				$shapes .= sprintf( '<a href="%1$s"%2$s %3$s>%4$s</a>', esc_url( $target['href'] ), $target['external'] ? ' target="_blank" rel="noopener"' : '', $attrs, $poly );
 			} else {
-				$shapes .= sprintf( '<g %1$s>%2$s</g>', $attrs, $poly );
+				$shapes .= sprintf( '<g role="img" %1$s>%2$s</g>', $attrs, $poly );
 			}
 			$tips .= sprintf( '<template id="%1$s">%2$s</template>', esc_attr( $tip_id ), self::template( 'tooltip', array( 'node' => $child, 'status' => $status, 'target' => $target ) ) );
 		}
 
 		// The frame holds the image and its polygons together, so on full screen they scale as one.
 		return sprintf(
-			'<div class="solo-estate-stage" style="--solo-estate-ratio:%7$s"><div class="solo-estate-stage__frame">%1$s<svg class="solo-estate-stage__svg" viewBox="0 0 %2$d %3$d" preserveAspectRatio="none" role="group">%4$s</svg></div><div class="solo-estate-tip" role="tooltip" data-close="%6$s" hidden></div>%8$s%5$s</div>',
+			'<div class="solo-estate-stage" style="--solo-estate-ratio:%7$s"><div class="solo-estate-stage__frame">%1$s<svg class="solo-estate-stage__svg" viewBox="0 0 %2$d %3$d" preserveAspectRatio="none" role="group" aria-label="%9$s"><defs><pattern id="solo-estate-hatch-%10$d" class="solo-estate-hatch" patternUnits="userSpaceOnUse" width="%11$s" height="%11$s" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="%11$s"></line></pattern></defs>%4$s</svg></div><div class="solo-estate-tip" role="tooltip" data-close="%6$s" hidden></div>%8$s%5$s</div>',
 			$img,
 			(int) $w,
 			(int) $h,
 			$shapes,
 			$tips,
 			esc_attr( Texts::get( 'close' ) ),
-			sprintf( '%.4F', $w / $h ),
-			self::fullscreen_button()
+			sprintf( '%.4F', $iw && $ih ? $iw / $ih : $w / $h ),
+			self::fullscreen_button(),
+			esc_attr( Nodes::display_title( $node ) ),
+			(int) $node->id,
+			// Hatch spacing in the outline's own units: about 9 screen pixels at full width.
+			esc_attr( (string) max( 4, round( $w / 110 ) ) )
 		);
+	}
+
+	/**
+	 * Accessible name of a polygon: its title and what its tooltip says — status, area and
+	 * price of a unit; availability counts of a building or floor.
+	 *
+	 * @param object      $node   Item.
+	 * @param object|null $status Its status (Statuses::of()).
+	 * @return string
+	 */
+	public static function shape_label( $node, $status ) {
+		$parts = array( Nodes::display_title( $node ) );
+		if ( Nodes::is_unit( $node->level ) || 'spot' === $node->level ) {
+			$title = Statuses::title( $status );
+			if ( '' !== $title ) {
+				$parts[] = $title;
+			}
+			$area = self::area( $node->area );
+			if ( '' !== $area ) {
+				$parts[] = $area;
+			}
+			$price = Settings::get( 'show_prices' ) && Statuses::is_clickable( $status ) ? Nodes::total_price( $node ) : null;
+			if ( null !== $price ) {
+				$parts[] = self::money( $price, (string) Settings::get( 'base_symbol' ) );
+			}
+		} else {
+			$state = self::state( $node );
+			if ( $state['sold_out'] || ( '' !== $state['label'] && ! self::count_parts( $node ) ) ) {
+				$parts[] = $state['label'];
+			}
+			foreach ( self::count_parts( $node ) as $part ) {
+				$parts[] = $part[0] . ': ' . $part[1];
+			}
+		}
+		return implode( ', ', array_filter( $parts, 'strlen' ) );
 	}
 
 	/**
@@ -411,18 +568,7 @@ class Renderer {
 	 * @return array{0:int,1:int}
 	 */
 	public static function image_size( $id ) {
-		$meta = wp_get_attachment_metadata( $id );
-		if ( ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) {
-			return array( (int) $meta['width'], (int) $meta['height'] );
-		}
-		$file = get_attached_file( $id );
-		if ( $file && is_readable( $file ) ) {
-			$size = wp_getimagesize( $file );
-			if ( $size ) {
-				return array( (int) $size[0], (int) $size[1] );
-			}
-		}
-		return array( 0, 0 );
+		return Nodes::image_size( $id );
 	}
 
 	/**
@@ -436,7 +582,7 @@ class Renderer {
 			return '';
 		}
 		$base = sprintf( '<span class="solo-estate-price__value" data-cur="base">%s</span>', esc_html( self::money( $amount, Settings::get( 'base_symbol' ) ) ) );
-		if ( ! Settings::get( 'alt_enabled' ) ) {
+		if ( ! \SoloEstate\Rates::alt_active() ) {
 			return '<span class="solo-estate-price">' . $base . '</span>';
 		}
 		$alt = sprintf( '<span class="solo-estate-price__value" data-cur="alt">%s</span>', esc_html( self::money( $amount * \SoloEstate\Rates::rate(), Settings::get( 'alt_symbol' ) ) ) );
@@ -449,7 +595,7 @@ class Renderer {
 	 * @return string
 	 */
 	public static function currency_switch() {
-		if ( ! Settings::get( 'show_prices' ) || ! Settings::get( 'alt_enabled' ) ) {
+		if ( ! Settings::get( 'show_prices' ) || ! \SoloEstate\Rates::alt_active() ) {
 			return '';
 		}
 		$first  = 'base' === Settings::get( 'default_currency' ) ? 'base' : 'alt';
@@ -458,13 +604,22 @@ class Renderer {
 			'base' => Settings::get( 'base_symbol' ) ? Settings::get( 'base_symbol' ) : Settings::get( 'base_currency' ),
 			'alt'  => Settings::get( 'alt_symbol' ) ? Settings::get( 'alt_symbol' ) : Settings::get( 'alt_currency' ),
 		);
+		// Symbols are read out poorly (or not at all): the buttons are named by the currency code.
+		$button = static function ( $cur ) use ( $labels, $first ) {
+			$code = strtoupper( (string) Settings::get( $cur . '_currency' ) );
+			return sprintf(
+				'<button type="button" data-set-cur="%1$s" aria-pressed="%2$s"%3$s>%4$s</button>',
+				esc_attr( $cur ),
+				$cur === $first ? 'true' : 'false',
+				'' !== $code && $code !== $labels[ $cur ] ? ' aria-label="' . esc_attr( $code ) . '"' : '',
+				esc_html( $labels[ $cur ] )
+			);
+		};
 		return sprintf(
-			'<span class="solo-estate-currency" role="group" aria-label="%5$s"><button type="button" data-set-cur="%1$s">%3$s</button><button type="button" data-set-cur="%2$s">%4$s</button></span>',
-			esc_attr( $first ),
-			esc_attr( $second ),
-			esc_html( $labels[ $first ] ),
-			esc_html( $labels[ $second ] ),
-			esc_attr( Texts::get( 'price' ) )
+			'<span class="solo-estate-currency" role="group" aria-label="%3$s">%1$s%2$s</span>',
+			$button( $first ),
+			$button( $second ),
+			esc_attr( Texts::get( 'currency' ) )
 		);
 	}
 
@@ -527,7 +682,7 @@ class Renderer {
 				'sold_out' => false,
 			);
 		}
-		$status = Statuses::get( $node->status_id );
+		$status = Statuses::of( $node->status_id );
 		$state  = array(
 			'label'    => Statuses::title( $status ),
 			'color'    => $status ? $status->color : (string) Settings::get( 'accent_color' ),
@@ -560,7 +715,7 @@ class Renderer {
 	 * @return string Plain text.
 	 */
 	public static function available_label( $node ) {
-		if ( Nodes::is_unit( $node->level ) || self::state( $node )['sold_out'] || ! Statuses::is_clickable( Statuses::get( $node->status_id ) ) || Nodes::ACCESS_CLOSED === $node->access ) {
+		if ( Nodes::is_unit( $node->level ) || self::state( $node )['sold_out'] || ! Statuses::is_clickable( Statuses::of( $node->status_id ) ) || Nodes::ACCESS_CLOSED === $node->access ) {
 			return '';
 		}
 		if ( 0 === Nodes::flat_count( $node ) ) {
@@ -686,7 +841,7 @@ class Renderer {
 	 * @return string
 	 */
 	public static function badge( $status ) {
-		if ( ! $status ) {
+		if ( ! $status || ! empty( $status->missing ) ) {
 			return '';
 		}
 		return sprintf( '<span class="solo-estate-badge" style="--solo-estate-shape:%1$s">%2$s</span>', esc_attr( $status->color ), esc_html( Statuses::title( $status ) ) );
@@ -728,17 +883,18 @@ class Renderer {
 			return '';
 		}
 		$last  = count( $items ) - 1;
-		$parts = array();
+		$parts = '';
 		foreach ( $items as $i => $item ) {
-			$parts[] = $i === $last
-				? '<span aria-current="page">' . esc_html( $item[0] ) . '</span>'
-				: '<a href="' . esc_url( $item[1] ) . '">' . esc_html( $item[0] ) . '</a>';
+			$parts .= $i === $last
+				? '<li><span aria-current="page">' . esc_html( $item[0] ) . '</span></li>'
+				: '<li><a href="' . esc_url( $item[1] ) . '">' . esc_html( $item[0] ) . '</a><span class="solo-estate-crumbs__sep" aria-hidden="true">/</span></li>';
 		}
 		return sprintf(
-			'<nav class="solo-estate-crumbs" aria-label="breadcrumbs"><a class="solo-estate-back" href="%1$s" aria-label="%2$s">←</a>%3$s</nav>',
+			'<nav class="solo-estate-crumbs" aria-label="%4$s"><a class="solo-estate-back" href="%1$s" aria-label="%2$s">←</a><ol class="solo-estate-crumbs__list">%3$s</ol></nav>',
 			esc_url( $items[ $last - 1 ][1] ),
 			esc_attr( Texts::get( 'back' ) ),
-			implode( '<span class="solo-estate-crumbs__sep">/</span>', $parts )
+			$parts,
+			esc_attr( Texts::get( 'breadcrumbs' ) )
 		);
 	}
 

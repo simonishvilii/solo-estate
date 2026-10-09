@@ -122,11 +122,15 @@ class Ui {
 			if ( ! $src ) {
 				continue;
 			}
+			// Drag to reorder, or the arrows (keyboard).
 			printf(
-				'<li data-id="%1$d"><img src="%2$s" alt=""><button type="button" class="solo-estate-gallery-field__remove" aria-label="%3$s">×</button></li>',
+				'<li data-id="%1$d"><img src="%2$s" alt="%3$s"><button type="button" class="solo-estate-gallery-field__remove" aria-label="%4$s">×</button><button type="button" class="solo-estate-gallery-field__move solo-estate-gallery-field__move--prev" data-solo-estate-move="-1" aria-label="%5$s">‹</button><button type="button" class="solo-estate-gallery-field__move solo-estate-gallery-field__move--next" data-solo-estate-move="1" aria-label="%6$s">›</button></li>',
 				(int) $id,
 				esc_url( $src ),
-				esc_attr__( 'Remove', 'solo-estate' )
+				esc_attr( get_the_title( $id ) ),
+				esc_attr__( 'Remove', 'solo-estate' ),
+				esc_attr__( 'Move earlier', 'solo-estate' ),
+				esc_attr__( 'Move later', 'solo-estate' )
 			);
 		}
 		echo '</ul>';

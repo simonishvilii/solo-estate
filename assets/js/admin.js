@@ -93,8 +93,10 @@
 				}
 				var url = ( file.sizes && file.sizes.thumbnail ) ? file.sizes.thumbnail.url : file.url;
 				var $li = $( '<li>' ).attr( 'data-id', file.id );
-				$( '<img alt="">' ).attr( 'src', url ).appendTo( $li );
+				$( '<img alt="">' ).attr( 'src', url ).attr( 'alt', file.title || '' ).appendTo( $li );
 				$( '<button type="button" class="solo-estate-gallery-field__remove">×</button>' ).attr( 'aria-label', t.remove || 'Remove' ).appendTo( $li );
+				$( '<button type="button" class="solo-estate-gallery-field__move solo-estate-gallery-field__move--prev" data-solo-estate-move="-1">‹</button>' ).attr( 'aria-label', t.moveEarlier || 'Move earlier' ).appendTo( $li );
+				$( '<button type="button" class="solo-estate-gallery-field__move solo-estate-gallery-field__move--next" data-solo-estate-move="1">›</button>' ).attr( 'aria-label', t.moveLater || 'Move later' ).appendTo( $li );
 				$list.append( $li );
 			} );
 			syncGallery( $root );
@@ -105,6 +107,36 @@
 		var $root = $( this ).closest( '[data-solo-estate-gallery]' );
 		$( this ).closest( 'li' ).remove();
 		syncGallery( $root );
+	} );
+
+	// Reordering without dragging: the arrow buttons of gallery images and specification
+	// fields move their item one place; the focus stays on the button and the new position is
+	// announced.
+	$( document ).on( 'click', '[data-solo-estate-move]', function () {
+		var $btn = $( this );
+		var $item = $btn.closest( 'li, tr' );
+		var $items = $item.parent().children( $item.is( 'tr' ) ? 'tr:not(.solo-estate-new-row)' : 'li' );
+		var index = $items.index( $item );
+		var to = index + Number( $btn.data( 'solo-estate-move' ) );
+		if ( to < 0 || to >= $items.length ) {
+			return;
+		}
+		if ( to < index ) {
+			$item.insertBefore( $items.eq( to ) );
+		} else {
+			$item.insertAfter( $items.eq( to ) );
+		}
+		if ( $item.is( 'tr' ) ) {
+			$item.parent().children( 'tr:not(.solo-estate-new-row)' ).each( function ( i ) {
+				$( this ).find( '[data-solo-estate-sort]' ).val( i + 1 );
+			} );
+		} else {
+			syncGallery( $item.closest( '[data-solo-estate-gallery]' ) );
+		}
+		$btn.trigger( 'focus' );
+		if ( window.wp && wp.a11y && t.moved ) {
+			wp.a11y.speak( t.moved.replace( '%1$d', to + 1 ).replace( '%2$d', $items.length ) );
+		}
 	} );
 
 	// New rooms / sections typed right on the unit.
@@ -152,14 +184,17 @@
 	} );
 
 	// Confirm destructive links and bulk deletes.
+	// data-solo-estate-confirm="trash": the item goes to the trash (can be restored).
 	$( document ).on( 'click', '[data-solo-estate-confirm]', function ( e ) {
-		if ( ! window.confirm( t.confirmDelete || 'Delete?' ) ) {
+		var message = 'trash' === $( this ).attr( 'data-solo-estate-confirm' ) ? t.confirmTrash : t.confirmDelete;
+		if ( ! window.confirm( message || 'Delete?' ) ) {
 			e.preventDefault();
 		}
 	} );
 	$( document ).on( 'click', '[data-solo-estate-bulk-confirm]', function ( e ) {
 		var value = $( this ).closest( 'form' ).find( 'select[name="bulk"]' ).val();
-		if ( 'delete' === value && ! window.confirm( t.confirmDelete || 'Delete?' ) ) {
+		var message = 'trash' === $( this ).attr( 'data-solo-estate-bulk-confirm' ) ? t.confirmTrash : t.confirmDelete;
+		if ( 'delete' === value && ! window.confirm( message || 'Delete?' ) ) {
 			e.preventDefault();
 		}
 	} );

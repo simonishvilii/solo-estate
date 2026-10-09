@@ -26,11 +26,14 @@ class Language_Links {
 		if ( is_admin() ) {
 			return;
 		}
-		// Polylang: switcher widget, menu items and pll_the_languages() (also hreflang links).
+		// Polylang: the translation URL (hreflang links, and the base of the switcher links)
+		// carries the item only; the switcher (widget, menu items, pll_the_languages()) also
+		// keeps the filter.
+		add_filter( 'pll_translation_url', array( __CLASS__, 'carry_item' ) );
 		add_filter( 'pll_the_language_link', array( __CLASS__, 'carry' ) );
-		add_filter( 'pll_translation_url', array( __CLASS__, 'carry' ) );
-		// WPML: language switchers.
+		// WPML: language switchers, and hreflang links with the item only.
 		add_filter( 'icl_ls_languages', array( __CLASS__, 'carry_wpml' ) );
+		add_filter( 'wpml_hreflangs', array( __CLASS__, 'hreflangs_wpml' ) );
 	}
 
 	/**
@@ -75,6 +78,37 @@ class Language_Links {
 			return $url;
 		}
 		return add_query_arg( array_map( 'rawurlencode', $args ), $url );
+	}
+
+	/**
+	 * Adds only the item argument to a translation URL: filter combinations are not indexed
+	 * (search results are noindex), so alternate-language links point at the item itself.
+	 *
+	 * @param mixed $url URL.
+	 * @return mixed
+	 */
+	public static function carry_item( $url ) {
+		$args = array_intersect_key( self::args(), array( Renderer::QUERY_ARG => true ) );
+		if ( ! $args || ! is_string( $url ) || '' === $url || Seo::is_missing() ) {
+			return $url;
+		}
+		return add_query_arg( $args, remove_query_arg( Search::ARGS, $url ) );
+	}
+
+	/**
+	 * WPML hreflang links: the item argument only.
+	 *
+	 * @param mixed $links URLs keyed by language.
+	 * @return mixed
+	 */
+	public static function hreflangs_wpml( $links ) {
+		if ( ! is_array( $links ) ) {
+			return $links;
+		}
+		foreach ( $links as $code => $url ) {
+			$links[ $code ] = self::carry_item( $url );
+		}
+		return $links;
 	}
 
 	/**

@@ -27,6 +27,9 @@
 		each( document.querySelectorAll( '.solo-estate-app' ), function ( app ) {
 			app.setAttribute( 'data-currency', cur );
 		} );
+		each( document.querySelectorAll( '.solo-estate-currency [data-set-cur]' ), function ( btn ) {
+			btn.setAttribute( 'aria-pressed', btn.getAttribute( 'data-set-cur' ) === cur ? 'true' : 'false' );
+		} );
 		try {
 			window.localStorage.setItem( STORAGE_KEY, cur );
 		} catch ( e ) {}
@@ -51,6 +54,8 @@
 			close.setAttribute( 'aria-label', tip.getAttribute( 'data-close' ) || 'Close' );
 			close.innerHTML = '&times;';
 			tip.insertBefore( close, tip.firstChild );
+			window.clearTimeout( hideTimer );
+			window.clearTimeout( hiddenTimer );
 			tip.hidden = false;
 			active = shape;
 			each( stage.querySelectorAll( '.solo-estate-shape.is-active' ), function ( s ) {
@@ -86,13 +91,45 @@
 			tip.style.setProperty( '--solo-estate-arrow', Math.max( 14, Math.min( w - 14, x - left ) ) + 'px' );
 		}
 
+		var hideTimer = null;
+		var hiddenTimer = null;
+		// Closed with Esc: stays closed until the pointer has left that polygon.
+		var dismissed = null;
+		function dismiss() {
+			dismissed = active;
+			hide();
+		}
 		function hide() {
+			window.clearTimeout( hideTimer );
 			tip.classList.remove( 'is-visible' );
 			if ( active ) {
 				active.classList.remove( 'is-active' );
 			}
 			active = null;
+			// After the fade, out of the accessibility tree and the tab order.
+			window.clearTimeout( hiddenTimer );
+			hiddenTimer = window.setTimeout( function () {
+				if ( ! tip.classList.contains( 'is-visible' ) ) {
+					tip.hidden = true;
+				}
+			}, 200 );
 		}
+		// Leaving a polygon with the mouse closes its tooltip after a short grace time, so the
+		// pointer can move onto the tooltip (hoverable content, WCAG 1.4.13).
+		function hideSoon() {
+			window.clearTimeout( hideTimer );
+			hideTimer = window.setTimeout( hide, 250 );
+		}
+		tip.addEventListener( 'pointerenter', function ( e ) {
+			if ( 'mouse' === e.pointerType ) {
+				window.clearTimeout( hideTimer );
+			}
+		} );
+		tip.addEventListener( 'pointerleave', function ( e ) {
+			if ( 'mouse' === e.pointerType ) {
+				hideSoon();
+			}
+		} );
 
 		function centerOf( shape ) {
 			var box = shape.getBoundingClientRect();
@@ -102,7 +139,7 @@
 
 		each( stage.querySelectorAll( '.solo-estate-shape' ), function ( shape ) {
 			shape.addEventListener( 'pointerenter', function ( e ) {
-				if ( 'mouse' !== e.pointerType ) {
+				if ( 'mouse' !== e.pointerType || dismissed === shape ) {
 					return;
 				}
 				fill( shape );
@@ -116,7 +153,10 @@
 			} );
 			shape.addEventListener( 'pointerleave', function ( e ) {
 				if ( 'mouse' === e.pointerType ) {
-					hide();
+					if ( dismissed === shape ) {
+						dismissed = null;
+					}
+					hideSoon();
 				}
 			} );
 			// Touch: first tap shows the tooltip, second tap follows the link. Whether this
@@ -201,6 +241,21 @@
 				stage.removeAttribute( 'data-touch' );
 			} else {
 				stage.setAttribute( 'data-touch', '1' );
+			}
+		} );
+		// Back on the keyboard after a tap (touch laptops, tablets with keyboards): Enter on a
+		// polygon must follow its link again, not just show the tooltip.
+		stage.addEventListener( 'keydown', function ( e ) {
+			stage.removeAttribute( 'data-touch' );
+			if ( 'Escape' === e.key && tip.classList.contains( 'is-visible' ) ) {
+				e.stopPropagation();
+				dismiss();
+			}
+		} );
+		// Esc closes the tooltip wherever the focus is (it is dismissible, WCAG 1.4.13).
+		document.addEventListener( 'keydown', function ( e ) {
+			if ( 'Escape' === e.key && tip.classList.contains( 'is-visible' ) && ! document.querySelector( '.solo-estate-lightbox' ) ) {
+				dismiss();
 			}
 		} );
 
@@ -294,6 +349,59 @@
 		}
 	}
 
+	/* ---------- Dialogs (photos, tour, info window) ---------- */
+
+	function t( key, fallback ) {
+		return ( config.i18n && config.i18n[ key ] ) || fallback;
+	}
+
+	// Makes an overlay a proper modal: the rest of the page is inert (not focusable, hidden
+	// from screen readers), Tab stays inside, and closing gives the focus back to the opener.
+	// Returns the function that undoes it.
+	function trapDialog( overlay ) {
+		var made = [];
+		var node = overlay;
+		while ( node && node.parentNode && node !== document.body ) {
+			each( node.parentNode.children, function ( sibling ) {
+				if ( sibling !== node && ! sibling.inert && 'SCRIPT' !== sibling.tagName && 'TEMPLATE' !== sibling.tagName ) {
+					sibling.inert = true;
+					made.push( sibling );
+				}
+			} );
+			node = node.parentNode;
+		}
+		function onTab( e ) {
+			// A dialog opened on top of this one (a photo from the info window) handles Tab.
+			if ( 'Tab' !== e.key || overlay.closest( '[inert]' ) ) {
+				return;
+			}
+			var items = Array.prototype.filter.call( overlay.querySelectorAll( 'a[href], button, iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])' ), function ( el ) {
+				return ! el.disabled && el.offsetParent !== null;
+			} );
+			if ( ! items.length ) {
+				return;
+			}
+			var first = items[ 0 ];
+			var last = items[ items.length - 1 ];
+			if ( e.shiftKey && ( document.activeElement === first || ! overlay.contains( document.activeElement ) ) ) {
+				e.preventDefault();
+				last.focus();
+			} else if ( ! e.shiftKey && ( document.activeElement === last || ! overlay.contains( document.activeElement ) ) ) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+		overlay.addEventListener( 'keydown', onTab );
+		document.addEventListener( 'keydown', onTab );
+		return function () {
+			each( made, function ( el ) {
+				el.inert = false;
+			} );
+			overlay.removeEventListener( 'keydown', onTab );
+			document.removeEventListener( 'keydown', onTab );
+		};
+	}
+
 	/* ---------- Lightbox ---------- */
 
 	// Images of the same group (data-solo-estate-lightbox="group") can be browsed with the
@@ -307,26 +415,32 @@
 		overlay.className = 'solo-estate-lightbox';
 		overlay.setAttribute( 'role', 'dialog' );
 		overlay.setAttribute( 'aria-modal', 'true' );
-		overlay.innerHTML = '<button type="button" class="solo-estate-lightbox__close" aria-label="Close">×</button>';
+		overlay.setAttribute( 'aria-label', t( 'photos', 'Photos' ) );
+		overlay.innerHTML = '<button type="button" class="solo-estate-lightbox__close">×</button>';
+		overlay.firstChild.setAttribute( 'aria-label', t( 'close', 'Close' ) );
 		var img = document.createElement( 'img' );
 		overlay.appendChild( img );
 		if ( items.length > 1 ) {
-			overlay.insertAdjacentHTML( 'beforeend', '<button type="button" class="solo-estate-lightbox__nav is-prev" aria-label="Previous">‹</button><button type="button" class="solo-estate-lightbox__nav is-next" aria-label="Next">›</button><span class="solo-estate-lightbox__count"></span>' );
+			overlay.insertAdjacentHTML( 'beforeend', '<button type="button" class="solo-estate-lightbox__nav is-prev">‹</button><button type="button" class="solo-estate-lightbox__nav is-next">›</button><span class="solo-estate-lightbox__count" aria-live="polite"></span>' );
+			overlay.querySelector( '.is-prev' ).setAttribute( 'aria-label', t( 'previous', 'Previous' ) );
+			overlay.querySelector( '.is-next' ).setAttribute( 'aria-label', t( 'next', 'Next' ) );
 		}
 		overlayHost().appendChild( overlay );
 		document.documentElement.classList.add( 'solo-estate-no-scroll' );
+		var release = trapDialog( overlay );
 
 		function showItem( i ) {
 			index = ( i + items.length ) % items.length;
 			var thumb = items[ index ].querySelector( 'img' );
 			img.src = items[ index ].getAttribute( 'href' );
-			img.alt = thumb ? thumb.alt : '';
+			img.alt = ( thumb && thumb.alt ) || items[ index ].getAttribute( 'aria-label' ) || '';
 			var count = overlay.querySelector( '.solo-estate-lightbox__count' );
 			if ( count ) {
 				count.textContent = ( index + 1 ) + ' / ' + items.length;
 			}
 		}
 		function close() {
+			release();
 			overlay.remove();
 			releaseScroll();
 			document.removeEventListener( 'keydown', onKey );
@@ -334,6 +448,7 @@
 		}
 		function onKey( e ) {
 			if ( 'Escape' === e.key ) {
+				e.stopPropagation();
 				close();
 			} else if ( 'ArrowLeft' === e.key && items.length > 1 ) {
 				showItem( index - 1 );
@@ -375,7 +490,9 @@
 		overlay.className = 'solo-estate-lightbox solo-estate-lightbox--tour';
 		overlay.setAttribute( 'role', 'dialog' );
 		overlay.setAttribute( 'aria-modal', 'true' );
-		overlay.innerHTML = '<button type="button" class="solo-estate-lightbox__close" aria-label="Close">×</button>';
+		overlay.setAttribute( 'aria-label', button.getAttribute( 'data-title' ) || t( 'tour', 'Virtual tour' ) );
+		overlay.innerHTML = '<button type="button" class="solo-estate-lightbox__close">×</button>';
+		overlay.firstChild.setAttribute( 'aria-label', t( 'close', 'Close' ) );
 		var frame = document.createElement( 'iframe' );
 		frame.src = button.getAttribute( 'data-solo-estate-tour' );
 		frame.title = button.getAttribute( 'data-title' ) || '';
@@ -385,8 +502,12 @@
 		overlay.appendChild( frame );
 		document.body.appendChild( overlay );
 		document.documentElement.classList.add( 'solo-estate-no-scroll' );
+		// Keys typed inside the tour (another site) never reach this page, so Esc cannot work
+		// there: the close button stays first in the dialog and Tab cycles back to it.
+		var release = trapDialog( overlay );
 
 		function close() {
+			release();
 			overlay.remove();
 			releaseScroll();
 			document.removeEventListener( 'keydown', onKey );
@@ -423,7 +544,7 @@
 		var close = document.createElement( 'button' );
 		close.type = 'button';
 		close.className = 'solo-estate-info__close';
-		close.setAttribute( 'aria-label', ( app && app.querySelector( '.solo-estate-tip' ) && app.querySelector( '.solo-estate-tip' ).getAttribute( 'data-close' ) ) || 'Close' );
+		close.setAttribute( 'aria-label', t( 'close', ( app && app.querySelector( '.solo-estate-tip' ) && app.querySelector( '.solo-estate-tip' ).getAttribute( 'data-close' ) ) || 'Close' ) );
 		close.innerHTML = '&times;';
 		panel.insertBefore( close, panel.firstChild );
 		var title = panel.querySelector( '.solo-estate-info__title' );
@@ -434,8 +555,10 @@
 		overlay.appendChild( panel );
 		overlayHost().appendChild( overlay );
 		document.documentElement.classList.add( 'solo-estate-no-scroll' );
+		var release = trapDialog( overlay );
 
 		function shut() {
+			release();
 			overlay.remove();
 			releaseScroll();
 			document.removeEventListener( 'keydown', onKey );
@@ -475,7 +598,7 @@
 			var key = btn.getAttribute( 'data-switch-to' );
 			each( tabs.querySelectorAll( '[data-switch-to]' ), function ( b ) {
 				b.classList.toggle( 'is-active', b === btn );
-				b.setAttribute( 'aria-selected', b === btn ? 'true' : 'false' );
+				b.setAttribute( 'aria-pressed', b === btn ? 'true' : 'false' );
 			} );
 			each( root.querySelectorAll( '[data-switch-pane]' ), function ( pane ) {
 				// Only this switch's own panes, not those of a nested one.
@@ -491,28 +614,63 @@
 	function initLead( form ) {
 		var message = form.querySelector( '.solo-estate-lead__message' );
 		var button = form.querySelector( 'button[type="submit"]' );
+		var sending = false;
+		// The script validates and shows its own messages; without it the browser's checks apply.
+		form.noValidate = true;
+
+		// Marks a field (in)valid: aria-invalid, its own error text, and the red frame.
+		function mark( input, bad ) {
+			input.classList.toggle( 'is-invalid', bad );
+			input.setAttribute( 'aria-invalid', bad ? 'true' : 'false' );
+			var error = document.getElementById( input.getAttribute( 'aria-describedby' ) || '' );
+			if ( error ) {
+				error.hidden = ! bad;
+			}
+		}
+		function invalidFields() {
+			var bad = [];
+			each( form.querySelectorAll( 'input[required]' ), function ( input ) {
+				var value = input.value.trim();
+				var wrong = '' === value || ( 'phone' === input.name && value.replace( /\D/g, '' ).length < 6 );
+				mark( input, wrong );
+				if ( wrong ) {
+					bad.push( input );
+				}
+			} );
+			return bad;
+		}
 
 		form.addEventListener( 'submit', function ( e ) {
 			e.preventDefault();
-
-			var invalid = false;
-			each( form.querySelectorAll( 'input[required]' ), function ( input ) {
-				var bad = '' === input.value.trim();
-				input.classList.toggle( 'is-invalid', bad );
-				invalid = invalid || bad;
-			} );
-			if ( invalid ) {
+			if ( sending ) {
+				return;
+			}
+			var bad = invalidFields();
+			if ( bad.length ) {
 				show( config.i18n && config.i18n.error, true );
+				bad[ 0 ].focus();
 				return;
 			}
 
 			var data = new FormData( form );
-			data.append( 'action', 'solo_estate_lead' );
-			data.append( 'lang', config.lang || '' );
-			data.append( 'page_url', window.location.href );
+			data.set( 'action', 'solo_estate_lead' );
+			data.set( 'lang', config.lang || data.get( 'lang' ) || '' );
+			data.set( 'page_url', window.location.href );
+			// Where the visitor came from, remembered by the small script on every page.
+			if ( config.attribution ) {
+				try {
+					var source = window.localStorage.getItem( 'solo_estate_attribution' );
+					if ( source ) {
+						data.set( 'attribution', source );
+					}
+				} catch ( err ) {}
+			}
 
-			button.disabled = true;
+			// Not "disabled": a disabled button loses the keyboard focus.
+			sending = true;
+			button.setAttribute( 'aria-disabled', 'true' );
 			form.classList.add( 'is-loading' );
+			form.setAttribute( 'aria-busy', 'true' );
 
 			fetch( config.ajaxUrl, { method: 'POST', body: data, credentials: 'same-origin' } )
 				.then( function ( response ) {
@@ -526,48 +684,93 @@
 						form.reset();
 						form.classList.add( 'is-sent' );
 						show( payload.message || ( config.i18n && config.i18n.success ), false );
+						// The fields are gone: the focus goes to the message instead of the page top.
+						message.focus();
 						track( form );
 					} else {
+						var first = null;
 						( payload.fields || [] ).forEach( function ( name ) {
 							var input = form.querySelector( '[name="' + name + '"]' );
 							if ( input ) {
-								input.classList.add( 'is-invalid' );
+								mark( input, true );
+								first = first || input;
 							}
 						} );
 						show( payload.message || ( config.i18n && config.i18n.error ), true );
+						if ( first ) {
+							first.focus();
+						}
 					}
 				} )
 				.catch( function () {
 					show( config.i18n && config.i18n.error, true );
 				} )
 				.then( function () {
-					button.disabled = false;
+					sending = false;
+					button.removeAttribute( 'aria-disabled' );
 					form.classList.remove( 'is-loading' );
+					form.removeAttribute( 'aria-busy' );
 				} );
 		} );
 
 		form.addEventListener( 'input', function ( e ) {
-			e.target.classList.remove( 'is-invalid' );
+			if ( e.target.classList.contains( 'is-invalid' ) ) {
+				mark( e.target, false );
+			}
 		} );
 
+		// Errors are announced assertively; the text is set a moment after the role, so screen
+		// readers notice the change.
 		function show( text, isError ) {
-			message.textContent = text || '';
-			message.hidden = ! text;
+			message.setAttribute( 'role', isError ? 'alert' : 'status' );
 			message.classList.toggle( 'is-error', !! isError );
+			message.textContent = '';
+			window.setTimeout( function () {
+				message.textContent = text || '';
+			}, 50 );
 		}
 	}
 
 	function track( form ) {
-		var detail = { nodeId: ( form.querySelector( '[name="node_id"]' ) || {} ).value };
+		// The apartment the request is about, from the form (price only where prices are shown).
+		var item = {
+			id: form.getAttribute( 'data-item-id' ) || ( form.querySelector( '[name="node_id"]' ) || {} ).value || '',
+			name: form.getAttribute( 'data-item-name' ) || '',
+			category: form.getAttribute( 'data-item-category' ) || '',
+			value: parseFloat( form.getAttribute( 'data-value' ) ) || 0,
+			currency: form.getAttribute( 'data-currency' ) || ''
+		};
+		var detail = { nodeId: item.id, name: item.name, project: item.category, value: item.value, currency: item.currency };
 		document.dispatchEvent( new CustomEvent( 'solo-estate:lead', { detail: detail } ) );
 		if ( ! config.tracking ) {
 			return;
 		}
+		var params = { event_category: 'solo-estate' };
+		if ( item.id && '0' !== item.id ) {
+			params.items = [ { item_id: String( item.id ), item_name: item.name, item_category: item.category, price: item.value || undefined, quantity: 1 } ];
+		}
+		if ( item.value && item.currency ) {
+			params.value = item.value;
+			params.currency = item.currency;
+		}
+		// gtag.js, or else Google Tag Manager's dataLayer (never both: the lead would count twice).
 		if ( 'function' === typeof window.gtag ) {
-			window.gtag( 'event', 'generate_lead', { event_category: 'solo-estate' } );
+			window.gtag( 'event', 'generate_lead', params );
+		} else if ( window.dataLayer && 'function' === typeof window.dataLayer.push ) {
+			window.dataLayer.push( { ecommerce: null } );
+			window.dataLayer.push( { event: 'generate_lead', ecommerce: { value: params.value, currency: params.currency, items: params.items }, solo_estate: detail } );
 		}
 		if ( 'function' === typeof window.fbq ) {
-			window.fbq( 'track', 'Lead' );
+			var meta = { content_name: item.name, content_category: item.category };
+			if ( item.id && '0' !== item.id ) {
+				meta.content_ids = [ String( item.id ) ];
+				meta.content_type = 'product';
+			}
+			if ( item.value && item.currency ) {
+				meta.value = item.value;
+				meta.currency = item.currency;
+			}
+			window.fbq( 'track', 'Lead', meta );
 		}
 	}
 
@@ -706,12 +909,54 @@
 			sync();
 		} );
 
+		// Pages behind a select: a choice made with the mouse or a touch picker opens at once,
+		// but arrow keys on a closed select (which change it step by step in some browsers)
+		// only move the choice; Enter or the "Show" button then opens it.
 		each( document.querySelectorAll( '[data-solo-estate-nav]' ), function ( select ) {
-			select.addEventListener( 'change', function () {
-				if ( select.value ) {
+			var start = select.value;
+			var keyed = false;
+			var go = select.parentNode.querySelector( '[data-solo-estate-go]' );
+			var open = function () {
+				if ( select.value && select.value !== start ) {
 					window.location.href = select.value;
 				}
+			};
+			var isOpen = function () {
+				try {
+					return select.matches( ':open' );
+				} catch ( err ) {
+					return false;
+				}
+			};
+			select.addEventListener( 'keydown', function ( e ) {
+				// Keys inside an open list (a styled select moves focus to its options) choose as
+				// usual, and the choice opens.
+				if ( e.target !== select || isOpen() ) {
+					keyed = false;
+					return;
+				}
+				if ( 'Enter' === e.key ) {
+					e.preventDefault();
+					open();
+				} else if ( 'Tab' !== e.key && 'Escape' !== e.key && 'Shift' !== e.key ) {
+					keyed = true;
+				}
 			} );
+			select.addEventListener( 'pointerdown', function () {
+				keyed = false;
+			} );
+			select.addEventListener( 'change', function () {
+				if ( ! keyed ) {
+					open();
+					return;
+				}
+				if ( go ) {
+					go.hidden = select.value === start;
+				}
+			} );
+			if ( go ) {
+				go.addEventListener( 'click', open );
+			}
 		} );
 	}
 

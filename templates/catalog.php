@@ -26,7 +26,7 @@ $solo_estate_tabs = count( Statuses::for_scope( 'project' ) ) > 1 ? Statuses::fo
 	<p class="solo-estate-empty"><?php echo esc_html( Texts::get( 'no_items' ) ); ?></p>
 <?php else : ?>
 	<?php if ( $solo_estate_tabs ) : ?>
-		<div class="solo-estate-tabs" role="group" data-solo-estate-tabs>
+		<div class="solo-estate-tabs" role="group" aria-label="<?php echo esc_attr( Texts::get( 'status' ) ); ?>" data-solo-estate-tabs>
 			<button type="button" class="is-active" aria-pressed="true" data-tab="all"><?php echo esc_html( Texts::get( 'all' ) ); ?></button>
 			<?php foreach ( $solo_estate_tabs as $solo_estate_status ) : ?>
 				<button type="button" aria-pressed="false" data-tab="<?php echo esc_attr( $solo_estate_status->id ); ?>"><?php echo esc_html( Statuses::title( $solo_estate_status ) ); ?></button>
@@ -47,7 +47,9 @@ $solo_estate_tabs = count( Statuses::for_scope( 'project' ) ) > 1 ? Statuses::fo
 				<<?php echo esc_attr( $solo_estate_tag ); ?> class="solo-estate-project"<?php echo $solo_estate_open ? ' href="' . esc_url( Renderer::url( $solo_estate_project ) ) . '"' : ''; ?>>
 					<span class="solo-estate-project__media">
 						<?php if ( $solo_estate_image ) : ?>
-							<?php echo wp_get_attachment_image( $solo_estate_image, 'large', false, array( 'alt' => Nodes::display_title( $solo_estate_project ), 'loading' => 'lazy' ) ); ?>
+							<?php // The first row of cards is on screen when the page opens: not lazy. ?>
+							<?php $solo_estate_card_no = isset( $solo_estate_card_no ) ? $solo_estate_card_no + 1 : 1; ?>
+							<?php echo wp_get_attachment_image( $solo_estate_image, 'large', false, array_merge( array( 'alt' => Renderer::alt( $solo_estate_image, Nodes::display_title( $solo_estate_project ) ) ), $solo_estate_card_no <= 3 ? array( 'loading' => 'eager', 'fetchpriority' => 1 === $solo_estate_card_no ? 'high' : 'auto' ) : array( 'loading' => 'lazy' ) ) ); ?>
 						<?php endif; ?>
 						<?php if ( $solo_estate_state['sold_out'] ) : ?>
 							<span class="solo-estate-project__soldout"><?php echo esc_html( Texts::get( 'sold_out' ) ); ?></span>
