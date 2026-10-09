@@ -40,20 +40,111 @@ class Install {
 	public static function maybe_upgrade() {
 		// A failed upgrade is retried after a while, not on every page view.
 		if ( get_option( 'solo_estate_db_version' ) !== SOLO_ESTATE_DB_VERSION && ! get_transient( self::ERROR_TRANSIENT ) ) {
-			self::install();
+			self::install( true );
 		}
 	}
 
 	/** Set when creating or upgrading the tables failed: [message, time]. */
 	const ERROR_TRANSIENT = 'solo_estate_install_error';
 
+	/** Option row held while one request upgrades (value: start time). */
+	const LOCK = 'solo_estate_upgrade_lock';
+
 	/**
 	 * Creates/updates tables, capabilities and default data.
+	 *
+	 * Right after an update every page view finds the old schema version. Only the request that
+	 * gets the lock upgrades; the others carry on with the old version for that moment. Without
+	 * it, two requests altered the same table at once and the second one failed with
+	 * "Duplicate column name" (and migrations could run twice).
+	 *
+	 * @param bool $upgrade Called for an upgrade on a page view (skipped when another request
+	 *                      finished it meanwhile); false on activation.
 	 */
-	public static function install() {
+	public static function install( $upgrade = false ) {
+		if ( ! self::lock() ) {
+			return;
+		}
+		try {
+			$from = self::stored_version();
+			if ( $upgrade && SOLO_ESTATE_DB_VERSION === $from ) {
+				delete_transient( self::ERROR_TRANSIENT );
+				wp_cache_delete( 'alloptions', 'options' );
+				return;
+			}
+			self::run( $from );
+		} finally {
+			self::unlock();
+		}
+	}
+
+	/**
+	 * Schema version as stored now (not the copy cached at the start of the request).
+	 *
+	 * @return string
+	 */
+	private static function stored_version() {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return (string) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'solo_estate_db_version' ) );
+	}
+
+	/**
+	 * Takes the upgrade lock. The unique option name makes the insert atomic; a lock older than
+	 * ten minutes (a request that died) is taken over.
+	 *
+	 * @return bool
+	 */
+	private static function lock() {
+		global $wpdb;
+		$now = time();
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery
+		if ( $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", self::LOCK, $now ) ) ) {
+			return true;
+		}
+		$since = (int) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", self::LOCK ) );
+		if ( $since && $now - $since > 10 * MINUTE_IN_SECONDS ) {
+			return 1 === (int) $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", $now, self::LOCK, $since ) );
+		}
+		// phpcs:enable
+		return false;
+	}
+
+	/**
+	 * Releases the upgrade lock.
+	 */
+	private static function unlock() {
+		global $wpdb;
+		$wpdb->delete( $wpdb->options, array( 'option_name' => self::LOCK ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+
+	/**
+	 * Database errors since a point that are real failures. "Duplicate column / key name" means
+	 * the column or index is already there, which is what the upgrade wants.
+	 *
+	 * @param int $since Number of errors before.
+	 * @return string[] Messages.
+	 */
+	private static function real_errors( $since ) {
+		global $EZSQL_ERROR;
+		$out = array();
+		foreach ( array_slice( is_array( $EZSQL_ERROR ) ? $EZSQL_ERROR : array(), $since ) as $error ) {
+			$message = isset( $error['error_str'] ) ? (string) $error['error_str'] : 'database error';
+			if ( ! preg_match( '/^Duplicate (column|key) name/i', $message ) ) {
+				$out[] = $message;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Creates/updates tables and data from a stored version.
+	 *
+	 * @param string $from Stored version ('' on a new install).
+	 */
+	private static function run( $from ) {
 		global $wpdb, $EZSQL_ERROR;
 
-		$from   = (string) get_option( 'solo_estate_db_version', '' );
 		$errors = is_array( $EZSQL_ERROR ) ? count( $EZSQL_ERROR ) : 0;
 		self::create_tables();
 		// The schema must be there before anything else runs on it.
@@ -85,9 +176,9 @@ class Install {
 			self::migrate_9();
 		}
 		// The version is recorded only when nothing failed; otherwise the upgrade runs again.
-		if ( is_array( $EZSQL_ERROR ) && count( $EZSQL_ERROR ) > $errors ) {
-			$last = end( $EZSQL_ERROR );
-			self::failed( isset( $last['error_str'] ) ? (string) $last['error_str'] : 'database error' );
+		$failures = self::real_errors( $errors );
+		if ( $failures ) {
+			self::failed( end( $failures ) );
 			return;
 		}
 		delete_transient( self::ERROR_TRANSIENT );

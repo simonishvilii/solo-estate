@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Solo Estate\n"
 "Report-Msgid-Bugs-To: https://solostudio.ge\n"
-"POT-Creation-Date: 2026-10-09 17:49+0000\n"
+"POT-Creation-Date: 2026-10-09 18:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,171 +18,175 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: includes/admin/class-admin.php:41
+#: includes/admin/class-admin.php:42
 msgid "Solo Estate"
 msgstr ""
 
-#: includes/admin/class-admin.php:42 includes/admin/class-nodes-page.php:193
+#: includes/admin/class-admin.php:43 includes/admin/class-nodes-page.php:193
 #: includes/admin/class-nodes-page.php:687
 #: includes/admin/class-statuses-page.php:44 includes/class-nodes.php:119
 msgid "Projects"
 msgstr ""
 
-#: includes/admin/class-admin.php:43 includes/admin/class-statuses-page.php:37
+#: includes/admin/class-admin.php:44 includes/admin/class-statuses-page.php:37
 msgid "Statuses"
 msgstr ""
 
-#: includes/admin/class-admin.php:44 includes/admin/class-specs-page.php:33
+#: includes/admin/class-admin.php:45 includes/admin/class-specs-page.php:33
 msgid "Specification fields"
 msgstr ""
 
-#: includes/admin/class-admin.php:44
+#: includes/admin/class-admin.php:45
 msgid "Specification"
 msgstr ""
 
-#: includes/admin/class-admin.php:45 includes/admin/class-leads-page.php:52
+#: includes/admin/class-admin.php:46 includes/admin/class-leads-page.php:52
 #: includes/admin/class-settings-page.php:42
 msgid "Leads"
 msgstr ""
 
-#: includes/admin/class-admin.php:46 includes/admin/class-transfer-page.php:33
+#: includes/admin/class-admin.php:47 includes/admin/class-transfer-page.php:33
 msgid "Import / Export"
 msgstr ""
 
-#: includes/admin/class-admin.php:47
+#: includes/admin/class-admin.php:48
 msgid "Settings"
 msgstr ""
 
-#: includes/admin/class-admin.php:71 includes/admin/class-ui.php:105
+#: includes/admin/class-admin.php:72 includes/admin/class-ui.php:105
 msgid "Choose image"
 msgstr ""
 
-#: includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:73
 msgid "Use this image"
 msgstr ""
 
-#: includes/admin/class-admin.php:73
+#: includes/admin/class-admin.php:74
 msgid "Choose images"
 msgstr ""
 
-#: includes/admin/class-admin.php:74
+#: includes/admin/class-admin.php:75
 msgid "Add to gallery"
 msgstr ""
 
-#: includes/admin/class-admin.php:75 includes/admin/class-nodes-page.php:746
+#: includes/admin/class-admin.php:76 includes/admin/class-nodes-page.php:746
 #: includes/admin/class-ui.php:106 includes/admin/class-ui.php:131
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-admin.php:76 includes/admin/class-ui.php:132
+#: includes/admin/class-admin.php:77 includes/admin/class-ui.php:132
 msgid "Move earlier"
 msgstr ""
 
-#: includes/admin/class-admin.php:77 includes/admin/class-ui.php:133
+#: includes/admin/class-admin.php:78 includes/admin/class-ui.php:133
 msgid "Move later"
 msgstr ""
 
-#: includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:80
 #, php-format
 msgid "Moved to position %1$d of %2$d."
 msgstr ""
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:82
 #, php-format
 msgid "Point %1$d of %2$d: %3$d, %4$d."
 msgstr ""
 
-#: includes/admin/class-admin.php:83
+#: includes/admin/class-admin.php:84
 #, php-format
 msgid "Outline with %1$d points."
 msgstr ""
 
-#: includes/admin/class-admin.php:84
+#: includes/admin/class-admin.php:85
 msgid "Outline editor"
 msgstr ""
 
-#: includes/admin/class-admin.php:85
+#: includes/admin/class-admin.php:86
 msgid "Delete permanently? Everything inside will be deleted too."
 msgstr ""
 
-#: includes/admin/class-admin.php:86
+#: includes/admin/class-admin.php:87
 msgid ""
 "Delete? Everything inside goes too. It stays in the trash for 30 days and "
 "can be restored."
 msgstr ""
 
-#: includes/admin/class-admin.php:87
+#: includes/admin/class-admin.php:88
 msgid "Remove all points of this polygon?"
 msgstr ""
 
-#: includes/admin/class-admin.php:100
+#: includes/admin/class-admin.php:108
 #, php-format
 msgid ""
 "Solo Estate could not update its database tables: %s. It tries again in an "
 "hour; ask your host if the database user may create and alter tables."
 msgstr ""
 
-#: includes/admin/class-admin.php:108
+#: includes/admin/class-admin.php:110
+msgid "Try again now"
+msgstr ""
+
+#: includes/admin/class-admin.php:119
 msgid "Saved."
 msgstr ""
 
-#: includes/admin/class-admin.php:109
+#: includes/admin/class-admin.php:120
 msgid "Deleted."
 msgstr ""
 
-#: includes/admin/class-admin.php:110
+#: includes/admin/class-admin.php:121
 msgid "Duplicated. You are now editing the copy."
 msgstr ""
 
-#: includes/admin/class-admin.php:111
+#: includes/admin/class-admin.php:122
 msgid "Duplicated, but some items inside could not be copied. Check the copy."
 msgstr ""
 
-#: includes/admin/class-admin.php:112
+#: includes/admin/class-admin.php:123
 msgid "Updated."
 msgstr ""
 
-#: includes/admin/class-admin.php:113
+#: includes/admin/class-admin.php:124
 msgid "Something went wrong. Nothing was changed."
 msgstr ""
 
-#: includes/admin/class-admin.php:114
+#: includes/admin/class-admin.php:125
 msgid "Style imported."
 msgstr ""
 
-#: includes/admin/class-admin.php:115
+#: includes/admin/class-admin.php:126
 msgid "This is not a Solo Estate style file. Nothing was changed."
 msgstr ""
 
-#: includes/admin/class-admin.php:116
+#: includes/admin/class-admin.php:127
 msgid ""
 "Moved to the trash. It can be restored from Projects → Trash for 30 days."
 msgstr ""
 
-#: includes/admin/class-admin.php:117
+#: includes/admin/class-admin.php:128
 msgid "Restored."
 msgstr ""
 
-#: includes/admin/class-admin.php:118
+#: includes/admin/class-admin.php:129
 msgid "Its parent no longer exists. Restore the parent first."
 msgstr ""
 
-#: includes/admin/class-admin.php:119
+#: includes/admin/class-admin.php:130
 msgid "Choose the status its items get; nothing was deleted."
 msgstr ""
 
-#: includes/admin/class-admin.php:124
+#: includes/admin/class-admin.php:135
 #, php-format
 msgid "Layout applied to %d apartment."
 msgid_plural "Layout applied to %d apartments."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-admin.php:129
+#: includes/admin/class-admin.php:140
 msgid "Saved, but please check:"
 msgstr ""
 
-#: includes/admin/class-admin.php:158 includes/admin/class-nodes-page.php:182
+#: includes/admin/class-admin.php:180 includes/admin/class-nodes-page.php:182
 msgid "You are not allowed to do this."
 msgstr ""
 
@@ -2095,15 +2099,15 @@ msgstr ""
 msgid "Could not save the changes of this row."
 msgstr ""
 
-#: includes/class-install.php:402
+#: includes/class-install.php:493
 msgid "Solo Estate Manager"
 msgstr ""
 
-#: includes/class-install.php:403
+#: includes/class-install.php:494
 msgid "Solo Estate Marketing"
 msgstr ""
 
-#: includes/class-install.php:404
+#: includes/class-install.php:495
 msgid "Solo Estate Sales"
 msgstr ""
 

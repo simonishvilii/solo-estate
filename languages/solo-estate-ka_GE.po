@@ -11,165 +11,169 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Domain: solo-estate\n"
 
-#: includes/admin/class-admin.php:41
+#: includes/admin/class-admin.php:42
 msgid "Solo Estate"
 msgstr "Solo Estate"
 
-#: includes/admin/class-admin.php:42 includes/admin/class-nodes-page.php:193
+#: includes/admin/class-admin.php:43 includes/admin/class-nodes-page.php:193
 #: includes/admin/class-nodes-page.php:687
 #: includes/admin/class-statuses-page.php:44 includes/class-nodes.php:119
 msgid "Projects"
 msgstr "პროექტები"
 
-#: includes/admin/class-admin.php:43 includes/admin/class-statuses-page.php:37
+#: includes/admin/class-admin.php:44 includes/admin/class-statuses-page.php:37
 msgid "Statuses"
 msgstr "სტატუსები"
 
-#: includes/admin/class-admin.php:44 includes/admin/class-specs-page.php:33
+#: includes/admin/class-admin.php:45 includes/admin/class-specs-page.php:33
 msgid "Specification fields"
 msgstr "სპეციფიკაციის ველები"
 
-#: includes/admin/class-admin.php:44
+#: includes/admin/class-admin.php:45
 msgid "Specification"
 msgstr "სპეციფიკაცია"
 
-#: includes/admin/class-admin.php:45 includes/admin/class-leads-page.php:52
+#: includes/admin/class-admin.php:46 includes/admin/class-leads-page.php:52
 #: includes/admin/class-settings-page.php:42
 msgid "Leads"
 msgstr "ლიდები"
 
-#: includes/admin/class-admin.php:46 includes/admin/class-transfer-page.php:33
+#: includes/admin/class-admin.php:47 includes/admin/class-transfer-page.php:33
 msgid "Import / Export"
 msgstr "იმპორტი / ექსპორტი"
 
-#: includes/admin/class-admin.php:47
+#: includes/admin/class-admin.php:48
 msgid "Settings"
 msgstr "პარამეტრები"
 
-#: includes/admin/class-admin.php:71 includes/admin/class-ui.php:105
+#: includes/admin/class-admin.php:72 includes/admin/class-ui.php:105
 msgid "Choose image"
 msgstr "სურათის არჩევა"
 
-#: includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:73
 msgid "Use this image"
 msgstr "ამ სურათის გამოყენება"
 
-#: includes/admin/class-admin.php:73
+#: includes/admin/class-admin.php:74
 msgid "Choose images"
 msgstr "სურათების არჩევა"
 
-#: includes/admin/class-admin.php:74
+#: includes/admin/class-admin.php:75
 msgid "Add to gallery"
 msgstr "გალერეაში დამატება"
 
-#: includes/admin/class-admin.php:75 includes/admin/class-nodes-page.php:746
+#: includes/admin/class-admin.php:76 includes/admin/class-nodes-page.php:746
 #: includes/admin/class-ui.php:106 includes/admin/class-ui.php:131
 msgid "Remove"
 msgstr "მოშორება"
 
-#: includes/admin/class-admin.php:76 includes/admin/class-ui.php:132
+#: includes/admin/class-admin.php:77 includes/admin/class-ui.php:132
 msgid "Move earlier"
 msgstr "წინ გადატანა"
 
-#: includes/admin/class-admin.php:77 includes/admin/class-ui.php:133
+#: includes/admin/class-admin.php:78 includes/admin/class-ui.php:133
 msgid "Move later"
 msgstr "უკან გადატანა"
 
-#: includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:80
 #, php-format
 msgid "Moved to position %1$d of %2$d."
 msgstr "გადატანილია %2$d-დან %1$d პოზიციაზე."
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:82
 #, php-format
 msgid "Point %1$d of %2$d: %3$d, %4$d."
 msgstr "წერტილი %1$d / %2$d: %3$d, %4$d."
 
-#: includes/admin/class-admin.php:83
+#: includes/admin/class-admin.php:84
 #, php-format
 msgid "Outline with %1$d points."
 msgstr "კონტური, %1$d წერტილი."
 
-#: includes/admin/class-admin.php:84
+#: includes/admin/class-admin.php:85
 msgid "Outline editor"
 msgstr "კონტურის რედაქტორი"
 
-#: includes/admin/class-admin.php:85
+#: includes/admin/class-admin.php:86
 msgid "Delete permanently? Everything inside will be deleted too."
 msgstr "წაიშალოს სამუდამოდ? შიგნით არსებული ყველაფერიც წაიშლება."
 
-#: includes/admin/class-admin.php:86
+#: includes/admin/class-admin.php:87
 msgid "Delete? Everything inside goes too. It stays in the trash for 30 days and can be restored."
 msgstr "წაიშალოს? შიგნით არსებული ყველაფერიც წაიშლება. 30 დღე სანაგვეში დარჩება და შეგიძლიათ აღადგინოთ."
 
-#: includes/admin/class-admin.php:87
+#: includes/admin/class-admin.php:88
 msgid "Remove all points of this polygon?"
 msgstr "წაიშალოს ამ პოლიგონის ყველა წერტილი?"
 
-#: includes/admin/class-admin.php:100
+#: includes/admin/class-admin.php:108
 #, php-format
 msgid "Solo Estate could not update its database tables: %s. It tries again in an hour; ask your host if the database user may create and alter tables."
 msgstr "Solo Estate-მა ბაზის ცხრილები ვერ განაახლა: %s. ერთ საათში ხელახლა სცდის; ჰოსტინგს ჰკითხეთ, აქვს თუ არა ბაზის მომხმარებელს ცხრილების შექმნისა და შეცვლის უფლება."
 
-#: includes/admin/class-admin.php:108
+#: includes/admin/class-admin.php:110
+msgid "Try again now"
+msgstr "ახლავე ცდა"
+
+#: includes/admin/class-admin.php:119
 msgid "Saved."
 msgstr "შენახულია."
 
-#: includes/admin/class-admin.php:109
+#: includes/admin/class-admin.php:120
 msgid "Deleted."
 msgstr "წაშლილია."
 
-#: includes/admin/class-admin.php:110
+#: includes/admin/class-admin.php:121
 msgid "Duplicated. You are now editing the copy."
 msgstr "დუბლირებულია. ახლა ასლს არედაქტირებთ."
 
-#: includes/admin/class-admin.php:111
+#: includes/admin/class-admin.php:122
 msgid "Duplicated, but some items inside could not be copied. Check the copy."
 msgstr "ასლი შეიქმნა, მაგრამ შიგნით ზოგიერთი ელემენტი ვერ დაკოპირდა. შეამოწმეთ ასლი."
 
-#: includes/admin/class-admin.php:112
+#: includes/admin/class-admin.php:123
 msgid "Updated."
 msgstr "განახლებულია."
 
-#: includes/admin/class-admin.php:113
+#: includes/admin/class-admin.php:124
 msgid "Something went wrong. Nothing was changed."
 msgstr "დაფიქსირდა შეცდომა. არაფერი შეცვლილა."
 
-#: includes/admin/class-admin.php:114
+#: includes/admin/class-admin.php:125
 msgid "Style imported."
 msgstr "სტილი შემოტანილია."
 
-#: includes/admin/class-admin.php:115
+#: includes/admin/class-admin.php:126
 msgid "This is not a Solo Estate style file. Nothing was changed."
 msgstr "ეს Solo Estate-ის სტილის ფაილი არ არის. არაფერი შეცვლილა."
 
-#: includes/admin/class-admin.php:116
+#: includes/admin/class-admin.php:127
 msgid "Moved to the trash. It can be restored from Projects → Trash for 30 days."
 msgstr "გადავიდა სანაგვეში. 30 დღის განმავლობაში შეგიძლიათ აღადგინოთ: პროექტები → სანაგვე."
 
-#: includes/admin/class-admin.php:117
+#: includes/admin/class-admin.php:128
 msgid "Restored."
 msgstr "აღდგენილია."
 
-#: includes/admin/class-admin.php:118
+#: includes/admin/class-admin.php:129
 msgid "Its parent no longer exists. Restore the parent first."
 msgstr "მისი მშობელი ელემენტი აღარ არსებობს. ჯერ ის აღადგინეთ."
 
-#: includes/admin/class-admin.php:119
+#: includes/admin/class-admin.php:130
 msgid "Choose the status its items get; nothing was deleted."
 msgstr "აირჩიეთ სტატუსი, რომელიც მის ელემენტებს მიენიჭება; არაფერი წაშლილა."
 
-#: includes/admin/class-admin.php:124
+#: includes/admin/class-admin.php:135
 #, php-format
 msgid "Layout applied to %d apartment."
 msgid_plural "Layout applied to %d apartments."
 msgstr[0] "განლაგება გადავიდა %d ბინაზე."
 
-#: includes/admin/class-admin.php:129
+#: includes/admin/class-admin.php:140
 msgid "Saved, but please check:"
 msgstr "შენახულია, მაგრამ შეამოწმეთ:"
 
-#: includes/admin/class-admin.php:158 includes/admin/class-nodes-page.php:182
+#: includes/admin/class-admin.php:180 includes/admin/class-nodes-page.php:182
 msgid "You are not allowed to do this."
 msgstr "ამის გაკეთების უფლება არ გაქვთ."
 
@@ -1905,15 +1909,15 @@ msgstr "სვეტი %1$s: „%2$s“ არ არის რიცხვი.
 msgid "Could not save the changes of this row."
 msgstr "ამ სტრიქონის ცვლილებები ვერ შეინახა."
 
-#: includes/class-install.php:402
+#: includes/class-install.php:493
 msgid "Solo Estate Manager"
 msgstr "Solo Estate მენეჯერი"
 
-#: includes/class-install.php:403
+#: includes/class-install.php:494
 msgid "Solo Estate Marketing"
 msgstr "Solo Estate მარკეტინგი"
 
-#: includes/class-install.php:404
+#: includes/class-install.php:495
 msgid "Solo Estate Sales"
 msgstr "Solo Estate გაყიდვები"
 

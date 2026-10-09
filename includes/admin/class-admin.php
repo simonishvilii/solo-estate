@@ -20,6 +20,7 @@ class Admin {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+		add_action( 'admin_post_solo_estate_retry_upgrade', array( __CLASS__, 'retry_upgrade' ) );
 
 		Nodes_Page::register();
 		Statuses_Page::register();
@@ -95,9 +96,19 @@ class Admin {
 	 */
 	public static function notices() {
 		$install = get_transient( \SoloEstate\Install::ERROR_TRANSIENT );
+		// An error from a request that lost a race is stale once the upgrade went through.
+		if ( is_array( $install ) && SOLO_ESTATE_DB_VERSION === get_option( 'solo_estate_db_version' ) ) {
+			delete_transient( \SoloEstate\Install::ERROR_TRANSIENT );
+			$install = false;
+		}
 		if ( is_array( $install ) && self::can_manage() ) {
-			/* translators: %s: database error */
-			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html( sprintf( __( 'Solo Estate could not update its database tables: %s. It tries again in an hour; ask your host if the database user may create and alter tables.', 'solo-estate' ), $install[0] ) ) );
+			printf(
+				'<div class="notice notice-error"><p>%1$s</p><p><a class="button" href="%2$s">%3$s</a></p></div>',
+				/* translators: %s: database error */
+				esc_html( sprintf( __( 'Solo Estate could not update its database tables: %s. It tries again in an hour; ask your host if the database user may create and alter tables.', 'solo-estate' ), $install[0] ) ),
+				esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=solo_estate_retry_upgrade' ), 'solo_estate_retry_upgrade' ) ),
+				esc_html__( 'Try again now', 'solo-estate' )
+			);
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$msg = isset( $_GET['solo_estate_msg'] ) ? sanitize_key( wp_unslash( $_GET['solo_estate_msg'] ) ) : '';
@@ -149,6 +160,17 @@ class Admin {
 			self::deny();
 		}
 		check_admin_referer( $action );
+	}
+
+	/**
+	 * Runs the database upgrade again right away (from the error notice).
+	 */
+	public static function retry_upgrade() {
+		self::check( 'solo_estate_retry_upgrade' );
+		delete_transient( Install::ERROR_TRANSIENT );
+		Install::install( true );
+		$back = wp_get_referer() ? wp_get_referer() : self::url();
+		self::redirect( $back, get_transient( Install::ERROR_TRANSIENT ) ? 'error' : 'updated' );
 	}
 
 	/**
